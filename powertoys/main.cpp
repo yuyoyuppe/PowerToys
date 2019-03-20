@@ -40,11 +40,35 @@ void start_timer_thread() {
     lock.unlock();
     std::this_thread::sleep_for(300ms);
     if (start_pressed && stdclock::now() - start_press_timestamp > 300ms) {
-      window->show(200, 200, 200, 30);
+      // TODO: add show overload that takes PaintProc and uses it to paint
+      window->show(100, 900, 200, 30);
     }
   }
 }
 
+void maximize_thread() {
+  using namespace std::chrono_literals;
+  while (true) {
+    std::this_thread::sleep_for(100ms);
+    POINT mouse_pos;
+    GetCursorPos(&mouse_pos);
+    auto mouse_window = WindowFromPoint(mouse_pos);
+    if (mouse_window == NULL) {
+      if (!start_pressed) {
+        window->hide();
+      }
+      continue;
+    }
+    RECT window_rect;
+    GetWindowRect(mouse_window, &window_rect);
+    if (mouse_pos.x > window_rect.right - 200 &&
+        mouse_pos.y < window_rect.top + 50) {
+      window->show(window_rect.right - 220, window_rect.top + 50, 200, 30);
+    } else if (!start_pressed) {
+      window->hide();
+    }
+  }
+}
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -60,7 +84,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   
   std::thread start_thread_handle(start_timer_thread);
   start_thread_handle.detach();
-  
+
+  std::thread maximize_thread_handle(maximize_thread);
+  maximize_thread_handle.detach();
+
   // Register hook for detecting Start menu press
   keyboard_hook_handle = SetWindowsHookEx(WH_KEYBOARD_LL,
                                           keyboard_hook,
