@@ -49,7 +49,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
   start_winkey_watcher(
     300,
-    [&]{ start_taskbar_popup.show(100, 900, 200, 30); },
+    [&]{
+      HWND active_window = GetForegroundWindow();
+      if (active_window == NULL) {
+        return;
+      }
+      RECT rect;
+      if (GetWindowRect(active_window, &rect) == 0) {
+        return;
+      }
+      start_taskbar_popup.show(
+        rect.left + (rect.right - rect.left) / 2,
+        rect.top + 150,
+        200, 30);
+      SetForegroundWindow(active_window);
+    },
     [&]{ start_taskbar_popup.hide(); }
   );
 

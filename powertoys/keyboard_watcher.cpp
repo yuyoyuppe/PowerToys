@@ -18,26 +18,38 @@ namespace {
   bool winkey_signaled = false;
   std::function<void()> on_held_cb, on_relese_cb;
 
-  LRESULT CALLBACK keyboard_hook2(int nCode, WPARAM wParam, LPARAM lParam) {
+  LRESULT CALLBACK keyboard_hook(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
-      if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-        std::unique_lock<std::mutex> lock(kbhook_mutex);
-        winkey_pressed = true;
-        winkey_press_timestamp = stdclock::now();
-        lock.unlock();
-        kbhook_cv.notify_one();
+    if (nCode != HC_ACTION) {
+      goto call_next_hook;
+    }
+    if (kb_hook->vkCode != VK_LWIN && kb_hook->vkCode != VK_RWIN) {
+      goto call_next_hook;
+    }
+    if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+      std::unique_lock<std::mutex> lock(kbhook_mutex);
+      winkey_pressed = true;
+      winkey_press_timestamp = stdclock::now();
+      lock.unlock();
+      kbhook_cv.notify_one();
+    } else {
+      std::unique_lock<std::mutex> lock(kbhook_mutex);
+      winkey_pressed = false;
+      if (winkey_signaled) {
+        winkey_signaled = false;
+        on_relese_cb();
       }
-      else {
-        std::unique_lock<std::mutex> lock(kbhook_mutex);
-        winkey_pressed = false;
+    }
+call_next_hook:
+    // If we are in "signalled" state and keypress arrives - call on_held_cb
+    // again, to update windows postion. 
+    if (winkey_signaled) {
+      std::thread([] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (winkey_signaled) {
-          winkey_signaled = false;
-          on_relese_cb();
-          // Prevent Start menu from appearing.
-          return 1;
+          on_held_cb();
         }
-      }
+      }).detach();
     }
     return CallNextHookEx(kbhook_handle, nCode, wParam, lParam);
   }
@@ -67,7 +79,7 @@ void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::func
   if (kbhook_handle == NULL) {
     winkey_pressed = false;
     winkey_signaled = false;
-    kbhook_handle = SetWindowsHookEx(WH_KEYBOARD_LL, keyboard_hook2, GetModuleHandle(NULL), NULL);
+    kbhook_handle = SetWindowsHookEx(WH_KEYBOARD_LL, keyboard_hook, GetModuleHandle(NULL), NULL);
     if (kbhook_handle == NULL) {
       throw std::runtime_error("Cannot install keyboard listener");
     }
