@@ -9,7 +9,7 @@ typedef std::function<LRESULT(HWND hwnd)> PaintProc;
 
 class PopupWindow {
 public:
-  PopupWindow(PaintProc paintProc) {
+  PopupWindow(PaintProc paint_proc = PaintProc{}) {
     static const char* class_name = "PToyPopup";
     std::lock_guard<std::mutex> lock(static_mutex);
     if (!window_class_initialized) {
@@ -41,15 +41,19 @@ public:
     if (hwnd == NULL)
       throw std::runtime_error("Cannot create window");
     SetLayeredWindowAttributes(hwnd, 0, (255 * 70) / 100, LWA_ALPHA);
-    paint_proc.emplace(hwnd, paintProc);
+    paint_procedures.emplace(hwnd, paint_proc);
   }
   
-  void show(int xPos, int yPos, int xSize, int ySize) {
-    SetWindowPos(hwnd, HWND_TOPMOST, xPos, yPos, xSize, ySize, 0);
-    HRGN elipse = CreateRoundRectRgn(0, 0, xSize, ySize, 15, 15);
+  void show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc) {
+    paint_procedures[hwnd] = paint_proc;
+    show(x_pos, y_pos, x_size, y_size);
+  }
+
+  void show(int x_pos, int y_pos, int x_size, int y_size) {
+    SetWindowPos(hwnd, HWND_TOPMOST, x_pos, y_pos, x_size, y_size, 0);
+    HRGN elipse = CreateRoundRectRgn(0, 0, x_size, y_size, 15, 15);
     SetWindowRgn(hwnd, elipse, TRUE);
-    ShowWindow(hwnd, SW_SHOWNA);
-    UpdateWindow(hwnd);
+    show();
   }
 
   void show() {
@@ -63,16 +67,18 @@ public:
 
   ~PopupWindow() {
     std::lock_guard<std::mutex> lock(static_mutex);
-    paint_proc.erase(hwnd);
+    paint_procedures.erase(hwnd);
   }
+
 private:
   HWND hwnd;
+
   static LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
     case WM_PAINT: {
       std::lock_guard<std::mutex> lock(static_mutex);
-      std::unordered_map<HWND, PaintProc>::const_iterator iter = paint_proc.find(hwnd);
-      return iter != paint_proc.end()
+      std::unordered_map<HWND, PaintProc>::const_iterator iter = paint_procedures.find(hwnd);
+      return iter != paint_procedures.end()
              ? iter->second(hwnd)
              : 0;
       }
@@ -89,5 +95,5 @@ private:
   }
   static std::mutex static_mutex;
   static bool window_class_initialized;
-  static std::unordered_map<HWND, PaintProc> paint_proc;
+  static std::unordered_map<HWND, PaintProc> paint_procedures;
 };

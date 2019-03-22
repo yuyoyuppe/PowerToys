@@ -120,10 +120,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="keyboard_watcher.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="popup_window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="keyboard_watcher.h" />
     <ClInclude Include="popup_window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
