@@ -14,6 +14,12 @@
     <ClCompile Include="winkey_handler.cpp">
       <Filter>Functionality</Filter>
     </ClCompile>
+    <ClCompile Include="mouse_watcher.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="mouse_handler.cpp">
+      <Filter>Functionality</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -27,6 +33,9 @@
     </ClInclude>
     <ClInclude Include="functionalities.h">
       <Filter>Functionality</Filter>
+    </ClInclude>
+    <ClInclude Include="mouse_watcher.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

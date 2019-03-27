@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -122,6 +122,8 @@
   <ItemGroup>
     <ClCompile Include="keyboard_watcher.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mouse_handler.cpp" />
+    <ClCompile Include="mouse_watcher.cpp" />
     <ClCompile Include="popup_window.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="winkey_handler.cpp" />
@@ -129,6 +131,7 @@
   <ItemGroup>
     <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
+    <ClInclude Include="mouse_watcher.h" />
     <ClInclude Include="popup_window.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

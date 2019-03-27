@@ -2,7 +2,7 @@
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 
-std::optional<RECT> get_maximize_button_pos(HWND hwnd) {
+std::optional<RECT> get_button_pos(HWND hwnd) {
   RECT button;
   if (DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &button, sizeof(RECT)) == S_OK) {
     return button;

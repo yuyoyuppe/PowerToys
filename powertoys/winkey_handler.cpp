@@ -31,7 +31,7 @@ namespace {
                << " DPI: " << dpi
                << " Window: (" << window->left << "," << window->top << ")x("
                                << window->right << "," << window->bottom << ")";
-        auto max_button = get_maximize_button_pos(active_window);
+        auto max_button = get_button_pos(active_window);
         if (max_button) {
           stream << " Button: " << max_button->right - max_button->left << ", " << max_button->bottom - max_button->top;
         }
