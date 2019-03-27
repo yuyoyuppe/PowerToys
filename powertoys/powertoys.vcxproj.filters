@@ -2,13 +2,30 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="popup_window.cpp" />
-    <ClCompile Include="keyboard_watcher.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="keyboard_watcher.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_window.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="popup_window.h" />
-    <ClInclude Include="keyboard_watcher.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="keyboard_watcher.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="popup_window.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{bc27e9c1-8afa-4d62-8179-789f4651c0b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

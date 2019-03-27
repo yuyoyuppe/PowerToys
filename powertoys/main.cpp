@@ -56,7 +56,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return;
       }
       auto dpi = GetDpiForWindow(active_window);
-      auto max_button = getWindowMaximizeButton(active_window);
+      auto max_button = get_maximize_button(active_window);
       RECT rect;
       if (GetWindowRect(active_window, &rect) == 0) {
         return;
@@ -95,10 +95,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     [&]{ start_taskbar_popup.hide(); }
   );
 
-  MSG msg;
-  while (GetMessage(&msg, NULL, 0, 0)) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-  return msg.wParam;
+  return run_message_loop();
 }
