@@ -11,6 +11,9 @@
     <ClCompile Include="utils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="winkey_handler.cpp">
+      <Filter>Functionality</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -22,10 +25,19 @@
     <ClInclude Include="utils.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="functionalities.h">
+      <Filter>Functionality</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">
       <UniqueIdentifier>{bc27e9c1-8afa-4d62-8179-789f4651c0b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Functionality">
+      <UniqueIdentifier>{ba8e1409-9389-41e1-a864-2df96b242c1d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
   </ItemGroup>
 </Project>

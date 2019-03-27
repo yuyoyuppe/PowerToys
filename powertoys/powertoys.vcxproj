@@ -124,11 +124,16 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="popup_window.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
     <ClInclude Include="popup_window.h" />
     <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

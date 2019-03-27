@@ -1,13 +1,13 @@
 #include "popup_window.h"
 #include <exception>
 
-std::mutex PopupWindow::static_mutex;
+std::recursive_mutex PopupWindow::static_mutex;
 bool PopupWindow::window_class_initialized;
 std::unordered_map<HWND, PaintProc> PopupWindow::paint_procedures;
 
 PopupWindow::PopupWindow(PaintProc paint_proc) {
   static const char* class_name = "PToyPopup";
-  std::lock_guard<std::mutex> lock(static_mutex);
+  std::lock_guard<std::recursive_mutex> lock(static_mutex);
   if (!window_class_initialized) {
     WNDCLASSEX wnd_class;
     wnd_class.cbSize = sizeof(WNDCLASSEX);
@@ -26,7 +26,7 @@ PopupWindow::PopupWindow(PaintProc paint_proc) {
       throw std::runtime_error("Cannot register window class");
     window_class_initialized = true;
   }
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED,
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT,
     class_name, class_name,
     WS_POPUP | WS_SYSMENU,
     CW_USEDEFAULT,
@@ -62,18 +62,19 @@ void PopupWindow::hide() {
 }
 
 PopupWindow::~PopupWindow() {
-  std::lock_guard<std::mutex> lock(static_mutex);
+  std::lock_guard<std::recursive_mutex> lock(static_mutex);
   paint_procedures.erase(hwnd);
 }
 
 LRESULT PopupWindow::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
   case WM_PAINT: {
-    std::lock_guard<std::mutex> lock(static_mutex);
+    std::lock_guard<std::recursive_mutex> lock(static_mutex);
     std::unordered_map<HWND, PaintProc>::const_iterator iter = paint_procedures.find(hwnd);
-    return iter != paint_procedures.end()
-      ? iter->second(hwnd)
-      : 0;
+    if (iter == end(paint_procedures))
+      return 0;
+    auto& paint_proc = iter->second;
+    return paint_proc(hwnd);
   }
   case WM_CLOSE:
     DestroyWindow(hwnd);

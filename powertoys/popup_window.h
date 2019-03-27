@@ -8,7 +8,7 @@ typedef std::function<LRESULT(HWND hwnd)> PaintProc;
 
 class PopupWindow {
 public:
-  PopupWindow(PaintProc paint_proc = PaintProc{});
+  PopupWindow(PaintProc paint_proc = [](HWND) { return 0; });
   void show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc);
   void show(int x_pos, int y_pos, int x_size, int y_size);
   void show();
@@ -17,7 +17,7 @@ public:
 private:
   HWND hwnd;
   static LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-  static std::mutex static_mutex;
+  static std::recursive_mutex static_mutex;
   static bool window_class_initialized;
   static std::unordered_map<HWND, PaintProc> paint_procedures;
 };
