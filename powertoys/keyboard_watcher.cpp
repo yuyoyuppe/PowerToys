@@ -11,8 +11,8 @@ namespace {
   using stdclock = std::chrono::system_clock;
 
   HHOOK hook_handle = NULL;
-  std::mutex held_delay_mutex, signal_delay_mutex;
-  std::condition_variable held_delay_cv, signal_delay_cv;
+  std::mutex held_delay_mutex, held_monitor_mutex;
+  std::condition_variable held_delay_cv, held_monitor_cv;
   stdclock::time_point winkey_press_timestamp;
   bool winkey_pressed = false;
   bool winkey_signaled = false;
@@ -41,11 +41,6 @@ namespace {
       }
     }
 call_next_hook:
-    // If we are in "signalled" state and keypress arrives - call on_held_cb
-    // again, to update windows postion. Give it some time to move the window. 
-    if (winkey_signaled) {
-      signal_delay_cv.notify_one();      
-    }
     return CallNextHookEx(hook_handle, nCode, wParam, lParam);
   }
 
@@ -63,18 +58,25 @@ call_next_hook:
       lock.lock();
       if (winkey_pressed && !winkey_signaled) {
         winkey_signaled = true;
+        held_monitor_cv.notify_one();
         on_held_cb();
       }
     }
   }
 
-  void signal_delay_thread_proc() {
+  void held_monitor_thread_proc() {
     while (true) {
-      std::unique_lock<std::mutex> lock(signal_delay_mutex);
-      signal_delay_cv.wait(lock, [] { return winkey_pressed && winkey_signaled; });
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::unique_lock<std::mutex> lock(held_monitor_mutex);
+      held_monitor_cv.wait(lock, [] { return winkey_pressed && winkey_signaled; });
+      std::this_thread::sleep_for(std::chrono::milliseconds(8));
+      winkey_pressed = (GetKeyState(VK_LWIN) & 0x8000) || (GetKeyState(VK_RWIN) & 0x8000);
       if (winkey_signaled) {
-        on_held_cb();
+        if (winkey_pressed) {
+          on_held_cb();
+        } else {
+          winkey_signaled = false;
+          on_relese_cb();
+        }
       }
     }
   }
@@ -90,7 +92,7 @@ void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::func
       throw std::runtime_error("Cannot install keyboard listener");
     }
     std::thread(held_delay_thread_proc, ms_delay).detach();
-    std::thread(signal_delay_thread_proc).detach();
+    std::thread(held_monitor_thread_proc).detach();
   }
   on_held_cb = on_held;
   on_relese_cb = on_released;

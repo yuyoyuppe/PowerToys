@@ -28,7 +28,7 @@ PopupWindow::PopupWindow(PaintProc paint_proc) {
   }
   hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT,
     class_name, class_name,
-    WS_POPUP | WS_SYSMENU,
+    WS_POPUP,
     CW_USEDEFAULT,
     CW_USEDEFAULT, 240, 120,
     NULL, NULL,

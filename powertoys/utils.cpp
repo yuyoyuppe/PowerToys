@@ -3,9 +3,8 @@
 #pragma comment(lib, "dwmapi.lib")
 
 std::optional<RECT> get_maximize_button_pos(HWND hwnd) {
-  RECT button, window;
-  auto res = DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &button, sizeof(RECT));
-  if (res == S_OK) {
+  RECT button;
+  if (DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &button, sizeof(RECT)) == S_OK) {
     return button;
   } else {
     return {};
