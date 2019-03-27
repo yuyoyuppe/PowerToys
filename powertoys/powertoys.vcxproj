@@ -123,10 +123,12 @@
     <ClCompile Include="keyboard_watcher.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="popup_window.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h" />
     <ClInclude Include="popup_window.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
