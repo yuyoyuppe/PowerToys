@@ -12,6 +12,7 @@ namespace {
     if (active_window == NULL) {
       return;
     }
+
     auto dpi = GetDpiForWindow(active_window);
     auto window = get_window_pos(active_window);
     if (!window) {
@@ -30,6 +31,10 @@ namespace {
                << " DPI: " << dpi
                << " Window: (" << window->left << "," << window->top << ")x("
                                << window->right << "," << window->bottom << ")";
+        auto max_button = get_maximize_button_pos(active_window);
+        if (max_button) {
+          stream << " Button: " << max_button->right - max_button->left << ", " << max_button->bottom - max_button->top;
+        }
         auto str = stream.str();
         TextOut(hdc, 20, 20, str.c_str(), str.length());
         EndPaint(hwnd, &ps);

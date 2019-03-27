@@ -33,7 +33,6 @@ namespace {
       lock.unlock();
       held_delay_cv.notify_one();
     } else {
-      std::unique_lock<std::mutex> lock(held_delay_mutex);
       winkey_pressed = false;
       if (winkey_signaled) {
         winkey_signaled = false;
@@ -83,8 +82,9 @@ call_next_hook:
 }
  
 void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::function<void()> on_released) {
-  std::lock_guard<std::mutex> lock(held_delay_mutex);
   if (hook_handle == NULL) {
+    on_held_cb = on_held;
+    on_relese_cb = on_released;
     winkey_pressed = false;
     winkey_signaled = false;
     hook_handle = SetWindowsHookEx(WH_KEYBOARD_LL, hook_proc, GetModuleHandle(NULL), NULL);
@@ -94,6 +94,4 @@ void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::func
     std::thread(held_delay_thread_proc, ms_delay).detach();
     std::thread(held_monitor_thread_proc).detach();
   }
-  on_held_cb = on_held;
-  on_relese_cb = on_released;
 }
