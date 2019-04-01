@@ -45,6 +45,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="monitors.h" />
+    <ClInclude Include="virtual_desktops.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">

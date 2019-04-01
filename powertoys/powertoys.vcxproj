@@ -138,6 +138,7 @@
     <ClInclude Include="move_window.h" />
     <ClInclude Include="popup_window.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="virtual_desktops.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

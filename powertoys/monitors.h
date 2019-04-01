@@ -27,6 +27,7 @@ bool operator==(const MonitorInfo& lhs, const MonitorInfo& rhs);
 
 // Returns monitor rects ordered from left to right
 std::vector<MonitorInfo> get_monitors();
+
 MonitorInfo get_primary_monitor();
 MonitorInfo get_window_monitor(HWND hwnd);
 int get_monitor_index(const std::vector<MonitorInfo>& monitors, const MonitorInfo& monitor);
