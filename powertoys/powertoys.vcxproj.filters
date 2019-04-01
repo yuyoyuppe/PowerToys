@@ -23,6 +23,7 @@
     <ClCompile Include="move_window.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="monitors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -43,6 +44,7 @@
     <ClInclude Include="move_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="monitors.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">

@@ -122,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="keyboard_watcher.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="monitors.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="mouse_watcher.cpp" />
     <ClCompile Include="move_window.cpp" />
@@ -132,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
+    <ClInclude Include="monitors.h" />
     <ClInclude Include="mouse_watcher.h" />
     <ClInclude Include="move_window.h" />
     <ClInclude Include="popup_window.h" />
