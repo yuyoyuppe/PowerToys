@@ -8,7 +8,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   // We will handle scaling ourselfs.
   SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
  
-  start_winkey_handler();
+  //start_winkey_handler();
   start_mouse_handler();
   return run_message_loop();
 }

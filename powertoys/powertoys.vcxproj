@@ -124,6 +124,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="mouse_watcher.cpp" />
+    <ClCompile Include="move_window.cpp" />
     <ClCompile Include="popup_window.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="winkey_handler.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
     <ClInclude Include="mouse_watcher.h" />
+    <ClInclude Include="move_window.h" />
     <ClInclude Include="popup_window.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

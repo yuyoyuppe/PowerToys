@@ -1,7 +1,7 @@
 #include "functionalities.h"
 #include "popup_window.h"
 #include "mouse_watcher.h"
-
+#include "move_window.h"
 namespace {
   PopupWindow* maximize_poup = NULL;
 
@@ -15,6 +15,7 @@ namespace {
     result.top = buttons.bottom;
     result.right = buttons.right;
     result.top = 2 * buttons.bottom - buttons.top;
+    move_window::to_screen_left(hwnd);
     return result;
   }
 
