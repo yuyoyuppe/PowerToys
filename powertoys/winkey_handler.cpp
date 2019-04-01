@@ -3,48 +3,41 @@
 #include "functionalities.h"
 #include "popup_window.h"
 #include "keyboard_watcher.h"
+#include "monitors.h"
 #include "utils.h"
 
 namespace {
   PopupWindow *winkey_popup;
   void on_held() {
-    HWND active_window = GetForegroundWindow();
-    if (active_window == NULL) {
-      return;
-    }
-
-    auto dpi = GetDpiForWindow(active_window);
-    auto window = get_window_pos(active_window);
-    if (!window) {
-      return;
-    }
-    winkey_popup->show(
-      window->left,
-      window->top,
-      window->right - window->left,
-      window->bottom - window->top,
-      [=](HWND hwnd) {
+    winkey_popup->set_transparency(0);
+    std::thread([] {
+      SetForegroundWindow(winkey_popup->hwnd);
+      auto primary = get_primary_monitor();
+      winkey_popup->show(
+        primary.left(), primary.top(), primary.width(), primary.height()+1,
+        [=](HWND hwnd) {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
-        std::stringstream stream;
-        stream << "HWND: " << active_window
-               << " DPI: " << dpi
-               << " Window: (" << window->left << "," << window->top << ")x("
-                               << window->right << "," << window->bottom << ")";
-        auto max_button = get_button_pos(active_window);
-        if (max_button) {
-          stream << " Button: " << max_button->right - max_button->left << ", " << max_button->bottom - max_button->top;
-        }
-        auto str = stream.str();
+        std::string str = "content here";
         TextOut(hdc, 20, 20, str.c_str(), str.length());
         EndPaint(hwnd, &ps);
         return 0;
       });
-    SetForegroundWindow(active_window);
+      for (double alpha = 0; alpha < 0.7; alpha += 0.08) {
+        winkey_popup->set_transparency(alpha);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+      }
+    }).detach();
   }
 
   void on_release() {
-    winkey_popup->hide();
+    std::thread([] {
+      for (double alpha = 0.7; alpha > 0; alpha -= 0.08) {
+        winkey_popup->set_transparency(alpha);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+      }
+      winkey_popup->hide();
+    }).detach();
   }
 }
 

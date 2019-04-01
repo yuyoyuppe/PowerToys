@@ -18,7 +18,7 @@ PopupWindow::PopupWindow(PaintProc paint_proc) {
     wnd_class.hInstance = GetModuleHandle(NULL);
     wnd_class.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     wnd_class.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wnd_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wnd_class.hbrBackground = (HBRUSH)(COLOR_BACKGROUND + 1);
     wnd_class.lpszMenuName = NULL;
     wnd_class.lpszClassName = class_name;
     wnd_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -36,8 +36,11 @@ PopupWindow::PopupWindow(PaintProc paint_proc) {
     NULL);
   if (hwnd == NULL)
     throw std::runtime_error("Cannot create window");
-  SetLayeredWindowAttributes(hwnd, 0, (255 * 70) / 100, LWA_ALPHA);
   paint_procedures.emplace(hwnd, paint_proc);
+}
+
+void PopupWindow::set_transparency(double alpha) {
+  SetLayeredWindowAttributes(hwnd, 0, (int)(255 * alpha), LWA_ALPHA);
 }
 
 void PopupWindow::show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc) {
