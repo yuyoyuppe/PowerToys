@@ -130,6 +130,7 @@
     <ClCompile Include="move_window.cpp" />
     <ClCompile Include="popup_window.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>

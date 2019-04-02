@@ -32,6 +32,9 @@
     <ClCompile Include="start_visible.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="virtual_desktops.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
