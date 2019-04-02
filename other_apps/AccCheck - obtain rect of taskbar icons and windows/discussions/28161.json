@@ -1,0 +1,66 @@
+[
+  {
+    "Id": "93961",
+    "ThreadId": "28161",
+    "Html": "Hello,<br>\r\n<br>\r\nThis is a quick note to let you know that we just published version 1.1.  This version includes important fixes and stabilizes the tool further, but most importantly, v.1.1 now works on Windows XP and Server 2003.<br>\r\n<br>\r\nPlease give this version a try, and post back your comments or suggestions to the Discussions forum on this site.<br>\r\n<br>\r\nThanks,<br>\r\nThe AccChecker team\r\n",
+    "PostedDate": "2008-05-21T09:20:57.337-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "94702",
+    "ThreadId": "28161",
+    "Html": "That's great.<br>\r\nIt was important to support WinXP. <br>\r\nI can agree it's run on WinXP without any error message.<br>\r\nIn the future i will comments again if worked in detail with the tool.<br>\r\nBR<br>\r\nMKnebel<br>\r\n",
+    "PostedDate": "2008-05-26T00:25:59.1-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "94958",
+    "ThreadId": "28161",
+    "Html": "Hi,<br>\r\n<br>\r\nI think change set isn't created for the version yet. Does the source code that can be downloaded using a source control client have been updated?<br>\r\n<br>\r\nThanks,<br>\r\nJunho \r\n",
+    "PostedDate": "2008-05-27T09:10:15.95-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "94967",
+    "ThreadId": "28161",
+    "Html": "<p style=\"margin:0in 0in 0pt\"><span style=\"font-size:10.5pt;font-family:'segoe ui','sans-serif'\">Hi,<br>\r\n<br>\r\nThe binaries we published here for version v.1.1 are built using the source code from change set 17154, which you can download from <a href=\"http://www.codeplex.com/AccCheck/SourceControl/ListDownloadableCommits.aspx\">http://www.codeplex.com/AccCheck/SourceControl/ListDownloadableCommits.aspx</a>.  So if you want to build the binaries yourself, just download this version, and build them with Visual Studio.<br>\r\n<br>\r\nI haven't tried downloading the source code through the source control client, so I cannot guarantee that this will work, although I fully expect it.  However, downloading the sources from the above URL and then building them will work - I have tried this.<br>\r\n<br>\r\nThanks,<br>\r\nPeter Lakov<br>\r\nAccChecker Program Manager</span></p>\r\n",
+    "PostedDate": "2008-05-27T09:39:11.17-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "95772",
+    "ThreadId": "28161",
+    "Html": "Hi,<br>\r\n<br>\r\nit is possible to use MS Visual Studio Express 2008 ??<br>\r\n<br>\r\nThx for your answers<br>\r\nMKnebel \r\n",
+    "PostedDate": "2008-05-30T05:30:06.91-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "95932",
+    "ThreadId": "28161",
+    "Html": "Haven't tried compiling it with Express - I get the full Visual Studio for free at work :-)<br>\r\n<br>\r\nIf you have Express already installed, do you mind trying and let us know whether it builds?  Off the top of my head, there should't be anything that would prevent building with Express 2008.<br>\r\n<br>\r\nThanks,<br>\r\nPeter<br>\r\n<div style=\"border-right:medium none;padding-right:0.2em;border-top:#aaa 0.1em dotted;padding-left:0.2em;padding-bottom:0.2em;margin:1em 0em 2.5em 3em;border-left:medium none;padding-top:0.2em;border-bottom:#aaa 0.1em dotted;font-style:italic\"><br>\r\nMKnebel wrote:<br>\r\nHi,<br>\r\n<br>\r\nit is possible to use MS Visual Studio Express 2008 ??<br>\r\n<br>\r\nThx for your answers<br>\r\nMKnebel <br>\r\n<br>\r\n</div>\r\n<br>\r\n",
+    "PostedDate": "2008-05-30T17:49:50.153-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "96174",
+    "ThreadId": "28161",
+    "Html": "Hello Peter,<br>\r\n<br>\r\ni tried it and it's run. Only a Error Code 1 because of copying the help files. But the programm itself running.<br>\r\nThx<br>\r\nMatthias<br>\r\n",
+    "PostedDate": "2008-06-02T02:31:57.16-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "96344",
+    "ThreadId": "28161",
+    "Html": "Thanks Matthias.<br>\r\n",
+    "PostedDate": "2008-06-02T16:23:38.847-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  }
+]

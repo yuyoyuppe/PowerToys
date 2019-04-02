@@ -1,0 +1,13 @@
+.assembly extern 'mscorlib'
+{
+  .publickeytoken = (B7 7A 5C 56 19 34 E0 89)
+  .ver clr2.0
+}
+.assembly 'AccCheckConsole'
+{
+  .custom instance void ['mscorlib']'System.Runtime.InteropServices'.'ComVisibleAttribute'::.ctor(bool) = (01 00 00 00 00)
+  .publickey = (00 24 00 00 04 80 00 00 94 00 00 00 06 02 00 00 00 24 00 00 52 53 41 31 00 04 00 00 01 00 01 00 C1 BC D9 B7 84 4C D3 57 25 B1 13 82 16 ED 5E 0F AB 91 46 76 D5 80 86 0F 6F 08 1C 8C 0E 83 B9 2D 83 5F FA E7 6F A9 68 F7 63 7E 4B 6E 32 D7 7F EE 1C 08 40 88 CE E7 36 CE 58 9D 65 AD 0F A6 6F 08 6C 2F 5F 75 5A 6F 29 09 D1 7C 64 3B 45 C7 2A 90 6A AA C6 17 BF D6 74 91 A8 FC E5 47 84 CA 98 31 7A EA 28 C0 54 45 46 FF 91 23 F6 F9 4E 59 79 3F 28 74 43 7B C3 D1 36 A4 00 95 D0 F9 60 E6 A6 A4)
+  .hash algorithm 0x00008004
+  .ver windowstest
+}
+

@@ -1,0 +1,82 @@
+[
+  {
+    "Id": "80456",
+    "ThreadId": "24009",
+    "Html": "\r\nHello:<br /><br />I tried top run the executable and got an immediate error. After the error, the application closed down. Is there an issue with this build or is it possible I am missing a pre-requisite? What are the pre-reqs with regard to OS, .NET framework version, etc.<br />",
+    "PostedDate": "2008-03-13T14:19:07.32-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "80677",
+    "ThreadId": "24009",
+    "Html": "\r\nHello,<br /><br />The current version is only tested and working on Windows Vista.  On XP it has a known issue where AccCheckUI will show an error and terminate (what you observed below).  Please let us know if you see this problem on Vista.<br /><br />Thanks,<br />Peter Lakov<br />AccChecker Program Manager<br /><br /><br /><div class=\"quote\" style=\"border: dotted .1em #aaa; border-left: none; border-right: none; font-style: italic; margin: 1em 0em 2.5em 3em;padding: .2em;\"><br />jlabbe wrote:<br />Hello:<br /><br />I tried top run the executable and got an immediate error. After the error, the application closed down. Is there an issue with this build or is it possible I am missing a pre-requisite? What are the pre-reqs with regard to OS, .NET framework version, etc.<br /><br /></div>",
+    "PostedDate": "2008-03-14T11:34:37.817-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "81857",
+    "ThreadId": "24009",
+    "Html": "\r\nHello,<br /><br />i discovered this tool. I can confirm that actually only run under Window Vista.<br />Would be in the next version supporting XP too ?<br /><br />I hope, i can exchange experience about the topic accessibility tools.<br />I searched a tool which would \"subtitle\" the narrator speaking. With this UI Accessibility Checker<br />make a list of all speaking text. Perhaps i have to examine the tool more, but a life subtitle would<br />be interessting for deaf people like me who test accessibility in applications.<br />I would be glad if i get some answers and helps.<br /><br />Best regards<br />M. Knebel<br />",
+    "PostedDate": "2008-03-20T06:15:35.367-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "81891",
+    "ThreadId": "24009",
+    "Html": "\r\nHi,<br /><br />Thanks for trying out AccChecker.  Yes, currently the tool does not work in XP, but we plan to fix that in the next release (early to mid April, 2008).<br /><br />Regarding the feature called \"Screen Reader\" - this is a feature that dumps the textual information from the MSAA tree that a reasonable screen reader would use (the accessible Role, Name, and Value).  The purpose of this feature is for testers to be able quickly to compare the visuals of a UI to the output in the \"Screen Reader\", and determine if what they see in the UI is more or less represented in the \"Screen Reader\".<br /><br />I didn't understand your comment on subtitles.  Could you provide more details on what you would expect from a \"subtitle\" feature?<br /><br />Thanks,<br />Peter Lakov<br />AccChecker Program Manager<br />",
+    "PostedDate": "2008-03-20T08:24:54.397-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "82261",
+    "ThreadId": "24009",
+    "Html": "\r\nHi,<br /><br />Happy Easter :)<br /><br />Sorry because my english wouldn't be perfect now but i will train it :)<br /><br />Ok, i try to explain what my wish is.<br />If the ScreenReader Narrator read something, in the same time i wish to read the spoken in e.g. a seperate window. Like the Caption/Subtitle in movies/TV.<br />Perhaps this would be present in another tool which i don't know. But i wish to have this features. I hope you can give me a tip or help to this.<br /><br />Actually your Programm make a list with all possibilities speech text. It that correct ? Actually i can't allocate the control or something for the speech text in the list.<br /><br />I hope you understand what i want to tell you and hope i would a step to reach my goal.<br /><br />Best regards<br />M. Knebel<br />",
+    "PostedDate": "2008-03-23T01:31:59.123-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "82421",
+    "ThreadId": "24009",
+    "Html": "\r\nHello and Happy Easter to you as well :-)<br /><br />The feature \"Screen Reader\" in AccChecker does not have this functionality.  I.e. if you tab around, it won't read the controls which get the focus.  Is just dumps the textual information, and then it's done.<br /><br />If you'd like to use a tool which will follow the keyboard focus and read the things that currently have focus, you can use the tool Inspect (from the MSAA SDK - you can download the binaries from MSDN).  Just enable keyboard focus tracking, enable rectangle highlight, and disable mouse tracking.  Then as you tab around, a rectangle will track the keyboard focus and Inspect will show the current Name/Value/Role/etc. of the currently focused item.<br /><br />If you'd like to use a tool which shows the data as it changes in other windows, you can use the AccEvent - again, see location below.  When you run this tool, it will start dumping the Win Events that occur on your machine.  For example, every 1 minute you will see an OBJ_VALUECHANGE event for the system time.<br /><br />You can download these tools here <a href=\"http://www.microsoft.com/downloads/details.aspx?familyid=3755582A-A707-460A-BF21-1373316E13F0&amp;displaylang=en\" class=\"externalLink\">http://www.microsoft.com/downloads/details.aspx?familyid=3755582A-A707-460A-BF21-1373316E13F0&amp;displaylang=en<span class=\"externalLinkIcon\" style=\"font-family:Consolas, Courier New, Courier, Monospace;\"></span></a><br /><br />Hope this helps,<br />Peter Lakov<br />AccChecker Program Manager<br />",
+    "PostedDate": "2008-03-24T09:53:01.787-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "82622",
+    "ThreadId": "24009",
+    "Html": "\r\nHi Peter Lakov,<br /><br />thank you for your answer and helps.<br />I would now try it.<br />Have a nice week.<br />Best regards<br />M. Knebel<br />",
+    "PostedDate": "2008-03-25T03:17:47.563-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "97131",
+    "ThreadId": "24009",
+    "Html": "I have been looking forward to using AccCheckUI, but 1.1 still does not appear to run on XP.  <br>\r\nI get an Error Exception and the app closes.<br>\r\n<br>\r\nI've check the readme and other sources, but can't find anything I am missing.<br>\r\nThanks,<br>\r\nDan \r\n",
+    "PostedDate": "2008-06-05T15:13:18.197-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "97197",
+    "ThreadId": "24009",
+    "Html": "Hello Dan,<br>\r\n<br>\r\ni can only say that i don't have any problem yet to run AccCechUI 1.1 on XP.<br>\r\nPerhaps it would help the support if you describe your Error Exception or make a dump<br>\r\nfor them. And of course description of your pc-system.<br>\r\nBest regards<br>\r\nMatthias<br>\r\n",
+    "PostedDate": "2008-06-05T23:39:17.663-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "97315",
+    "ThreadId": "24009",
+    "Html": "Dan,<br>\r\n<br>\r\nAs Matthias mentioned, the above would help a lot.  <br>\r\n<br>\r\nAlso, did you try running AccCheckUI.exe from the same folder where the UI lives?  For example, if AccCheckUI.exe is in folder C:\\Tools\\, and your current directory is C:\\ and you try to run it with the command C:\\Tools\\AccCheckUI.exe, it will not work.  You will need to be in C:\\Tools\\.<br>\r\n<br>\r\nThanks,<br>\r\nPeter\r\n",
+    "PostedDate": "2008-06-06T10:07:51.18-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  }
+]

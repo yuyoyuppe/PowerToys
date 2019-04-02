@@ -1,0 +1,34 @@
+[
+  {
+    "Id": "848394",
+    "ThreadId": "359434",
+    "Html": "\r\n<p>Hello sir,</p>\r\n<p>I am using Acc Chacker for testing silverlight application.I am using 32bit and 2.0 version of Acc chacker.I am not able to test colour contrast,label name,heading kind of issues with Acc chacker right not with default Verifications provided.</p>\r\n<p>Can I get this verifications in ready to use form ?</p>\r\n<p>thanks,</p>\r\n<p>Dhaval Panchal</p>\r\n",
+    "PostedDate": "2012-06-13T05:53:04.19-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "848759",
+    "ThreadId": "359434",
+    "Html": "<p>And are those 4 Dll are enough to test any app for&nbsp;Accessibility ?.How many Guidelines does this verifications follow given on the WCAG site for silverlight(SL) ?&nbsp;</p>\r\n<p>&nbsp;</p>\r\n<p>Thnnks</p>",
+    "PostedDate": "2012-06-13T22:48:36.487-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "848760",
+    "ThreadId": "359434",
+    "Html": "\r\n<p>-</p>\r\n",
+    "PostedDate": "2012-06-13T22:49:09.27-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "848761",
+    "ThreadId": "359434",
+    "Html": "\r\n<p>-</p>\r\n",
+    "PostedDate": "2012-06-13T22:49:28.033-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  }
+]

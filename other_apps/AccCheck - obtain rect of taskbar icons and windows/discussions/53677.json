@@ -1,0 +1,34 @@
+[
+  {
+    "Id": "180689",
+    "ThreadId": "53677",
+    "Html": "It is possible to check the accessibility of webpages using acccheck api<br>\r\n<br>\r\nThanks!<br>\r\nEric\r\n",
+    "PostedDate": "2009-04-17T14:44:47.363-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "182896",
+    "ThreadId": "53677",
+    "Html": "<p>Hi Eric,</p>\r\n<p>The short answer is &quot;No, you cannot use AccChecker to test webpages.&quot;</p>\r\n<p>The long answer:</p>\r\n<p>The currently published latest version (v1.1) of AccChecker does not include verifications suitable for webpages.  You could run the current verifications on a webpage, however the results may not be very relevant, since web browsers expose MSAA differently compared to standard Windows user interfaces.  Also, the APIs expose the same verifications that are available through the GUI and Console mode, so that limitation will be available in all 3 modes (GUI, console, APIs).</p>\r\n<p>Certain verifications could make sense for webpages (such as parent-child relationship), however they would be testing much more the accessibility of the rendering engine (Trident for Internet Explorer or Gecko for Firefox), rather than the accessibility of the webpage itself.</p>\r\n<p>While we don't have a plan of record, we expect that future versions of AccChecker will include webpage verifications, so stay tuned.  Hope this helps.</p>\r\n<p>Best regards, <br>\r\nPeter Lakov<br>\r\nAccChecker Program Manager</p>\r\n",
+    "PostedDate": "2009-04-23T10:24:40.883-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "226762",
+    "ThreadId": "53677",
+    "Html": "<p>Hi Peter!</p>\r\n<p>I have already started a discussion in UIVerify discussions on the subject...</p>\r\n<p><a href=\"http://uiautomationverify.codeplex.com/Thread/View.aspx?ThreadId=66713\">http://uiautomationverify.codeplex.com/Thread/View.aspx?ThreadId=66713</a></p>\r\n<p>As per this post, I could not find UI elements placed on an HTML page that is embedded in a windows container which is part of a windows application, using UIVerify. When I used AccChecker to verify the same, I'm able to find all the controls in the said html page in a tree view and could visualize them as well. For example, there is a link, which is found in the tree as follows...</p>\r\n<p>Name: Deposit</p>\r\n<p>Value: javascript:openCashierDeposit()</p>\r\n<p>Role: Text</p>\r\n<p>State: Linked ReadOnly Selectable Focusable</p>\r\n<p>Location: {X=983,Y=203,Width=44,Height=12}</p>\r\n<p>My request now to you is that, how would get this object so that I can programmatically perform an actions such as verification of name or most importantly clicking the link.</p>\r\n<p>&nbsp;</p>\r\n<p>Thanks</p>\r\n<p>Sreedhar</p>\r\n<p>&nbsp;</p>\r\n<p>&nbsp;</p>",
+    "PostedDate": "2009-08-22T22:12:37.83-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "230459",
+    "ThreadId": "53677",
+    "Html": "<p><span style=\"color:black;font-size:10pt\">Sreedhar,</span></p>\r\n<p><span style=\"color:black;font-size:10pt\">Are you asking how to select an individual control with AccChecker and run the verifications on that control (rather than on an entire window)?</span></p>\r\n<p><span style=\"color:black;font-size:10pt\">AccChecker was designed to specify entire windows (on a HWND boundary) on which to run the verifications &ndash; the current version doesn&rsquo;t have the granularity to specify individual controls.&nbsp; For that, you may need to use some other tools, such as Inspect (they don&rsquo;t have the verifications, but you can use them to select and view individual controls.</span></p>\r\n<p><span style=\"color:black;font-size:10pt\">Also, if you need to run the verifications on individual controls, could you explain what the value of doing that is?&nbsp; It seems that for the UI as a whole to work correctly, all the controls should be well accessible, not just a few.</span></p>\r\n<p><span style=\"color:black;font-size:10pt\">Thanks,</span></p>\r\n<p><span style=\"color:black;font-size:10pt\">Peter </span></p>",
+    "PostedDate": "2009-09-02T17:45:35.507-07:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  }
+]

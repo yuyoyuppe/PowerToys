@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirewallAutomation", "FirewallAutomation\FirewallAutomation.csproj", "{CC15C0F4-CB8B-4342-AC64-6538217C5B81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirewallAutomationWithoutTaef", "FirewallAutomationWithoutTaef\FirewallAutomationWithoutTaef.csproj", "{B1BA3A42-1EDC-4C46-866A-A18232412F52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckTreeDepthVerification", "CheckTreeDepthVerification\CheckTreeDepthVerification.csproj", "{69DE5F21-755C-48A7-8B25-1495B2FDF4CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC15C0F4-CB8B-4342-AC64-6538217C5B81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC15C0F4-CB8B-4342-AC64-6538217C5B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC15C0F4-CB8B-4342-AC64-6538217C5B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC15C0F4-CB8B-4342-AC64-6538217C5B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1BA3A42-1EDC-4C46-866A-A18232412F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1BA3A42-1EDC-4C46-866A-A18232412F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1BA3A42-1EDC-4C46-866A-A18232412F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1BA3A42-1EDC-4C46-866A-A18232412F52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69DE5F21-755C-48A7-8B25-1495B2FDF4CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69DE5F21-755C-48A7-8B25-1495B2FDF4CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69DE5F21-755C-48A7-8B25-1495B2FDF4CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69DE5F21-755C-48A7-8B25-1495B2FDF4CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
