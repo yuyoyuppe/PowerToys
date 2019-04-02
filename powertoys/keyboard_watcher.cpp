@@ -21,9 +21,9 @@ namespace {
 
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    if (nCode == HC_ACTION) {
+    if (nCode == HC_ACTION && (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN)) {
       std::unique_lock<std::mutex> lock(hook_mutex);
-      if ((kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
+      if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
         winkey_pressed = true;
         winkey_press_timestamp = stdclock::now();
         lock.unlock();
