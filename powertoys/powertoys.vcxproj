@@ -120,6 +120,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="com.cpp" />
+    <ClCompile Include="start_visible.cpp" />
     <ClCompile Include="keyboard_watcher.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="monitors.cpp" />
@@ -131,6 +133,8 @@
     <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="com.h" />
+    <ClInclude Include="start_visible.h" />
     <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
     <ClInclude Include="monitors.h" />

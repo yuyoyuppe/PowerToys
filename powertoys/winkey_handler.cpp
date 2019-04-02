@@ -11,14 +11,15 @@ namespace {
   void on_held() {
     winkey_popup->set_transparency(0);
     std::thread([] {
-      SetForegroundWindow(winkey_popup->hwnd);
       auto primary = get_primary_monitor();
       winkey_popup->show(
         primary.left(), primary.top(), primary.width(), primary.height()+1,
         [=](HWND hwnd) {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
-        std::string str = "content here";
+        std::stringstream stream;
+        stream << "Hullo!";
+        std::string str = stream.str();
         TextOut(hdc, 20, 20, str.c_str(), str.length());
         EndPaint(hwnd, &ps);
         return 0;

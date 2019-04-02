@@ -6,6 +6,7 @@
 #include <functional>
 #include <condition_variable>
 #include <Windows.h>
+#include "start_visible.h"
 
 namespace {
   using stdclock = std::chrono::system_clock;
@@ -20,9 +21,9 @@ namespace {
 
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    if (nCode == HC_ACTION && (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN)) {
+    if (nCode == HC_ACTION) {
       std::unique_lock<std::mutex> lock(hook_mutex);
-      if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+      if ((kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
         winkey_pressed = true;
         winkey_press_timestamp = stdclock::now();
         lock.unlock();
@@ -51,7 +52,7 @@ namespace {
           lock.lock();
           wait_time = stdclock::now() - winkey_press_timestamp;
         }
-        if (winkey_pressed) {
+        if (winkey_pressed && !is_start_visible()) {
           winkey_signaled = true;
           on_held_cb();
         }
