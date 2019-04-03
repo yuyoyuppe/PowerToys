@@ -13,6 +13,7 @@ struct ComInit {
 };
 
 void init_com() {
+  // C++ guarantees this will be initialized once in a thread-safe way
   static ComInit init;
 }
 
