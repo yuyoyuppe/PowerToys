@@ -20,6 +20,15 @@ std::optional<RECT> get_window_pos(HWND hwnd) {
   }
 }
 
+std::optional<POINT> get_mouse_pos() {
+  POINT point;
+  if (GetCursorPos(&point) == 0) {
+    return {};
+  } else {
+    return point;
+  }
+}
+
 int run_message_loop() {
   MSG msg;
   while (GetMessage(&msg, NULL, 0, 0)) {

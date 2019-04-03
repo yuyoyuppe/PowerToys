@@ -5,7 +5,7 @@ std::recursive_mutex PopupWindow::static_mutex;
 bool PopupWindow::window_class_initialized;
 std::unordered_map<HWND, PaintProc> PopupWindow::paint_procedures;
 
-PopupWindow::PopupWindow(PaintProc paint_proc) {
+PopupWindow::PopupWindow(PaintProc paint_proc) : fade(*this) {
   static const char* class_name = "PToyPopup";
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
   if (!window_class_initialized) {
@@ -64,6 +64,14 @@ void PopupWindow::hide() {
   ShowWindow(hwnd, SW_HIDE);
 }
 
+void PopupWindow::fade_in() {
+  fade.fade_in();
+}
+
+void PopupWindow::fade_out() {
+  fade.fade_out();
+}
+
 PopupWindow::~PopupWindow() {
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
   paint_procedures.erase(hwnd);
@@ -89,4 +97,61 @@ LRESULT PopupWindow::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     return DefWindowProc(hwnd, msg, wParam, lParam);
   }
   return 0;
+}
+
+FadeWindow::FadeWindow(PopupWindow& window) : running(false), exit(false), window_ptr(&window) {
+  thread = std::thread(&FadeWindow::thread_proc, this);
+}
+
+void FadeWindow::fade_in() {
+  std::unique_lock<std::mutex> lock(mutex);
+  if (!running) {
+    next = 0;
+  }
+  delta = 0.05;
+  running = true;
+  lock.unlock();
+  cv.notify_one();
+}
+
+void FadeWindow::fade_out() {
+  std::unique_lock<std::mutex> lock(mutex);
+  if (!running) {
+    next = 0.7;
+  }
+  delta = -0.05;
+  running = true;
+  lock.unlock();
+  cv.notify_one();
+}
+
+FadeWindow::~FadeWindow() {
+  std::unique_lock<std::mutex> lock(mutex);
+  exit = true;
+  lock.unlock();
+  cv.notify_one();
+  thread.join();
+}
+
+void FadeWindow::thread_proc() {
+  std::unique_lock<std::mutex> lock(mutex);
+  while (!exit) {
+    cv.wait(lock, [&] { return running || exit; });
+    if (exit)
+      return;
+    while (!exit) {
+      if (next < 0) {
+        window_ptr->hide();
+        break;
+      }
+      if (next > 0.7) {
+        window_ptr->set_transparency(0.7);
+        break;
+      }
+      window_ptr->set_transparency(next);
+      next += delta;
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+    running = false;
+  }
 }

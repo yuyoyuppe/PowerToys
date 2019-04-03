@@ -2,25 +2,28 @@
 #include "popup_window.h"
 #include "mouse_watcher.h"
 #include "move_window.h"
+#include "utils.h"
+
 namespace {
   PopupWindow* maximize_poup = NULL;
-
+  
   RECT on_mouse_in(HWND hwnd, RECT buttons) {
-    maximize_poup->show(buttons.left,
-                        buttons.bottom,
-                        buttons.right - buttons.left,
+    maximize_poup->set_transparency(0);
+    maximize_poup->show(buttons.left - 50,
+                        buttons.bottom + 20,
+                        buttons.right - buttons.left + 100,
                         buttons.bottom - buttons.top);
+    maximize_poup->fade_in();
     RECT result;
-    result.left = buttons.left;
-    result.top = buttons.bottom;
-    result.right = buttons.right;
-    result.top = 2 * buttons.bottom - buttons.top;
-    move_window::to_screen_left(hwnd);
+    result.left = buttons.left - 50;
+    result.top = buttons.bottom + 20;
+    result.right = buttons.right + 50;
+    result.bottom = buttons.bottom + (buttons.bottom - buttons.top) + 20;
     return result;
   }
 
   void on_mouse_out() {
-    maximize_poup->hide();
+    maximize_poup->fade_out();
   }
 }
 

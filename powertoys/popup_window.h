@@ -2,9 +2,29 @@
 #include <functional>
 #include <unordered_map>
 #include <mutex>
+#include <thread>
+#include <condition_variable>
 #include <windows.h>
 
 typedef std::function<LRESULT(HWND hwnd)> PaintProc;
+
+class PopupWindow;
+
+class FadeWindow {
+public:
+  FadeWindow(PopupWindow& window);
+  void fade_in();
+  void fade_out();
+  ~FadeWindow();
+private:
+  PopupWindow* window_ptr;
+  double next, delta;
+  bool running, exit;
+  std::thread thread;
+  std::mutex mutex;
+  std::condition_variable cv;
+  void thread_proc();
+};
 
 class PopupWindow {
 public:
@@ -14,10 +34,12 @@ public:
   void show(int x_pos, int y_pos, int x_size, int y_size);
   void show();
   void hide();
+  void fade_in();
+  void fade_out();
   ~PopupWindow();
   HWND hwnd;
 private:
-  
+  FadeWindow fade;
   static LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
   static std::recursive_mutex static_mutex;
   static bool window_class_initialized;
