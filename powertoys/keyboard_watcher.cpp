@@ -20,6 +20,14 @@ namespace {
   std::function<void()> on_held_cb, on_relese_cb;
   std::function<void(unsigned long)> on_held_pressed_cb;
 
+/*
+  Uses SetWindowsHookEx to install system-wide hook that intercepts keyboard
+  events. After WinKey is pressed, conditional variable is signaled and
+  held_delay_thread_proc thread waits for specified amount of time. If the key
+  is still pressed on_held callback is called.
+
+  Takes care not to call any of the callbacks more than once for each event.
+*/
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
     if (nCode == HC_ACTION) {
@@ -57,6 +65,7 @@ namespace {
           lock.lock();
           wait_time = stdclock::now() - winkey_press_timestamp;
         }
+        // Make sure not to call the callback if start menu is visible
         if (winkey_pressed && !is_start_visible()) {
           winkey_signaled = true;
           on_held_cb();

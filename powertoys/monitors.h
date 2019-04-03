@@ -27,8 +27,12 @@ bool operator==(const MonitorInfo& lhs, const MonitorInfo& rhs);
 
 // Returns monitor rects ordered from left to right
 std::vector<MonitorInfo> get_monitors();
-
+// Return primary display
 MonitorInfo get_primary_monitor();
+// Return monitor on which hwnd window is displayed
 MonitorInfo get_window_monitor(HWND hwnd);
+// Gets numeric index of the given monitor, for easy access to the screens on the left and right
 int get_monitor_index(const std::vector<MonitorInfo>& monitors, const MonitorInfo& monitor);
+// Scales window from src_monitor coordinates to des_monitor coordinates. Returned RECT will show the window
+// in the same proportion on the dest monitor as it was on the src one.
 RECT translate_monitors(const RECT& window, const MonitorInfo& src_monitor, const MonitorInfo& dest_monitor);

@@ -5,6 +5,19 @@ std::recursive_mutex PopupWindow::static_mutex;
 bool PopupWindow::window_class_initialized;
 std::unordered_map<HWND, PaintProc> PopupWindow::paint_procedures;
 
+/*
+  Class for creating and displaying windows. Used params:
+    WS_EX_TOOLWINDOW - window wont appear in Alt-Tab and on the taskbar
+    WS_EX_TOPMOST - window should be on top
+    WS_EX_LAYERED - can be made transparent by a call to SetLayeredWindowAttributes
+    WS_EX_TRANSPARENT - window will be "clickthrough", all clicks will go to the
+                        underlying window
+    WS_POPUP - minimal window
+
+  We keep hash map of WM_PAINT handlers for each window (paint_procedures). This
+  way we can easily substitute paint handler to customize window content. We can
+  even do that when resizing the window.
+*/
 PopupWindow::PopupWindow(PaintProc paint_proc) : fade(*this) {
   static const char* class_name = "PToyPopup";
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
@@ -27,13 +40,13 @@ PopupWindow::PopupWindow(PaintProc paint_proc) : fade(*this) {
     window_class_initialized = true;
   }
   hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT,
-    class_name, class_name,
-    WS_POPUP,
-    CW_USEDEFAULT,
-    CW_USEDEFAULT, 240, 120,
-    NULL, NULL,
-    GetModuleHandle(NULL),
-    NULL);
+                        class_name, class_name,
+                        WS_POPUP,
+                        CW_USEDEFAULT,
+                        CW_USEDEFAULT, 240, 120,
+                        NULL, NULL,
+                        GetModuleHandle(NULL),
+                        NULL);
   if (hwnd == NULL)
     throw std::runtime_error("Cannot create window");
   paint_procedures.emplace(hwnd, paint_proc);
