@@ -27,6 +27,6 @@ namespace {
 void start_mouse_handler() {
   if (maximize_poup == NULL) {
     maximize_poup = new PopupWindow();
-    start_mouse_watcher(300, on_mouse_in, on_mouse_out);
+    start_mouse_watcher(300, 100, on_mouse_in, on_mouse_out);
   }
 }

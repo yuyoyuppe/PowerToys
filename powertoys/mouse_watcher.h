@@ -11,4 +11,4 @@ typedef std::function<RECT(HWND, RECT)> MouseInProc;
 typedef std::function<void()> MouseOutProc;
 
 
-void start_mouse_watcher(int ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out);
+void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out);
