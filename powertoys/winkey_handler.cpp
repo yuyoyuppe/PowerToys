@@ -29,6 +29,8 @@ namespace {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
       }
     }).detach();
+  void on_held_pressed(DWORD vkCode) {
+
   }
 
   void on_release() {
@@ -46,5 +48,5 @@ void start_winkey_handler() {
   if (winkey_popup)
     return;
   winkey_popup = new PopupWindow();
-  start_winkey_watcher(300, on_held, on_release);
+  start_winkey_watcher(300, on_held, on_held_pressed, on_release);
 }

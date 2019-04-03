@@ -22,11 +22,7 @@ keyboard_watcher:
 Uses SetWindowsHookEx to install system-wide hook that intercepts keyboard
 events. After WinKey is pressed, conditional variable is signaled and
 held_delay_thread_proc thread waits for specified amount of time. If the key
-is still pressed on_held callback is called. After it is called, another thread
-(held_monitor_thread_proc) is also signaled. This thread calls  on_held_cb
-every 8ms (120 FPS) to keep up with the windows if they move around the screen.
-
-The on_release_cb is called when the WinKey is released.
+is still pressed on_held callback is called.
 
 winkey_handler:
 

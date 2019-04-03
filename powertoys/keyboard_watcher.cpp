@@ -18,22 +18,27 @@ namespace {
   bool winkey_pressed = false;
   bool winkey_signaled = false;
   std::function<void()> on_held_cb, on_relese_cb;
+  std::function<void(unsigned long)> on_held_pressed_cb;
 
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    if (nCode == HC_ACTION && (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN)) {
+    if (nCode == HC_ACTION) {
       std::unique_lock<std::mutex> lock(hook_mutex);
-      if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
-        winkey_pressed = true;
-        winkey_press_timestamp = stdclock::now();
-        lock.unlock();
-        hook_cv.notify_one();
-      } else {
-        winkey_pressed = false;
-        if (winkey_signaled) {
+      if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
+        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+          winkey_pressed = true;
+          winkey_press_timestamp = stdclock::now();
           lock.unlock();
           hook_cv.notify_one();
+        } else {
+          winkey_pressed = false;
+          if (winkey_signaled) {
+            lock.unlock();
+            hook_cv.notify_one();
+          }
         }
+      } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+        on_held_pressed_cb(kb_hook->vkCode);
       }
     }
     return CallNextHookEx(hook_handle, nCode, wParam, lParam);
@@ -64,9 +69,10 @@ namespace {
   }
 }
  
-void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::function<void()> on_released) {
+void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::function<void(unsigned long)> on_held_pressed, std::function<void()> on_released) {
   if (hook_handle == NULL) {
     on_held_cb = on_held;
+    on_held_pressed_cb = on_held_pressed;
     on_relese_cb = on_released;
     winkey_pressed = false;
     winkey_signaled = false;
