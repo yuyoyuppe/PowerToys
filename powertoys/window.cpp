@@ -10,8 +10,6 @@ std::unordered_map<HWND, PaintProc> Window::paint_procedures;
     WS_EX_TOOLWINDOW - window wont appear in Alt-Tab and on the taskbar
     WS_EX_TOPMOST - window should be on top
     WS_EX_LAYERED - can be made transparent by a call to SetLayeredWindowAttributes
-    WS_EX_TRANSPARENT - window will be "clickthrough", all clicks will go to the
-                        underlying window
     WS_POPUP - minimal window
 
   We keep hash map of WM_PAINT handlers for each window (paint_procedures). This
@@ -39,7 +37,7 @@ Window::Window(PaintProc paint_proc) : fade(*this) {
       throw std::runtime_error("Cannot register window class");
     window_class_initialized = true;
   }
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT,
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED,
                         class_name, class_name,
                         WS_POPUP,
                         CW_USEDEFAULT,
