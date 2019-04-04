@@ -8,17 +8,21 @@ namespace {
   PopupWindow* maximize_poup = NULL;
   
   RECT on_mouse_in(HWND hwnd, RECT buttons) {
-    maximize_poup->set_transparency(0);
-    maximize_poup->show(buttons.left - 50,
-                        buttons.bottom + 20,
-                        buttons.right - buttons.left + 100,
-                        buttons.bottom - buttons.top);
-    maximize_poup->fade_in();
+    auto dpi = GetDpiForWindow(hwnd);
+    int offset_x = (50 * dpi) / 120;
+    int offset_y = (20 * dpi) / 120;
     RECT result;
-    result.left = buttons.left - 50;
-    result.top = buttons.bottom + 20;
-    result.right = buttons.right + 50;
-    result.bottom = buttons.bottom + (buttons.bottom - buttons.top) + 20;
+    result.left = buttons.left - offset_x;
+    result.top = buttons.bottom + offset_y;
+    result.right = buttons.right + offset_x;
+    result.bottom = buttons.bottom + 4 * offset_y;
+    maximize_poup->set_transparency(0);
+    maximize_poup->show(result.left,
+                        result.top,
+                        result.right - result.left,
+                        result.bottom - result.top);
+    maximize_poup->fade_in();
+    
     return result;
   }
 
