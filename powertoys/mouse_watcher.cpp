@@ -15,7 +15,7 @@ namespace {
   MouseOutProc mouse_out_cb;
   stdclock::time_point mousein_timestamp;
   stdclock::duration mousein_wait, mousein_sleep;
-  RECT popup_rect, buttons_rect;
+  RECT popup_rect, buttons_rect, stored_window_rect;
 
   bool mouse_in_rect(POINT mouse_pos, RECT rect) {
     return mouse_pos.x >= rect.left && mouse_pos.x <= rect.right &&
@@ -45,34 +45,46 @@ namespace {
     int px_right = top_right + (int)(dright * dy);
     return mouse_pos.x >= px_left && mouse_pos.x <= px_right;
   }
-
+  void maybe_mouse_out() {
+    if (mousein_signalled) {
+      mousein_signalled = false;
+      mouse_out_cb();
+    }
+  }
   void mouse_thread_proc() {
     while (true) {
       std::this_thread::sleep_for(mousein_sleep);
       auto mouse_pos = get_mouse_pos();
       if (!mouse_pos) {
-        if (mousein_signalled) {
-          mousein_signalled = false;
-          mouse_out_cb();
-        }
-        continue;
-      }
-      if (mousein_signalled) {
-        if (!mouse_in_bounds(*mouse_pos, buttons_rect, popup_rect)) {
-          mousein_signalled = false;
-          mouse_out_cb();
-        }
+        maybe_mouse_out();
         continue;
       }
       auto mouse_window = WindowFromPoint(*mouse_pos);
-      if (mouse_window == nullptr)
+      if (mouse_window == nullptr) {
+        maybe_mouse_out();
         continue;
+      }
       mouse_window = GetAncestor(mouse_window, GA_ROOTOWNER);
-      if (GetWindowLong(mouse_window, GWL_STYLE) & WS_CHILD)
+      if (GetWindowLong(mouse_window, GWL_STYLE) & WS_CHILD) {
+        maybe_mouse_out();
         continue;
+      }
       auto window_rect = get_window_pos(mouse_window);
-      if (!window_rect)
+      if (!window_rect) {
+        maybe_mouse_out();
         continue;
+      }
+      if (mousein_signalled) {
+        if (window_rect->left != stored_window_rect.left ||
+            window_rect->top != stored_window_rect.top ||
+            window_rect->bottom != stored_window_rect.bottom ||
+            window_rect->right != stored_window_rect.right ||
+            !mouse_in_bounds(*mouse_pos, buttons_rect, popup_rect)) {
+          mousein_signalled = false;
+          mouse_out_cb();
+        }
+        continue;
+      }
       auto dpi = GetDpiForWindow(mouse_window);
       int buttons_width = 185 * dpi / 120;
       int buttons_height = 37 * dpi / 120;
@@ -87,6 +99,7 @@ namespace {
         }
         if (stdclock::now() - mousein_timestamp > mousein_wait) {
           mousein_signalled = true;
+          stored_window_rect = *window_rect;
           popup_rect = mouse_in_cb(mouse_window, buttons_rect);
         }
       } else {
