@@ -3,8 +3,7 @@
 
 std::recursive_mutex Window::static_mutex;
 bool Window::window_class_initialized;
-std::unordered_map<HWND, PaintProc> Window::paint_procedures;
-
+std::unordered_map<HWND, std::unordered_map<UINT, MsgProc>> Window::msg_procedures;
 /*
   Class for creating and displaying windows. Used params:
     WS_EX_TOOLWINDOW - window wont appear in Alt-Tab and on the taskbar
@@ -16,7 +15,7 @@ std::unordered_map<HWND, PaintProc> Window::paint_procedures;
   way we can easily substitute paint handler to customize window content. We can
   even do that when resizing the window.
 */
-Window::Window(PaintProc paint_proc) : fade(*this) {
+Window::Window() : fade(*this), corner_radius(0) {
   static const char* class_name = "PToyPopup";
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
   if (!window_class_initialized) {
@@ -47,67 +46,90 @@ Window::Window(PaintProc paint_proc) : fade(*this) {
                         NULL);
   if (hwnd == NULL)
     throw std::runtime_error("Cannot create window");
-  paint_procedures.emplace(hwnd, paint_proc);
 }
 
-void Window::set_transparency(double alpha) {
+Window& Window::set_transparency(double alpha) {
   SetLayeredWindowAttributes(hwnd, 0, (int)(255 * alpha), LWA_ALPHA);
+  return *this;
 }
 
-void Window::show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc) {
-  paint_procedures[hwnd] = paint_proc;
-  show(x_pos, y_pos, x_size, y_size);
+Window& Window::round_corners(int radius) {
+  corner_radius = radius;
+  return *this;
 }
 
-void Window::show(int x_pos, int y_pos, int x_size, int y_size) {
+Window& Window::add_handler(UINT msg, MsgProc msg_proc) {
+  std::unique_lock<std::recursive_mutex> lock(static_mutex);
+  msg_procedures[hwnd][msg] = msg_proc;
+  return *this;
+}
+
+Window& Window::show(int x_pos, int y_pos, int x_size, int y_size, MsgProc wmpaint_proc) {
+  add_handler(WM_PAINT, wmpaint_proc);
+  return show(x_pos, y_pos, x_size, y_size);
+}
+
+Window& Window::show(int x_pos, int y_pos, int x_size, int y_size) {
   SetWindowPos(hwnd, HWND_TOPMOST, x_pos, y_pos, x_size, y_size, 0);
-  HRGN elipse = CreateRoundRectRgn(0, 0, x_size, y_size, 15, 15);
+  HRGN elipse = CreateRoundRectRgn(0, 0, x_size, y_size, corner_radius, corner_radius);
   SetWindowRgn(hwnd, elipse, TRUE);
-  show();
+  return show();
 }
 
-void Window::show() {
+Window& Window::show(RECT rect, MsgProc wmpaint_proc) {
+  return show(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, wmpaint_proc);
+}
+
+Window& Window::show(RECT rect) {
+  return show(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+}
+
+Window& Window::show() {
   ShowWindow(hwnd, SW_SHOWNA);
   UpdateWindow(hwnd);
+  return *this;
 }
 
-void Window::hide() {
+Window& Window::hide() {
   ShowWindow(hwnd, SW_HIDE);
+  return *this;
 }
 
-void Window::fade_in() {
+Window& Window::fade_in() {
   fade.fade_in();
+  return *this;
 }
 
-void Window::fade_out() {
+Window& Window::fade_out() {
   fade.fade_out();
+  return *this;
 }
 
 Window::~Window() {
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
-  paint_procedures.erase(hwnd);
+  msg_procedures.erase(hwnd);
+  DestroyWindow(hwnd);
 }
 
 LRESULT Window::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  std::lock_guard<std::recursive_mutex> lock(static_mutex);
   switch (msg) {
-  case WM_PAINT: {
-    std::lock_guard<std::recursive_mutex> lock(static_mutex);
-    std::unordered_map<HWND, PaintProc>::const_iterator iter = paint_procedures.find(hwnd);
-    if (iter == end(paint_procedures))
-      return 0;
-    auto& paint_proc = iter->second;
-    return paint_proc(hwnd);
-  }
   case WM_CLOSE:
     DestroyWindow(hwnd);
-    break;
+    return 0;
   case WM_DESTROY:
     PostQuitMessage(0);
-    break;
+    return 0;
   default:
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+    auto hwnd_iter = msg_procedures.find(hwnd);
+    if (hwnd_iter == end(msg_procedures))
+      break;
+    auto proc_iter = hwnd_iter->second.find(msg);
+    if (proc_iter == end(hwnd_iter->second))
+      break;
+    return proc_iter->second(hwnd, wParam, lParam);
   }
-  return 0;
+  return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 FadeWindow::FadeWindow(Window& window) : running(false), exit(false), window_ptr(&window) {

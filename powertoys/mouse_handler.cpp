@@ -16,12 +16,10 @@ namespace {
     result.top = buttons.bottom + offset_y;
     result.right = buttons.right + offset_x;
     result.bottom = buttons.bottom + 4 * offset_y;
-    maximize_poup->set_transparency(0);
-    maximize_poup->show(result.left,
-                        result.top,
-                        result.right - result.left,
-                        result.bottom - result.top);
-    maximize_poup->fade_in();
+    maximize_poup->set_transparency(0)
+                  .round_corners((15 * dpi) / 120)
+                  .show(result)
+                  .fade_in();
     
     return result;
   }

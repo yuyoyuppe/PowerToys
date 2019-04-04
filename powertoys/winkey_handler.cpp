@@ -12,7 +12,7 @@ namespace {
     auto primary = get_primary_monitor();
     winkey_popup->show(
       primary.left(), primary.top(), primary.width(), primary.height() + 1,
-      [=](HWND hwnd) {
+      [=](HWND hwnd, WPARAM, LPARAM) {
       PAINTSTRUCT ps;
       HDC hdc = BeginPaint(hwnd, &ps);
       std::stringstream stream;
@@ -21,8 +21,7 @@ namespace {
       TextOut(hdc, 20, 20, str.c_str(), str.length());
       EndPaint(hwnd, &ps);
       return 0;
-    });
-    winkey_popup->fade_in();
+    }).fade_in();
   }
 
   void on_held_pressed(DWORD vkCode) {
