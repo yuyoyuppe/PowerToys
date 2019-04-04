@@ -1,11 +1,11 @@
 #include "functionalities.h"
-#include "popup_window.h"
+#include "window.h"
 #include "mouse_watcher.h"
 #include "move_window.h"
 #include "utils.h"
 
 namespace {
-  PopupWindow* maximize_poup = NULL;
+  Window* maximize_poup = NULL;
   
   RECT on_mouse_in(HWND hwnd, RECT buttons) {
     auto dpi = GetDpiForWindow(hwnd);
@@ -33,7 +33,7 @@ namespace {
 
 void start_mouse_handler() {
   if (maximize_poup == NULL) {
-    maximize_poup = new PopupWindow();
+    maximize_poup = new Window();
     start_mouse_watcher(300, 100, on_mouse_in, on_mouse_out);
   }
 }

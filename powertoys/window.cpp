@@ -1,9 +1,9 @@
-#include "popup_window.h"
+#include "window.h"
 #include <exception>
 
-std::recursive_mutex PopupWindow::static_mutex;
-bool PopupWindow::window_class_initialized;
-std::unordered_map<HWND, PaintProc> PopupWindow::paint_procedures;
+std::recursive_mutex Window::static_mutex;
+bool Window::window_class_initialized;
+std::unordered_map<HWND, PaintProc> Window::paint_procedures;
 
 /*
   Class for creating and displaying windows. Used params:
@@ -18,14 +18,14 @@ std::unordered_map<HWND, PaintProc> PopupWindow::paint_procedures;
   way we can easily substitute paint handler to customize window content. We can
   even do that when resizing the window.
 */
-PopupWindow::PopupWindow(PaintProc paint_proc) : fade(*this) {
+Window::Window(PaintProc paint_proc) : fade(*this) {
   static const char* class_name = "PToyPopup";
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
   if (!window_class_initialized) {
     WNDCLASSEX wnd_class;
     wnd_class.cbSize = sizeof(WNDCLASSEX);
     wnd_class.style = CS_SAVEBITS;
-    wnd_class.lpfnWndProc = PopupWindow::window_proc;
+    wnd_class.lpfnWndProc = Window::window_proc;
     wnd_class.cbClsExtra = 0;
     wnd_class.cbWndExtra = 0;
     wnd_class.hInstance = GetModuleHandle(NULL);
@@ -52,45 +52,45 @@ PopupWindow::PopupWindow(PaintProc paint_proc) : fade(*this) {
   paint_procedures.emplace(hwnd, paint_proc);
 }
 
-void PopupWindow::set_transparency(double alpha) {
+void Window::set_transparency(double alpha) {
   SetLayeredWindowAttributes(hwnd, 0, (int)(255 * alpha), LWA_ALPHA);
 }
 
-void PopupWindow::show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc) {
+void Window::show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc) {
   paint_procedures[hwnd] = paint_proc;
   show(x_pos, y_pos, x_size, y_size);
 }
 
-void PopupWindow::show(int x_pos, int y_pos, int x_size, int y_size) {
+void Window::show(int x_pos, int y_pos, int x_size, int y_size) {
   SetWindowPos(hwnd, HWND_TOPMOST, x_pos, y_pos, x_size, y_size, 0);
   HRGN elipse = CreateRoundRectRgn(0, 0, x_size, y_size, 15, 15);
   SetWindowRgn(hwnd, elipse, TRUE);
   show();
 }
 
-void PopupWindow::show() {
+void Window::show() {
   ShowWindow(hwnd, SW_SHOWNA);
   UpdateWindow(hwnd);
 }
 
-void PopupWindow::hide() {
+void Window::hide() {
   ShowWindow(hwnd, SW_HIDE);
 }
 
-void PopupWindow::fade_in() {
+void Window::fade_in() {
   fade.fade_in();
 }
 
-void PopupWindow::fade_out() {
+void Window::fade_out() {
   fade.fade_out();
 }
 
-PopupWindow::~PopupWindow() {
+Window::~Window() {
   std::lock_guard<std::recursive_mutex> lock(static_mutex);
   paint_procedures.erase(hwnd);
 }
 
-LRESULT PopupWindow::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+LRESULT Window::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
   case WM_PAINT: {
     std::lock_guard<std::recursive_mutex> lock(static_mutex);
@@ -112,7 +112,7 @@ LRESULT PopupWindow::window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
   return 0;
 }
 
-FadeWindow::FadeWindow(PopupWindow& window) : running(false), exit(false), window_ptr(&window) {
+FadeWindow::FadeWindow(Window& window) : running(false), exit(false), window_ptr(&window) {
   thread = std::thread(&FadeWindow::thread_proc, this);
 }
 

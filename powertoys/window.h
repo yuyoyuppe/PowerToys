@@ -8,16 +8,16 @@
 
 typedef std::function<LRESULT(HWND hwnd)> PaintProc;
 
-class PopupWindow;
+class Window;
 
 class FadeWindow {
 public:
-  FadeWindow(PopupWindow& window);
+  FadeWindow(Window& window);
   void fade_in();
   void fade_out();
   ~FadeWindow();
 private:
-  PopupWindow* window_ptr;
+  Window* window_ptr;
   double next, delta;
   bool running, exit;
   std::thread thread;
@@ -26,9 +26,9 @@ private:
   void thread_proc();
 };
 
-class PopupWindow {
+class Window {
 public:
-  PopupWindow(PaintProc paint_proc = [](HWND) { return 0; });
+  Window(PaintProc paint_proc = [](HWND) { return 0; });
   void set_transparency(double alpha);
   void show(int x_pos, int y_pos, int x_size, int y_size, PaintProc paint_proc);
   void show(int x_pos, int y_pos, int x_size, int y_size);
@@ -36,7 +36,7 @@ public:
   void hide();
   void fade_in();
   void fade_out();
-  ~PopupWindow();
+  ~Window();
   HWND hwnd;
 private:
   FadeWindow fade;

@@ -1,13 +1,13 @@
 #include <sstream>
 #include <string>
 #include "functionalities.h"
-#include "popup_window.h"
+#include "window.h"
 #include "keyboard_watcher.h"
 #include "monitors.h"
 #include "utils.h"
 
 namespace {
-  PopupWindow *winkey_popup;
+  Window *winkey_popup;
   void on_held() {
     auto primary = get_primary_monitor();
     winkey_popup->show(
@@ -37,6 +37,6 @@ namespace {
 void start_winkey_handler() {
   if (winkey_popup)
     return;
-  winkey_popup = new PopupWindow();
+  winkey_popup = new Window();
   start_winkey_watcher(300, on_held, on_held_pressed, on_release);
 }

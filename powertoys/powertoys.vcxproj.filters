@@ -5,9 +5,6 @@
     <ClCompile Include="keyboard_watcher.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="popup_window.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -35,12 +32,12 @@
     <ClCompile Include="virtual_desktops.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="popup_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
@@ -65,6 +62,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="start_visible.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
