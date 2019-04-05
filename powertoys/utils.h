@@ -9,6 +9,9 @@ std::optional<RECT> get_button_pos(HWND hwnd);
 std::optional<RECT> get_window_pos(HWND hwnd);
 // Gets mouse postion.
 std::optional<POINT> get_mouse_pos();
-
+// Compare rects
+bool operator==(const RECT& lhs, const RECT& rhs);
+bool operator!=(const RECT& lhs, const RECT& rhs);
+bool operator<(const RECT& lhs, const RECT& rhs);
 // Initializes and runs windows message loop
 int run_message_loop();

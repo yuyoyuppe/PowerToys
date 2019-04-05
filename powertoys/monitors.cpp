@@ -1,4 +1,5 @@
 #include "monitors.h"
+#include "utils.h"
 #include <tuple>
 #include <algorithm>
 
@@ -20,9 +21,7 @@ std::vector<MonitorInfo> get_monitors() {
   std::vector<MonitorInfo> monitors;
   EnumDisplayMonitors(NULL, NULL, get_displays_enum_cb, reinterpret_cast<LPARAM>(&monitors));
   std::sort(begin(monitors), end(monitors), [](const MonitorInfo& lhs, const MonitorInfo& rhs) {
-    auto lhs_tuple = std::make_tuple(lhs.rect.left, lhs.rect.right, lhs.rect.top, lhs.rect.bottom);
-    auto rhs_tuple = std::make_tuple(rhs.rect.left, rhs.rect.right, rhs.rect.top, rhs.rect.bottom);
-    return lhs_tuple < rhs_tuple;
+    return lhs.rect < rhs.rect;
   });
   return monitors;
 }
