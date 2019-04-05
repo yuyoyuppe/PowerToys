@@ -1,12 +1,7 @@
+#include "pch.h"
 #include "keyboard_watcher.h"
-#include <algorithm>
-#include <chrono>
-#include <mutex>
-#include <thread>
-#include <functional>
-#include <condition_variable>
-#include <Windows.h>
 #include "start_visible.h"
+
 
 namespace {
   using stdclock = std::chrono::system_clock;

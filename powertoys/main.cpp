@@ -1,14 +1,15 @@
-#include <windows.h>
+#include "pch.h"
+#include "functionalities.h"
 #include <ShellScalingApi.h>
 #pragma comment(lib, "shcore.lib")
-#include <stdexcept>
-#include "functionalities.h"
-#include "utils.h"
+#pragma comment(lib, "windowsapp")
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  winrt::init_apartment();
+  
   try {
     // We will handle scaling ourselfs.
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+    winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
 
     start_winkey_handler();
     start_mouse_handler();

@@ -1,7 +1,5 @@
+#include "pch.h"
 #include "monitors.h"
-#include "utils.h"
-#include <tuple>
-#include <algorithm>
 
 bool operator==(const MonitorInfo& lhs, const MonitorInfo& rhs) {
   auto lhs_tuple = std::make_tuple(lhs.rect.left, lhs.rect.right, lhs.rect.top, lhs.rect.bottom);

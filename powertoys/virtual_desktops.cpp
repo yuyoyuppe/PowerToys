@@ -1,10 +1,5 @@
+#include "pch.h"
 #include "virtual_desktops.h"
-#include <objbase.h>
-#include <ObjectArray.h>
-#include <ShObjIdl_core.h>
-#include <wrl.h>
-#include <stdexcept>
-#include "com.h"
 
 const CLSID CLSID_ImmersiveShell = { 0xC2F03A33, 0x21F5, 0x47FA, 0xB4, 0xBB, 0x15, 0x63, 0x62, 0xA2, 0xF2, 0x39 };
 const CLSID CLSID_VirtualDesktopAPI_Unknown = { 0xC5E0CDCA, 0x7B6E, 0x41B2, 0x9F, 0xC4, 0xD9, 0x39, 0x75, 0xCC, 0x46, 0x7B };
@@ -87,64 +82,41 @@ public:
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient13() = 0;
 };
 
-static IServiceProvider* init_service_provider() {
-  static Microsoft::WRL::ComPtr<IServiceProvider> provider;
-  if (provider.Get() == nullptr) {
-    auto hr = CoCreateInstance(CLSID_ImmersiveShell, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&provider));
-    if (FAILED(hr)) {
-      throw std::runtime_error("Cannot open ImmersiveShell provider");
+namespace {
+  IServiceProvider* get_service_provider() {
+    static winrt::com_ptr<IServiceProvider> provider;
+    if (!provider) {
+      winrt::check_hresult(CoCreateInstance(CLSID_ImmersiveShell, nullptr, CLSCTX_LOCAL_SERVER, __uuidof(provider), provider.put_void()));
     }
+    return provider.get();
   }
-  return provider.Get();
-}
 
-static IVirtualDesktopManagerInternal* init_manager_internal() {
-  static Microsoft::WRL::ComPtr<IVirtualDesktopManagerInternal> manager;
-  if (manager.Get() == nullptr) {
-    auto provider = init_service_provider();
-    auto hr = provider->QueryService(CLSID_VirtualDesktopAPI_Unknown, IID_PPV_ARGS(&manager));
-    if (FAILED(hr)) {
-      throw std::runtime_error("Cannot open VirtualDesktop internal manager");
+  IVirtualDesktopManagerInternal* get_manager_internal() {
+    auto provider = get_service_provider();
+    static winrt::com_ptr<IVirtualDesktopManagerInternal> manager;
+    if (!manager) {
+      winrt::check_hresult(provider->QueryService(CLSID_VirtualDesktopAPI_Unknown, __uuidof(manager), manager.put_void()));
     }
+    return manager.get();
   }
-  return manager.Get();
-}
 
-static IVirtualDesktopManagerInternal* get_manager_internal() {
-  init_com();
-  init_service_provider();
-  return init_manager_internal();
-}
-
-static IVirtualDesktopManager* init_manager() {
-  static Microsoft::WRL::ComPtr<IVirtualDesktopManager> manager;
-  if (manager.Get() == nullptr) {
-    auto provider = init_service_provider();
-    auto hr = provider->QueryService(__uuidof(IVirtualDesktopManager), manager.GetAddressOf());
-    if (FAILED(hr)) {
-      throw std::runtime_error("Cannot open VirtualDesktop manager");
+  IVirtualDesktopManager* get_manager() {
+    auto provider = get_service_provider();
+    static winrt::com_ptr<IVirtualDesktopManager> manager;
+    if (!manager) {
+      winrt::check_hresult(provider->QueryService(__uuidof(manager), manager.put()));
     }
+    return manager.get();
   }
-  return manager.Get();
 }
-
-static IVirtualDesktopManager* get_manager() {
-  init_com();
-  init_service_provider();
-  return init_manager();
-}
-
 
 void move_window_to_new_desktop(HWND hwnd) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
-  Microsoft::WRL::ComPtr<IVirtualDesktop> new_desktop;
-  if (FAILED(manager_internal->CreateDesktopW(new_desktop.GetAddressOf())))
-    throw std::runtime_error("Cannot create new desktop");
+  winrt::com_ptr<IVirtualDesktop> new_desktop;
+  winrt::check_hresult(manager_internal->CreateDesktopW(new_desktop.put()));
   GUID id;
-  if (FAILED(new_desktop->GetID(&id)))
-    throw std::runtime_error("Cannot get GUID of the new desktop");
-  auto result = manager->MoveWindowToDesktop(hwnd, id);
-  /*if (FAILED())
-    throw std::runtime_error("Cannot move window");*/
+  winrt::check_hresult(new_desktop->GetID(&id));
+  // this failes
+  manager->MoveWindowToDesktop(hwnd, id);
 }

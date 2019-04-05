@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "window.h"
-#include <exception>
 
 std::recursive_mutex Window::static_mutex;
 bool Window::window_class_initialized;

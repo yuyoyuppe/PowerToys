@@ -1,9 +1,6 @@
+#include "pch.h"
 #include "move_window.h"
 #include "monitors.h"
-#include <vector>
-#include <algorithm>
-#include <tuple>
-#include <optional>
 
 namespace move_window {
   void maximize(HWND hwnd) {}

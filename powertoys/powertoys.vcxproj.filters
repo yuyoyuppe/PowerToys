@@ -20,9 +20,6 @@
     <ClCompile Include="move_window.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="com.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="monitors.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -35,6 +32,7 @@
     <ClCompile Include="window.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -55,9 +53,6 @@
     <ClInclude Include="virtual_desktops.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="com.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="monitors.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -67,6 +62,7 @@
     <ClInclude Include="window.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">

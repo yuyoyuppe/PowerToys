@@ -1,8 +1,8 @@
+#include "pch.h"
 #include "functionalities.h"
 #include "window.h"
 #include "mouse_watcher.h"
 #include "move_window.h"
-#include "utils.h"
 
 namespace {
   Window* maximize_poup = NULL;

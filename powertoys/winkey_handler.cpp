@@ -1,10 +1,9 @@
-#include <sstream>
-#include <string>
+#include "pch.h"
 #include "functionalities.h"
 #include "window.h"
 #include "keyboard_watcher.h"
 #include "monitors.h"
-#include "utils.h"
+#include <sstream>
 
 namespace {
   Window *winkey_popup;

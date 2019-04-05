@@ -1,9 +1,5 @@
+#include "pch.h"
 #include "mouse_watcher.h"
-#include "utils.h"
-#include <Windows.h>
-#include <thread>
-#include <chrono>
-#include <mutex>
 
 namespace {
   using stdclock = std::chrono::system_clock;
