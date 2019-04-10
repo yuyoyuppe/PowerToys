@@ -84,10 +84,6 @@ void undocumented_acrylic(HWND hwnd) {
 D2DWindow::D2DWindow() {
   static const char* class_name = "PToyD2DPopup";
   auto primary_screen = get_primary_monitor();
-  primary_screen.rect.left = 200;
-  primary_screen.rect.top = 200;
-  primary_screen.rect.right = 1000;
-  primary_screen.rect.bottom = 1000;
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
@@ -95,10 +91,10 @@ D2DWindow::D2DWindow() {
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
   RegisterClass(&wc);
-  hwnd = CreateWindowEx(WS_EX_NOREDIRECTIONBITMAP,
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP,
                         wc.lpszClassName,
                         "PToyD2DPopup",
-                        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+                        WS_POPUP| WS_VISIBLE,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         nullptr, nullptr, wc.hInstance, this);
@@ -112,10 +108,6 @@ D2DWindow::D2DWindow() {
 
 void D2DWindow::init() {
   auto primary_screen = get_primary_monitor();
-  primary_screen.rect.left = 200;
-  primary_screen.rect.top = 200;
-  primary_screen.rect.right = 1000;
-  primary_screen.rect.bottom = 1000;
   winrt::check_hresult(D3D11CreateDevice(nullptr,
                                          D3D_DRIVER_TYPE_HARDWARE,
                                          nullptr,
@@ -186,14 +178,15 @@ void D2DWindow::render() {
     d2d_dc->BeginDraw();
     d2d_dc->Clear();
     winrt::com_ptr<ID2D1SolidColorBrush> brush;
-    D2D1_COLOR_F const brushColor = D2D1::ColorF(0.18f, 0.55f, 0.34f, 0.75f);
+    D2D1_COLOR_F const brushColor = D2D1::ColorF(0.18f, 0.55f, 0.34f, 1.0f);
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor,
       brush.put()));
     D2D1_POINT_2F const ellipseCenter = D2D1::Point2F(150.0f, 150.0f);
     D2D1_ELLIPSE const ellipse = D2D1::Ellipse(ellipseCenter, 100.0f, 100.0f);
     d2d_dc->FillEllipse(ellipse, brush.get());
-
     winrt::check_hresult(d2d_dc->EndDraw());
+
+    
 
     winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
 
