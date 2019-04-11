@@ -82,6 +82,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /y /b "$(ProjectDir)..\x64\Debug\powertoys_hook.dll" "$(OutDir)" &amp;&amp; copy /y /b "$(ProjectDir)..\x64\Debug\powertoys_hook_loader.exe" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy x64 helper and dll</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -94,6 +100,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /y /b "$(ProjectDir)..\Debug\powertoys_hook_32.dll" "$(OutDir)" &amp;&amp; copy /y /b "$(ProjectDir)..\Debug\powertoys_hook_loader_32.exe" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy x86 helper and dll</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -112,6 +124,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /y /b "$(ProjectDir)..\x64\Release\powertoys_hook.dll" "$(OutDir)" &amp;&amp; copy /y /b "$(ProjectDir)..\x64\Release\powertoys_hook_loader.exe" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy x64 helper and dll</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -130,6 +148,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /y /b "$(ProjectDir)..\Release\powertoys_hook_32.dll" "$(OutDir)" &amp;&amp; copy /y /b "$(ProjectDir)..\Release\powertoys_hook_loader_32.exe" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy x86 helper and dll</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="d2d_window.cpp" />
@@ -146,9 +170,9 @@
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="mouse_watcher.cpp" />
     <ClCompile Include="move_window.cpp" />
+    <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="utils.cpp" />
-    <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,9 +184,17 @@
     <ClInclude Include="monitors.h" />
     <ClInclude Include="mouse_watcher.h" />
     <ClInclude Include="move_window.h" />
+    <ClInclude Include="virtual_desktops.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="utils.h" />
-    <ClInclude Include="virtual_desktops.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\powertoys_hook_loader\powertoys_hook_loader.vcxproj">
+      <Project>{eacd7397-8fe3-4281-b90c-abb291a55b39}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\powertoys_hook_loader_32\powertoys_hook_loader_32.vcxproj">
+      <Project>{6babcddf-f3d6-4299-9a73-609764c06f61}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

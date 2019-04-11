@@ -26,14 +26,14 @@
     <ClCompile Include="start_visible.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="virtual_desktops.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="window.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="d2d_window.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="virtual_desktops.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,9 +53,6 @@
     <ClInclude Include="move_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="virtual_desktops.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="monitors.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -67,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="d2d_window.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="virtual_desktops.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

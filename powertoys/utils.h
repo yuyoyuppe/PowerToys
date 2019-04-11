@@ -15,3 +15,4 @@ bool operator!=(const RECT& lhs, const RECT& rhs);
 bool operator<(const RECT& lhs, const RECT& rhs);
 // Initializes and runs windows message loop
 int run_message_loop();
+void ShowLastErrorMessage(LPTSTR lpszFunction, DWORD dw);

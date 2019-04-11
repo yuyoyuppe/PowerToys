@@ -1,6 +1,8 @@
-#include "pch.h"
 #include "virtual_desktops.h"
-#include "move_window.h"
+#include "stdafx.h"
+#include <winrt/base.h>
+#include <Windows.h>
+#include <Shobjidl.h>
 
 const CLSID CLSID_ImmersiveShell = { 0xC2F03A33, 0x21F5, 0x47FA, 0xB4, 0xBB, 0x15, 0x63, 0x62, 0xA2, 0xF2, 0x39 };
 const CLSID CLSID_VirtualDesktopAPI_Unknown = { 0xC5E0CDCA, 0x7B6E, 0x41B2, 0x9F, 0xC4, 0xD9, 0x39, 0x75, 0xCC, 0x46, 0x7B };
@@ -70,17 +72,17 @@ EXTERN_C const IID IID_IApplicationViewCollection;
 MIDL_INTERFACE("2c08adf0-a386-4b35-9250-0fe183476fcc") IApplicationViewCollection : public IUnknown
 {
 public:
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient3() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient4() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient5() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient6() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient7() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient8() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient9() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient10() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient11() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient12() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient13() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient3() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient4() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient5() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient6() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient7() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient8() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient9() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient10() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient11() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient12() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient13() = 0;
 };
 
 namespace {
@@ -111,69 +113,46 @@ namespace {
   }
 }
 
-
 // Adapted from https://gallery.technet.microsoft.com/scriptcenter/Powershell-commands-to-d0e79cc5
-int GetDesktopGUIDIndex(GUID id) {
+GUID GetDesktopGUIDAtIndex(int index) {
   auto manager_internal = get_manager_internal();
-  int index = -1;
-  u_int count;
+  UINT count;
   winrt::check_hresult(manager_internal->GetCount(&count));
+  if (index < 0 || index >= count) throw std::out_of_range("GetDesktopGUIDAtIndex : index is out of range.");
   winrt::com_ptr<IObjectArray> desktops;
   manager_internal->GetDesktops(desktops.put());
-  for (int i = 0; i < count; i++)
-  {
-    winrt::com_ptr<IVirtualDesktop> objdesktop;
-    desktops.get()->GetAt(i, __uuidof(IVirtualDesktop), objdesktop.put_void());
-    GUID compare_id;
-    winrt::check_hresult(objdesktop->GetID(&compare_id));
-    if (IsEqualGUID(id, compare_id)) {
-      index = i;
-      break;
-    }
-  }
+  winrt::com_ptr<IVirtualDesktop> objdesktop;
+  desktops.get()->GetAt(index, __uuidof(IVirtualDesktop), objdesktop.put_void());
+  GUID id;
+  winrt::check_hresult(objdesktop->GetID(&id));
   //TODO: Verify releases needed with IObjectArray and winrt::com_ptr
-  return index;
+  return id;
 }
 
-#define MOVETONEWDESKTOPMSGSTR "POWERTOYS_MOVE_TO_NEW_DESKTOP"
 
-void move_window_to_new_desktop(HWND hwnd) {
+void move_window_to_new_desktop_impl(HWND hwnd, int desktop_index) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
-  winrt::com_ptr<IVirtualDesktop> new_desktop;
-  winrt::check_hresult(manager_internal->CreateDesktopW(new_desktop.put()));
-  GUID id;
-  winrt::check_hresult(new_desktop->GetID(&id));
-  
-  // Maximize the Window.
-  ShowWindow(hwnd, SW_MAXIMIZE);
 
-  // This fails, because it needs to run in the target Window's process context.
-  // manager->MoveWindowToDesktop(hwnd, id);
-  // Instead, we use executables to install a message hook from 64 and 32 bits dlls
-  // at startup and Post a Message from here.
+  GUID current_desktopId;
+  winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
 
-  UINT msg = RegisterWindowMessage(MOVETONEWDESKTOPMSGSTR);
-  int desktop_index = GetDesktopGUIDIndex(id);
-
-  // Send custom message, with target desktop index in LPARAM.
-  BOOL res = PostMessage(hwnd, msg, 0, (LPARAM)desktop_index);
-  if (res==0) {
-    DWORD dw = GetLastError();
-    // Couldn't ask the Window to Move. Remove the created Desktop.
-    winrt::com_ptr<IVirtualDesktop> curr_desktop;
-    winrt::check_hresult(manager_internal->GetCurrentDesktop(curr_desktop.put()));
-    winrt::check_hresult(manager_internal->RemoveDesktop(new_desktop.get(), curr_desktop.get()));
-    if (dw == 5) {
-      // Access denied. Means Windows UIPI is blocking powertoys from moving the window to another Desktop.
-      MessageBox(NULL, "Couldn't move the window to a new Desktop. Need to start as an Administrator to do that.", "Access Denied", MB_OK | MB_ICONEXCLAMATION);
-    }
-    else {
-      ShowLastErrorMessage((LPTSTR)"PostMessage", dw);
-    }
+  GUID target_desktopId;
+  try {
+    target_desktopId = GetDesktopGUIDAtIndex(desktop_index);
+  }
+  catch (std::out_of_range& ex) {
+    // Tried to search the GUID of an out of range index desktop.
+    MessageBox(NULL, "Desktop index is out of range.", "Error", MB_OK | MB_ICONERROR);
+    return;
+  }
+  if (IsEqualGUID(current_desktopId, target_desktopId)) {
+    // Duplicate move request to the same desktop.
+    // Ignore it.
     return;
   }
 
-  // Switch to the new desktop.
-  winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
+  // Move Window To Desktop
+  winrt::check_hresult(manager->MoveWindowToDesktop(hwnd, target_desktopId));
+
 }

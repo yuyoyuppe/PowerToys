@@ -3,7 +3,12 @@
 #include "monitors.h"
 
 namespace move_window {
-  void maximize(HWND hwnd) {}
+  void maximize(HWND hwnd) {
+    auto current_monitor = get_window_monitor(hwnd);
+    RECT new_pos = current_monitor.rect;
+    // This isn't exactly maximized. Seems to leave a bit of a distance from the borders.
+    SetWindowPos(hwnd, HWND_TOP, new_pos.left, new_pos.top, new_pos.right - new_pos.left, new_pos.bottom - new_pos.top, SWP_SHOWWINDOW);
+  }
   void restore(HWND hwnd) {}
   void minimize(HWND hwnd) {}
 
