@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1258px" height="544px" viewBox="0 0 1258 544" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Group 5</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="463" height="290"></rect>
+    </defs>
+    <g id="Devices" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="2.6-Control-Panel-Copy" transform="translate(-60.000000, -110.000000)">
+            <g id="Group-5" transform="translate(60.000000, 110.000000)">
+                <g id="Group-2" transform="translate(523.000000, 0.000000)">
+                    <g>
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="A" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.16999996" fill="#FFFFFF">
+                                <tspan x="14.993125" y="24">A</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Action-center" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.182142854" fill="#222222">
+                            <tspan x="50" y="25">Open Action center</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy" transform="translate(0.000000, 400.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="M" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.16999996" fill="#FFFFFF">
+                                <tspan x="13.2157813" y="24">M</tspan>
+                            </text>
+                        </g>
+                        <text id="Minimize-all-windows" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.182142854" fill="#222222">
+                            <tspan x="50" y="25">Minimize all windows</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-2" transform="translate(0.000000, 450.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="R" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="15.3451758" y="24">R</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Run-dialog-box" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Run dialog box</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 50.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="D" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="14.7538672" y="24">D</tspan>
+                            </text>
+                        </g>
+                        <text id="Display-and-hide-the" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Display and hide the desktop</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 100.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="E" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="16.1894141" y="24">E</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-File-Explorer" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open File Explorer</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 150.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="G" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="14.9384375" y="24">G</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Game-bar" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Game bar</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 200.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="H" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="14.552207" y="24">H</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-the-Share-charm" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open the Share charm</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 250.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="I" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="17.6967383" y="24">I</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Settings" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Settings</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 300.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="K" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="15.3725195" y="24">K</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-the-Connect-qui" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open the Connect quick action</tspan>
+                        </text>
+                    </g>
+                    <g transform="translate(0.000000, 350.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="L" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="16.3363867" y="24">L</tspan>
+                            </text>
+                        </g>
+                        <text id="Lock-your-PC-or-swit" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Lock your PC or switch accounts</tspan>
+                        </text>
+                    </g>
+                </g>
+                <g id="Group-3" transform="translate(850.000000, 0.000000)">
+                    <g id="Group-2-Copy-3">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="S" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="15.9911719" y="24">S</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Search" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Search</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-4" transform="translate(0.000000, 50.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="U" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="14.8529883" y="24">U</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Ease-of-Access" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Ease of Access Center</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-5" transform="translate(0.000000, 100.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="X" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="15.3280859" y="24">X</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Quick-Link-menu" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Quick Link menu</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-6" transform="translate(0.000000, 149.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="1" width="40" height="40"></rect>
+                            <text id="," font-family="SegoeUI-Bold, Segoe UI" font-size="24" font-weight="bold" letter-spacing="2.00571418" fill="#FFFFFF">
+                                <tspan x="17.2451898" y="26">,</tspan>
+                            </text>
+                        </g>
+                        <text id="Temporarily-peek-at" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="26">Temporarily peek at the desktop</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-7" transform="translate(0.000000, 200.000000)">
+                        <g id="Group" transform="translate(70.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="D" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" letter-spacing="1.17" fill="#FFFFFF">
+                                <tspan x="14.7538672" y="24">D</tspan>
+                            </text>
+                        </g>
+                        <g id="Group-Copy">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="Ctrl" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" fill="#FFFFFF">
+                                <tspan x="8.1328125" y="24">Ctrl</tspan>
+                            </text>
+                        </g>
+                        <text id="Add-a-virtual-deskto" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="120" y="25">Add a virtual desktop</tspan>
+                        </text>
+                        <text id="+" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">+</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-8" transform="translate(0.000000, 250.000000)">
+                        <g id="Group" transform="translate(70.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(18.500000, 20.500000) rotate(-90.000000) translate(-18.500000, -20.500000) " points="18.5 17 23 24 14 24"></polygon>
+                        </g>
+                        <g id="Group-Copy-2" transform="translate(140.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(21.500000, 20.500000) scale(-1, 1) rotate(-90.000000) translate(-21.500000, -20.500000) " points="21.5 17 26 24 17 24"></polygon>
+                        </g>
+                        <g id="Group-Copy">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="Ctrl" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" fill="#FFFFFF">
+                                <tspan x="8.1328125" y="24">Ctrl</tspan>
+                            </text>
+                        </g>
+                        <text id="Switch-between-virtu" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="191" y="25">Switch between virtual desktops</tspan>
+                        </text>
+                        <text id="+" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">+</tspan>
+                        </text>
+                        <text id="or" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="118" y="25">or</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-12" transform="translate(1.000000, 348.000000)">
+                        <g id="Group" transform="translate(0.000000, 2.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="+" font-family="SegoeUI-Bold, Segoe UI" font-size="21" font-weight="bold" letter-spacing="0.212500051" fill="#FFFFFF">
+                                <tspan x="12" y="25">+</tspan>
+                            </text>
+                        </g>
+                        <g id="Group-Copy-2" transform="translate(70.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="2" width="40" height="40"></rect>
+                            <text id="-" font-family="SegoeUI-Bold, Segoe UI" font-size="27" font-weight="bold" letter-spacing="0.2732144" fill="#FFFFFF">
+                                <tspan x="15" y="29">-</tspan>
+                            </text>
+                        </g>
+                        <text id="Zoom-using-magnifier" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="121" y="27">Zoom using magnifier</tspan>
+                        </text>
+                        <text id="or" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="48" y="27">or</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-9" transform="translate(0.000000, 300.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="Enter" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" fill="#FFFFFF">
+                                <tspan x="3.24267578" y="24">Enter</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Narrator" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Narrator</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-14" transform="translate(0.000000, 450.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="Tab" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" fill="#FFFFFF">
+                                <tspan x="8.29101562" y="24">Tab</tspan>
+                            </text>
+                        </g>
+                        <text id="Open-Task-view" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Open Task view</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-2-Copy-13" transform="translate(0.000000, 400.000000)">
+                        <g id="Group">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <text id="Prt-Scn" font-family="SegoeUI-Bold, Segoe UI" font-size="14" font-weight="bold" line-spacing="13" fill="#FFFFFF">
+                                <tspan x="9.20898438" y="21">Prt</tspan>
+                                <tspan x="7.5" y="34">Scn</tspan>
+                            </text>
+                        </g>
+                        <text id="Capture-a-screenshot" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="50" y="25">Capture a screenshot</tspan>
+                        </text>
+                    </g>
+                </g>
+                <g id="Group-1">
+                    <g id="Group-3" transform="translate(202.000000, 355.000000)">
+                        <g id="Group-Copy-2" transform="translate(12.000000, 26.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(19.500000, 19.500000) scale(-1, 1) rotate(-360.000000) translate(-19.500000, -19.500000) " points="19.5 16 24 23 15 23"></polygon>
+                        </g>
+                        <text id="Maximize" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="0.372502619" y="16">Maximize</tspan>
+                        </text>
+                    </g>
+                    <path d="M164.5,341.5 L305.449219,341.5" id="Line-2" stroke="#AAAAAA" stroke-linecap="square"></path>
+                    <text id="Window-controls" font-family="SegoeUI-Bold, Segoe UI" font-size="15" font-weight="bold" letter-spacing="0.1821429" fill="#222222">
+                        <tspan x="173.038713" y="321">Window controls</tspan>
+                    </text>
+                    <g id="Group-3-Copy" transform="translate(264.000000, 431.000000)">
+                        <g id="Group-Copy-2">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(20.500000, 19.500000) scale(-1, 1) rotate(-90.000000) translate(-20.500000, -19.500000) " points="20.5 16 25 23 16 23"></polygon>
+                        </g>
+                        <text id="Snap-right" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="51" y="25">Snap right</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-3-Copy-2" transform="translate(203.000000, 482.000000)">
+                        <g id="Group-Copy-2" transform="translate(11.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(19.500000, 19.500000) scale(-1, -1) rotate(-360.000000) translate(-19.500000, -19.500000) " points="19.5 16 24 23 15 23"></polygon>
+                        </g>
+                        <text id="Minimize" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="0.570012384" y="61">Minimize</tspan>
+                        </text>
+                    </g>
+                    <g id="Group-3-Copy-3" transform="translate(94.000000, 431.000000)">
+                        <g id="Group-Copy-2" transform="translate(70.000000, 0.000000)">
+                            <rect id="Rectangle" fill="#0263B1" x="0" y="0" width="40" height="40"></rect>
+                            <polygon id="Triangle" fill="#FFFFFF" transform="translate(19.500000, 19.500000) scale(1, -1) rotate(-90.000000) translate(-19.500000, -19.500000) " points="19.5 16 24 23 15 23"></polygon>
+                        </g>
+                        <text id="Snap-left" font-family="SegoeUI, Segoe UI" font-size="15" font-weight="normal" letter-spacing="0.1821429" fill="#222222">
+                            <tspan x="0.818233431" y="25">Snap left</tspan>
+                        </text>
+                    </g>
+                    <g id="windows_bg">
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <use id="Mask" fill="#0263B1" xlink:href="#path-1"></use>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

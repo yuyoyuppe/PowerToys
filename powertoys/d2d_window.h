@@ -3,8 +3,8 @@
 #include <Windows.h>
 #include <dxgi1_3.h>
 #include <d3d11_2.h>
-#include <d2d1_2.h>
-#include <d2d1_2helper.h>
+#include <d2d1_3.h>
+#include <d2d1_3helper.h>
 #include <dcomp.h>
 class D2DWindow
 {
@@ -16,7 +16,11 @@ private:
   static LRESULT __stdcall d2d_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
   static D2DWindow* this_from_hwnd(HWND window);
   void init();
+  void resize();
   void render();
+  winrt::com_ptr<IStream> svg_strem;
+  winrt::com_ptr<ID2D1SvgDocument> svg_document;
+  // todo: we do not need all those things.. probably..
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;
   winrt::com_ptr<IDXGIFactory2> dxgi_factory;
@@ -24,5 +28,10 @@ private:
   winrt::com_ptr<IDCompositionDevice> composition_device;
   winrt::com_ptr<IDCompositionTarget> target;
   winrt::com_ptr<IDCompositionVisual> visual;
+  winrt::com_ptr<ID2D1Factory6> d2d_factory;
+  winrt::com_ptr<ID2D1Device5> d2d_device;
+  winrt::com_ptr<ID2D1DeviceContext5> d2d_dc;
+  winrt::com_ptr<IDXGISurface2> dxgi_surface;
+  winrt::com_ptr<ID2D1Bitmap1> d2d_bitmap;
 };
 

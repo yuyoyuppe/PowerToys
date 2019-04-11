@@ -2,6 +2,7 @@
 #include <winrt/base.h>
 #include <Windows.h>
 #include <Shobjidl.h>
+#include <Shlwapi.h>
 #include <string>
 #include <algorithm>
 #include <chrono>
