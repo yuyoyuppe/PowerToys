@@ -29,7 +29,7 @@ std::optional<POINT> get_mouse_pos() {
     return point;
   }
 }
-
+/*
 bool operator==(const RECT& lhs, const RECT& rhs) {
   auto lhs_tuple = std::make_tuple(lhs.left, lhs.right, lhs.top, lhs.bottom);
   auto rhs_tuple = std::make_tuple(rhs.left, rhs.right, rhs.top, rhs.bottom);
@@ -39,7 +39,7 @@ bool operator==(const RECT& lhs, const RECT& rhs) {
 bool operator!=(const RECT& lhs, const RECT& rhs) {
   return !(lhs == rhs);
 }
-
+*/
 bool operator<(const RECT& lhs, const RECT& rhs) {
   auto lhs_tuple = std::make_tuple(lhs.left, lhs.right, lhs.top, lhs.bottom);
   auto rhs_tuple = std::make_tuple(rhs.left, rhs.right, rhs.top, rhs.bottom); 

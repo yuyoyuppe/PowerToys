@@ -1,15 +1,7 @@
 #include "pch.h"
 #include "d2d_window.h"
 #include "monitors.h"
-#include "utils.h"
-#include <d2d1helper.h>
-#include <dwmapi.h>
 
-#pragma comment(lib, "dxgi")
-#pragma comment(lib, "d3d11")
-#pragma comment(lib, "d2d1")
-#pragma comment(lib, "dcomp")
-#pragma comment(lib, "dwmapi")
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -53,7 +45,6 @@ void enable_acrylic_window(HWND hwnd) {
 
 D2DWindow::D2DWindow() {
   static const char* class_name = "PToyD2DPopup";
-  auto primary_screen = get_primary_monitor();
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
@@ -71,16 +62,25 @@ D2DWindow::D2DWindow() {
   WINRT_VERIFY(hwnd);
   init();
   enable_acrylic_window(hwnd);
-  MoveWindow(hwnd, primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height(), TRUE);
 }
 
-/*
-void D2DWindow::init() {
+void D2DWindow::show(HWND active_window) {
   auto primary_screen = get_primary_monitor();
-  
-  
+  SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height(), 0);
+  ShowWindow(hwnd, SW_SHOWNA);
+  if (active_window) {
+    // Ignore errors, if this fails we will just not show the thumbnail
+    DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
+  }
 }
-*/
+
+void D2DWindow::hide() {
+  if (thumbnail) {
+    DwmUnregisterThumbnail(thumbnail);
+  }
+  ShowWindow(hwnd, SW_HIDE);
+}
+
 void D2DWindow::init() {
   // D2D1Factory is independent from the device, no need to recreate it if
   // we need to recreate the device.
@@ -135,6 +135,26 @@ void D2DWindow::init() {
     svg_strem.get(),
     D2D1::SizeF(1,1),
     svg_document.put()));
+  // Get SVG size and thumbnail position. Store window group for hiding it later
+  winrt::com_ptr<ID2D1SvgElement> root;
+  svg_document->GetRoot(root.put());
+  float tmp;
+  winrt::check_hresult(root->GetAttributeValue(L"width", &tmp));
+  svg_width = (int)tmp;
+  winrt::check_hresult(root->GetAttributeValue(L"height", &tmp));
+  svg_height = (int)tmp;
+  
+  // we need to rename that later
+  winrt::check_hresult(svg_document->FindElementById(L"Group-1", svg_window_group.put()));
+  winrt::com_ptr<ID2D1SvgElement> thumbnail_box;
+  winrt::check_hresult(svg_document->FindElementById(L"path-1", thumbnail_box.put()));
+  
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"x", &thumbnail_top_left.x));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"y", &thumbnail_top_left.y));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
+  thumbnail_bottom_right.x += thumbnail_top_left.x;
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
+  thumbnail_bottom_right.y += thumbnail_bottom_right.y;
 }
 
 void D2DWindow::resize() {
@@ -164,12 +184,12 @@ void D2DWindow::resize() {
     __uuidof(composition_device),
     composition_device.put_void()));
 
-  target = nullptr;
-  winrt::check_hresult(composition_device->CreateTargetForHwnd(hwnd, true, target.put()));
-  visual = nullptr;
-  winrt::check_hresult(composition_device->CreateVisual(visual.put()));
-  winrt::check_hresult(visual->SetContent(dxgi_swap_chain.get()));
-  winrt::check_hresult(target->SetRoot(visual.get()));
+  composition_target = nullptr;
+  winrt::check_hresult(composition_device->CreateTargetForHwnd(hwnd, true, composition_target.put()));
+  composition_visual = nullptr;
+  winrt::check_hresult(composition_device->CreateVisual(composition_visual.put()));
+  winrt::check_hresult(composition_visual->SetContent(dxgi_swap_chain.get()));
+  winrt::check_hresult(composition_target->SetRoot(composition_visual.get()));
   
   dxgi_surface = nullptr;
   winrt::check_hresult(dxgi_swap_chain->GetBuffer(0, __uuidof(dxgi_surface), dxgi_surface.put_void()));
@@ -182,34 +202,45 @@ void D2DWindow::resize() {
     properties,
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
-}
 
-HTHUMBNAIL tid = nullptr;
+  auto svg_rescale_matrix = D2D1::Matrix3x2F::Identity();
+  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Translation((width - svg_width) / 2, (height - svg_height) / 2);
+  // make it so the svg takes at most 90% of the screen in single direction
+  double h_scale = 0.9f * height / svg_height;
+  double v_scale = 0.9f * width / svg_width;
+  double scale = min(h_scale, v_scale);
+  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2, height / 2));
+  auto scaled_top_left = svg_rescale_matrix.TransformPoint(thumbnail_top_left);
+  auto scanled_bottom_right = svg_rescale_matrix.TransformPoint(thumbnail_bottom_right);
+  thumbnail_scaled_rect.left = scaled_top_left.x;
+  thumbnail_scaled_rect.top = scaled_top_left.y;
+  thumbnail_scaled_rect.right = scanled_bottom_right.x;
+  thumbnail_scaled_rect.bottom = scanled_bottom_right.y;
+  svg_rescale = svg_rescale_matrix;
+
+ }
+
 void D2DWindow::render() {
  
-    if (!d2d_dc || !d2d_bitmap)
+    if (!d2d_dc)
       return;
 
-    auto active = FindWindow("notepad", NULL); //GetForegroundWindow();
-    if (active && tid == nullptr) {
-      winrt::check_hresult(DwmRegisterThumbnail(hwnd, active, &tid));
-      RECT dest = { 0,0,100,150 };
-      DWM_THUMBNAIL_PROPERTIES dskThumbProps;
-      dskThumbProps.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_OPACITY | DWM_TNP_RECTDESTINATION;
-      dskThumbProps.fSourceClientAreaOnly = FALSE;
-      dskThumbProps.fVisible = TRUE;
-      dskThumbProps.opacity = (255 * 70) / 100;
-      dskThumbProps.rcDestination = dest;
-
-      // Display the thumbnail
-      winrt::check_hresult(DwmUpdateThumbnailProperties(tid, &dskThumbProps));
+    if (thumbnail) {
+      DWM_THUMBNAIL_PROPERTIES thumb_properties;
+      thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
+      thumb_properties.fSourceClientAreaOnly = FALSE;
+      thumb_properties.fVisible = TRUE;
+      thumb_properties.rcDestination = thumbnail_scaled_rect;
+      winrt::check_hresult(DwmUpdateThumbnailProperties(thumbnail, &thumb_properties));
+      svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE);
+    } else {
+      svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
     }
 
     d2d_dc->BeginDraw();
     d2d_dc->Clear();
 
     // Draw background
-    d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
     winrt::com_ptr<ID2D1SolidColorBrush> brush;
     D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
@@ -219,11 +250,9 @@ void D2DWindow::render() {
     rect.right = 3840;
     d2d_dc->FillRectangle(rect, brush.get());
     // Draw SVG
-    D2D1_MATRIX_3X2_F transform = D2D1::Matrix3x2F::Identity();
-    transform = transform * D2D1::Matrix3x2F::Translation((3840 - 1258) / 2, (2160 - 554) / 2);
-    transform = transform * D2D1::Matrix3x2F::Scale(2.5, 2.5, D2D1::Point2F(1920, 1080));
-    d2d_dc->SetTransform(transform);
+    d2d_dc->SetTransform(svg_rescale);
     d2d_dc->DrawSvgDocument(svg_document.get());
+    d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
 
     winrt::check_hresult(d2d_dc->EndDraw());
 
@@ -232,6 +261,7 @@ void D2DWindow::render() {
 }
 
 D2DWindow::~D2DWindow() {
+  hide();
   DestroyWindow(hwnd);
 }
  
