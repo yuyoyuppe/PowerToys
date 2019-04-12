@@ -16,7 +16,8 @@ namespace {
     window = GetAncestor(window, GA_ROOT);
     if (window == desktop || window == shell)
       window = nullptr;
-    if (window && (GetWindowLong(window, GWL_STYLE) & WS_CHILD))
+    LONG window_styles = window ? GetWindowLong(window, GWL_STYLE) : 0;
+    if ((window_styles & WS_CHILD) || (window_styles & WS_DISABLED) || (window_styles & WS_POPUP))
       window = nullptr;
     winkey_popup->show(window);
   }
