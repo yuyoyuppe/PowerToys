@@ -25,6 +25,7 @@ private:
   void render();
 
   HWND hwnd;
+  D2D1_RECT_F hwnd_rect;
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
   RECT thumbnail_scaled_rect;
   HTHUMBNAIL thumbnail;

@@ -106,7 +106,6 @@ void D2DWindow::init() {
     d3d_device.put(),
     nullptr,
     nullptr));
-  // A bug in winrt - d3d_device.as(dxgi_device) does not compile. Roll out our own implementation:
   dxgi_device = nullptr;
   winrt::check_hresult(d3d_device->QueryInterface(
     __uuidof(dxgi_device),
@@ -159,6 +158,10 @@ void D2DWindow::init() {
 
 void D2DWindow::resize() {
   auto window_rect = *get_window_pos(hwnd);
+  hwnd_rect.left = (int)window_rect.left;
+  hwnd_rect.top = (int)window_rect.top;
+  hwnd_rect.bottom = (int)window_rect.bottom;
+  hwnd_rect.right = (int)window_rect.right;
   auto width = window_rect.right - window_rect.left;
   auto height = window_rect.bottom - window_rect.top;
   if (width == 0 || height == 0)
@@ -261,21 +264,23 @@ void D2DWindow::render() {
     }
 
     d2d_dc->BeginDraw();
-    d2d_dc->Clear();
 
-    // Draw background
-    winrt::com_ptr<ID2D1SolidColorBrush> brush;
-    D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
-    winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
-    D2D1_RECT_F rect;
-    rect.left = 0; rect.top = 0;
-    rect.bottom = 2160;
-    rect.right = 3840;
-    d2d_dc->FillRectangle(rect, brush.get());
-    // Draw SVG
-    d2d_dc->SetTransform(svg_rescale);
-    d2d_dc->DrawSvgDocument(svg_document.get());
-    d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+    try {
+      d2d_dc->Clear();
+      // Draw background
+      winrt::com_ptr<ID2D1SolidColorBrush> brush;
+      D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
+      winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+      d2d_dc->FillRectangle(hwnd_rect, brush.get());
+      // Draw SVG
+      d2d_dc->SetTransform(svg_rescale);
+      d2d_dc->DrawSvgDocument(svg_document.get());
+      d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+    } catch (...) {
+      // If failed, reinit
+      init();
+      return;
+    }
 
     winrt::check_hresult(d2d_dc->EndDraw());
 
