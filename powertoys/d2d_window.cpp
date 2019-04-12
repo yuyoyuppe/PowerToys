@@ -3,11 +3,13 @@
 #include "monitors.h"
 #include "utils.h"
 #include <d2d1helper.h>
+#include <dwmapi.h>
 
 #pragma comment(lib, "dxgi")
 #pragma comment(lib, "d3d11")
 #pragma comment(lib, "d2d1")
 #pragma comment(lib, "dcomp")
+#pragma comment(lib, "dwmapi")
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -182,10 +184,27 @@ void D2DWindow::resize() {
   d2d_dc->SetTarget(d2d_bitmap.get());
 }
 
+HTHUMBNAIL tid = nullptr;
 void D2DWindow::render() {
  
     if (!d2d_dc || !d2d_bitmap)
       return;
+
+    auto active = FindWindow("notepad", NULL); //GetForegroundWindow();
+    if (active && tid == nullptr) {
+      winrt::check_hresult(DwmRegisterThumbnail(hwnd, active, &tid));
+      RECT dest = { 0,0,100,150 };
+      DWM_THUMBNAIL_PROPERTIES dskThumbProps;
+      dskThumbProps.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_OPACITY | DWM_TNP_RECTDESTINATION;
+      dskThumbProps.fSourceClientAreaOnly = FALSE;
+      dskThumbProps.fVisible = TRUE;
+      dskThumbProps.opacity = (255 * 70) / 100;
+      dskThumbProps.rcDestination = dest;
+
+      // Display the thumbnail
+      winrt::check_hresult(DwmUpdateThumbnailProperties(tid, &dskThumbProps));
+    }
+
     d2d_dc->BeginDraw();
     d2d_dc->Clear();
 
