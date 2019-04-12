@@ -2,6 +2,7 @@
 #include "d2d_window.h"
 #include "monitors.h"
 #include "utils.h"
+#include <d2d1helper.h>
 
 #pragma comment(lib, "dxgi")
 #pragma comment(lib, "d3d11")
@@ -38,6 +39,8 @@ void enable_acrylic_window(HWND hwnd) {
   auto SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
   ACCENT_POLICY accent = {};
   accent.AccentState = 3; // ACCENT_ENABLE_BLURBEHIND;
+  accent.GradientColor = 0xffffff;
+  accent.AccentFlags = 0;
   WINDOWCOMPOSITIONATTRIBDATA data;
   data.Attrib = 19; // WCA_ACCENT_POLICY
   data.pvData = &accent;
@@ -185,14 +188,24 @@ void D2DWindow::render() {
       return;
     d2d_dc->BeginDraw();
     d2d_dc->Clear();
+
+    // Draw background
+    d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+    winrt::com_ptr<ID2D1SolidColorBrush> brush;
+    D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
+    winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+    D2D1_RECT_F rect;
+    rect.left = 0; rect.top = 0;
+    rect.bottom = 2160;
+    rect.right = 3840;
+    d2d_dc->FillRectangle(rect, brush.get());
+    // Draw SVG
+    D2D1_MATRIX_3X2_F transform = D2D1::Matrix3x2F::Identity();
+    transform = transform * D2D1::Matrix3x2F::Translation((3840 - 1258) / 2, (2160 - 554) / 2);
+    transform = transform * D2D1::Matrix3x2F::Scale(2.5, 2.5, D2D1::Point2F(1920, 1080));
+    d2d_dc->SetTransform(transform);
     d2d_dc->DrawSvgDocument(svg_document.get());
-    /*winrt::com_ptr<ID2D1SolidColorBrush> brush;
-    D2D1_COLOR_F const brushColor = D2D1::ColorF(0.18f, 0.55f, 0.34f, 1.0f);
-    winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor,
-      brush.put()));
-    D2D1_POINT_2F const ellipseCenter = D2D1::Point2F(150.0f, 150.0f);
-    D2D1_ELLIPSE const ellipse = D2D1::Ellipse(ellipseCenter, 100.0f, 100.0f);
-    d2d_dc->FillEllipse(ellipse, brush.get());*/
+
     winrt::check_hresult(d2d_dc->EndDraw());
 
     winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
