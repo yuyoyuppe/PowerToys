@@ -21,6 +21,7 @@ private:
   static D2DWindow* this_from_hwnd(HWND window);
   void init();
   void resize();
+  bool show_thumbnail();
   void render();
 
   HWND hwnd;

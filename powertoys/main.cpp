@@ -6,12 +6,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   winrt::init_apartment();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
   try {
-    D2DWindow overlay;
-    auto active = GetActiveWindow();
-    overlay.show(active);
-
-    /*start_winkey_handler();
-    start_mouse_handler();*/
+    start_winkey_handler();
     return run_message_loop();
   } catch (std::runtime_error err) {
     MessageBox(NULL, err.what(), "Error", MB_OK | MB_ICONERROR);

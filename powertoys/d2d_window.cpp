@@ -204,52 +204,59 @@ void D2DWindow::resize() {
   d2d_dc->SetTarget(d2d_bitmap.get());
 
   auto svg_rescale_matrix = D2D1::Matrix3x2F::Identity();
-  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Translation((width - svg_width) / 2, (height - svg_height) / 2);
+  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Translation((width - svg_width) / 2.0f, (height - svg_height) / 2.0f);
   // make it so the svg takes at most 90% of the screen in single direction
-  double h_scale = 0.9f * height / svg_height;
-  double v_scale = 0.9f * width / svg_width;
-  double scale = min(h_scale, v_scale);
-  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2, height / 2));
+  float h_scale = 0.9f * height / svg_height;
+  float v_scale = 0.9f * width / svg_width;
+  float scale = min(h_scale, v_scale);
+  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
   auto scaled_top_left = svg_rescale_matrix.TransformPoint(thumbnail_top_left);
   auto scanled_bottom_right = svg_rescale_matrix.TransformPoint(thumbnail_bottom_right);
-  thumbnail_scaled_rect.left = scaled_top_left.x;
-  thumbnail_scaled_rect.top = scaled_top_left.y;
-  thumbnail_scaled_rect.right = scanled_bottom_right.x;
-  thumbnail_scaled_rect.bottom = scanled_bottom_right.y;
+  thumbnail_scaled_rect.left = (int)scaled_top_left.x;
+  thumbnail_scaled_rect.top = (int)scaled_top_left.y;
+  thumbnail_scaled_rect.right = (int)scanled_bottom_right.x;
+  thumbnail_scaled_rect.bottom = (int)scanled_bottom_right.y;
   svg_rescale = svg_rescale_matrix;
 
  }
 
+bool D2DWindow::show_thumbnail() {
+  if (!thumbnail)
+    return false;
+  SIZE thumb_size;
+  if (DwmQueryThumbnailSourceSize(thumbnail, &thumb_size) != S_OK)
+    return false;
+  int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
+  int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
+  if (thumbnail_scaled_rect_heigh == 0 || thumbnail_scaled_rect_width == 0 ||
+    thumb_size.cx == 0 || thumb_size.cy == 0) {
+    return false;
+  }
+  double scale_h = 0.99f * thumbnail_scaled_rect_width / thumb_size.cx;
+  double scale_v = 0.99f * thumbnail_scaled_rect_heigh / thumb_size.cy;
+  double scale = min(scale_h, scale_v);
+  RECT thumb_rect;
+  thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
+  thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
+  thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
+  thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
+  DWM_THUMBNAIL_PROPERTIES thumb_properties;
+  thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
+  thumb_properties.fSourceClientAreaOnly = FALSE;
+  thumb_properties.fVisible = TRUE;
+  thumb_properties.rcDestination = thumb_rect;
+  if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
+    return false;
+  return true;
+}
 void D2DWindow::render() {
  
     if (!d2d_dc)
       return;
 
-    if (thumbnail) {
-      // Scale the thumb to fit it into our preview box
-      // but keep aspect ratio
-      SIZE thumb_size;
-      winrt::check_hresult(DwmQueryThumbnailSourceSize(thumbnail, &thumb_size));
-      int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-      int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-      double scale_h = 0.95f * thumbnail_scaled_rect_width / thumb_size.cx;
-      double scale_v = 0.95f * thumbnail_scaled_rect_heigh/ thumb_size.cy;
-      double scale = min(scale_h, scale_v);
-      RECT thumb_rect;
-      thumb_rect.left = thumbnail_scaled_rect.left + (thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
-      thumb_rect.right = thumbnail_scaled_rect.right - (thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
-      thumb_rect.top = thumbnail_scaled_rect.top + (thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
-      thumb_rect.bottom = thumbnail_scaled_rect.bottom - (thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
-      DWM_THUMBNAIL_PROPERTIES thumb_properties;
-      thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
-      thumb_properties.fSourceClientAreaOnly = FALSE;
-      thumb_properties.fVisible = TRUE;
-      thumb_properties.rcDestination = thumb_rect;
-      winrt::check_hresult(DwmUpdateThumbnailProperties(thumbnail, &thumb_properties));
-      //svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE);
+    if (show_thumbnail()) {
       svg_window_group->SetAttributeValue(L"fill-opacity", 1.0f);
     } else {
-      //svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
       svg_window_group->SetAttributeValue(L"fill-opacity", 0.3f);
     }
 

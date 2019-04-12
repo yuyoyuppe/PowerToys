@@ -1,26 +1,24 @@
 #include "pch.h"
 #include "functionalities.h"
-#include "window.h"
+#include "d2d_window.h"
 #include "keyboard_watcher.h"
 #include "monitors.h"
 #include <sstream>
 
 namespace {
-  Window *winkey_popup;
+  D2DWindow *winkey_popup;
+  HWND desktop, shell;
   void on_held() {
-    auto primary = get_primary_monitor();
-    winkey_popup->show(
-      primary.left(), primary.top(), primary.width(), primary.height() + 1,
-      [=](HWND hwnd, WPARAM, LPARAM) {
-      PAINTSTRUCT ps;
-      HDC hdc = BeginPaint(hwnd, &ps);
-      std::stringstream stream;
-      stream << "Hullo!";
-      std::string str = stream.str();
-      TextOut(hdc, 20, 20, str.c_str(), str.length());
-      EndPaint(hwnd, &ps);
-      return 0;
-    }).fade_in();
+    auto window = GetForegroundWindow();
+    auto parent = GetParent(window);
+
+
+    window = GetAncestor(window, GA_ROOT);
+    if (window == desktop || window == shell)
+      window = nullptr;
+    if (window && (GetWindowLong(window, GWL_STYLE) & WS_CHILD))
+      window = nullptr;
+    winkey_popup->show(window);
   }
 
   void on_held_pressed(DWORD vkCode) {
@@ -28,13 +26,15 @@ namespace {
   }
 
   void on_release() {
-    winkey_popup->fade_out();
+    winkey_popup->hide();
   }
 }
 
 void start_winkey_handler() {
   if (winkey_popup)
     return;
-  winkey_popup = new Window();
+  desktop = GetDesktopWindow();
+  shell = GetShellWindow();
+  winkey_popup = new D2DWindow();
   start_winkey_watcher(300, on_held, on_held_pressed, on_release);
 }
