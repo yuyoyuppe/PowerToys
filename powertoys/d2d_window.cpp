@@ -65,13 +65,13 @@ D2DWindow::D2DWindow() {
 }
 
 void D2DWindow::show(HWND active_window) {
-  auto primary_screen = get_primary_monitor();
-  SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height(), 0);
-  ShowWindow(hwnd, SW_SHOWNA);
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
     DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
   }
+  auto primary_screen = get_primary_monitor();
+  SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height(), 0);
+  ShowWindow(hwnd, SW_SHOWNA);
 }
 
 void D2DWindow::hide() {
@@ -154,7 +154,7 @@ void D2DWindow::init() {
   winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
   thumbnail_bottom_right.x += thumbnail_top_left.x;
   winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
-  thumbnail_bottom_right.y += thumbnail_bottom_right.y;
+  thumbnail_bottom_right.y += thumbnail_top_left.y;
 }
 
 void D2DWindow::resize() {
@@ -226,15 +226,31 @@ void D2DWindow::render() {
       return;
 
     if (thumbnail) {
+      // Scale the thumb to fit it into our preview box
+      // but keep aspect ratio
+      SIZE thumb_size;
+      winrt::check_hresult(DwmQueryThumbnailSourceSize(thumbnail, &thumb_size));
+      int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
+      int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
+      double scale_h = 0.95f * thumbnail_scaled_rect_width / thumb_size.cx;
+      double scale_v = 0.95f * thumbnail_scaled_rect_heigh/ thumb_size.cy;
+      double scale = min(scale_h, scale_v);
+      RECT thumb_rect;
+      thumb_rect.left = thumbnail_scaled_rect.left + (thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
+      thumb_rect.right = thumbnail_scaled_rect.right - (thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
+      thumb_rect.top = thumbnail_scaled_rect.top + (thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
+      thumb_rect.bottom = thumbnail_scaled_rect.bottom - (thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
       DWM_THUMBNAIL_PROPERTIES thumb_properties;
       thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
       thumb_properties.fSourceClientAreaOnly = FALSE;
       thumb_properties.fVisible = TRUE;
-      thumb_properties.rcDestination = thumbnail_scaled_rect;
+      thumb_properties.rcDestination = thumb_rect;
       winrt::check_hresult(DwmUpdateThumbnailProperties(thumbnail, &thumb_properties));
-      svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE);
+      //svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE);
+      svg_window_group->SetAttributeValue(L"fill-opacity", 1.0f);
     } else {
-      svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
+      //svg_window_group->SetAttributeValue(L"display", D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
+      svg_window_group->SetAttributeValue(L"fill-opacity", 0.3f);
     }
 
     d2d_dc->BeginDraw();
