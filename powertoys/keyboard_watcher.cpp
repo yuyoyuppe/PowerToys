@@ -29,10 +29,22 @@ namespace {
       std::unique_lock<std::mutex> lock(hook_mutex);
       if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
         if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-          winkey_pressed = true;
-          winkey_press_timestamp = stdclock::now();
-          lock.unlock();
-          hook_cv.notify_one();
+          // Check if any other key is held
+          BYTE keys_state[256];
+          bool other_key_held = false;
+          memset(keys_state, 0, 256);
+          GetKeyboardState(keys_state);
+          for (int vk = 0; vk < 256 && !other_key_held; ++vk) {
+            if (vk == VK_LWIN || vk == VK_RWIN)
+              continue;
+            other_key_held = keys_state[vk] & 0x80; // test high bit
+          }
+          if (!other_key_held) {
+            winkey_pressed = true;
+            winkey_press_timestamp = stdclock::now();
+            lock.unlock();
+            hook_cv.notify_one();
+          }
         } else {
           winkey_pressed = false;
           if (winkey_signaled) {
