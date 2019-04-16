@@ -81,6 +81,103 @@ void D2DWindow::hide() {
   ShowWindow(hwnd, SW_HIDE);
 }
 
+D2DSVG& D2DSVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
+  window_group = nullptr;
+  svg = nullptr;
+  thumbnail_top_left = {};
+  thumbnail_bottom_right = {};
+  thumbnail_scaled_rect = {};
+  
+  winrt::com_ptr<IStream> svg_stream;
+  winrt::check_hresult(SHCreateStreamOnFileEx(filename.c_str(),
+    STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE,
+    nullptr,
+    svg_stream.put()));
+  
+  winrt::check_hresult(d2d_dc->CreateSvgDocument(
+    svg_stream.get(),
+    D2D1::SizeF(1, 1),
+    svg.put()));
+  
+  winrt::com_ptr<ID2D1SvgElement> root;
+  svg->GetRoot(root.put());
+  float tmp;
+  winrt::check_hresult(root->GetAttributeValue(L"width", &tmp));
+  svg_width = (int)tmp;
+  winrt::check_hresult(root->GetAttributeValue(L"height", &tmp));
+  svg_height = (int)tmp;
+  return *this;
+}
+D2DSVG& D2DSVG::find_thumbnail(const std::wstring& id) {
+  winrt::com_ptr<ID2D1SvgElement> thumbnail_box;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), thumbnail_box.put()));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"x", &thumbnail_top_left.x));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"y", &thumbnail_top_left.y));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
+  thumbnail_bottom_right.x += thumbnail_top_left.x;
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
+  thumbnail_bottom_right.y += thumbnail_top_left.y;
+  return *this;
+}
+D2DSVG& D2DSVG::find_window_group(const std::wstring& id) {
+  window_group = nullptr;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), window_group.put()));
+  return *this;
+}
+D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill) {
+  auto transform = D2D1::Matrix3x2F::Identity();
+  // Center 
+  transform = transform * D2D1::Matrix3x2F::Translation((width - svg_width) / 2.0f, (height - svg_height) / 2.0f);
+  float h_scale = fill  * height / svg_height;
+  float v_scale = fill * width / svg_width;
+  float scale = min(h_scale, v_scale);
+  transform = transform * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
+  transform = transform * D2D1::Matrix3x2F::Translation((float)x, (float)y);
+  this->transform = transform;
+
+  if (thumbnail_bottom_right.x != 0 && thumbnail_bottom_right.y != 0) {
+    auto scaled_top_left = transform.TransformPoint(thumbnail_top_left);
+    auto scanled_bottom_right = transform.TransformPoint(thumbnail_bottom_right);
+    thumbnail_scaled_rect.left = (int)scaled_top_left.x;
+    thumbnail_scaled_rect.top = (int)scaled_top_left.y;
+    thumbnail_scaled_rect.right = (int)scanled_bottom_right.x;
+    thumbnail_scaled_rect.bottom = (int)scanled_bottom_right.y;
+  }
+  return *this;
+}
+
+RECT D2DSVG::get_thumbnail_rect(int window_cx, int window_cy) {
+  if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0)
+    return {};
+  int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
+  int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
+  if (thumbnail_scaled_rect_heigh == 0 || thumbnail_scaled_rect_width == 0 ||
+      window_cx == 0 || window_cy == 0) {
+    return {};
+  }
+  double scale_h = 0.99f * thumbnail_scaled_rect_width / window_cx;
+  double scale_v = 0.99f * thumbnail_scaled_rect_heigh / window_cy;
+  double scale = min(scale_h, scale_v);
+  RECT thumb_rect;
+  thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - scale * window_cx) / 2;
+  thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - scale * window_cx) / 2;
+  thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - scale * window_cy) / 2;
+  thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - scale * window_cy) / 2;
+  return thumb_rect;
+}
+D2DSVG& D2DSVG::toggle_window_group(bool active) {
+  if (window_group)
+    window_group->SetAttributeValue(L"fill-opacity", active ? 1.0f : 0.3f);
+  return *this;
+}
+D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
+  d2d_dc->SetTransform(transform);
+  d2d_dc->DrawSvgDocument(svg.get());
+  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+  return *this;
+}
+
+
 void D2DWindow::init() {
   std::unique_lock<std::mutex> lock(mutex);
   // D2D1Factory is independent from the device, no need to recreate it if
@@ -122,48 +219,18 @@ void D2DWindow::init() {
   winrt::check_hresult(d2d_device->CreateDeviceContext(
     D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
     d2d_dc.put()));
-  svg_strem = nullptr;
-  winrt::check_hresult(SHCreateStreamOnFileEx(
-    L"overlay.svg",
-    STGM_READ,
-    FILE_ATTRIBUTE_NORMAL,
-    FALSE,
-    nullptr,
-    svg_strem.put()));
-  svg_document = nullptr;
-  winrt::check_hresult(d2d_dc->CreateSvgDocument(
-    svg_strem.get(),
-    D2D1::SizeF(1,1),
-    svg_document.put()));
-  // Get SVG size and thumbnail position. Store window group for hiding it later
-  winrt::com_ptr<ID2D1SvgElement> root;
-  svg_document->GetRoot(root.put());
-  float tmp;
-  winrt::check_hresult(root->GetAttributeValue(L"width", &tmp));
-  svg_width = (int)tmp;
-  winrt::check_hresult(root->GetAttributeValue(L"height", &tmp));
-  svg_height = (int)tmp;
-  
-  // we need to rename that later
-  winrt::check_hresult(svg_document->FindElementById(L"Group-1", svg_window_group.put()));
-  winrt::com_ptr<ID2D1SvgElement> thumbnail_box;
-  winrt::check_hresult(svg_document->FindElementById(L"path-1", thumbnail_box.put()));
-  
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"x", &thumbnail_top_left.x));
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"y", &thumbnail_top_left.y));
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
-  thumbnail_bottom_right.x += thumbnail_top_left.x;
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
-  thumbnail_bottom_right.y += thumbnail_top_left.y;
+  landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
+           .find_thumbnail(L"path-1")
+           .find_window_group(L"Group-1");
 }
 
 void D2DWindow::resize() {
   std::unique_lock<std::mutex> lock(mutex);
   auto window_rect = *get_window_pos(hwnd);
-  hwnd_rect.left = (int)window_rect.left;
-  hwnd_rect.top = (int)window_rect.top;
-  hwnd_rect.bottom = (int)window_rect.bottom;
-  hwnd_rect.right = (int)window_rect.right;
+  hwnd_rect.left = (float)window_rect.left;
+  hwnd_rect.top = (float)window_rect.top;
+  hwnd_rect.bottom = (float)window_rect.bottom;
+  hwnd_rect.right = (float)window_rect.right;
   auto width = window_rect.right - window_rect.left;
   auto height = window_rect.bottom - window_rect.top;
   if (width == 0 || height == 0)
@@ -208,22 +275,8 @@ void D2DWindow::resize() {
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
 
-  auto svg_rescale_matrix = D2D1::Matrix3x2F::Identity();
-  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Translation((width - svg_width) / 2.0f, (height - svg_height) / 2.0f);
-  // make it so the svg takes at most 90% of the screen in single direction
-  float h_scale = 0.9f * height / svg_height;
-  float v_scale = 0.9f * width / svg_width;
-  float scale = min(h_scale, v_scale);
-  svg_rescale_matrix = svg_rescale_matrix * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
-  auto scaled_top_left = svg_rescale_matrix.TransformPoint(thumbnail_top_left);
-  auto scanled_bottom_right = svg_rescale_matrix.TransformPoint(thumbnail_bottom_right);
-  thumbnail_scaled_rect.left = (int)scaled_top_left.x;
-  thumbnail_scaled_rect.top = (int)scaled_top_left.y;
-  thumbnail_scaled_rect.right = (int)scanled_bottom_right.x;
-  thumbnail_scaled_rect.bottom = (int)scanled_bottom_right.y;
-  svg_rescale = svg_rescale_matrix;
-
- }
+  landscape.resize(0, 0, width, height, 0.95f);
+}
 
 bool D2DWindow::show_thumbnail() {
   if (!thumbnail)
@@ -231,25 +284,13 @@ bool D2DWindow::show_thumbnail() {
   SIZE thumb_size;
   if (DwmQueryThumbnailSourceSize(thumbnail, &thumb_size) != S_OK)
     return false;
-  int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-  int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-  if (thumbnail_scaled_rect_heigh == 0 || thumbnail_scaled_rect_width == 0 ||
-    thumb_size.cx == 0 || thumb_size.cy == 0) {
-    return false;
-  }
-  double scale_h = 0.99f * thumbnail_scaled_rect_width / thumb_size.cx;
-  double scale_v = 0.99f * thumbnail_scaled_rect_heigh / thumb_size.cy;
-  double scale = min(scale_h, scale_v);
-  RECT thumb_rect;
-  thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
-  thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - scale * thumb_size.cx) / 2;
-  thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
-  thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - scale * thumb_size.cy) / 2;
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  thumb_properties.rcDestination = thumb_rect;
+  thumb_properties.rcDestination = landscape.get_thumbnail_rect(thumb_size.cx, thumb_size.cy);
+  if (thumb_properties.rcDestination.bottom == 0)
+    return false;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
     return false;
   return true;
@@ -258,7 +299,6 @@ void D2DWindow::render() {
   std::unique_lock<std::mutex> lock(mutex);
   if (!d2d_bitmap)
     return;
-  svg_window_group->SetAttributeValue(L"fill-opacity", show_thumbnail() ? 1.0f : 0.3f);
   d2d_dc->BeginDraw();
   d2d_dc->Clear();
   // Draw background
@@ -267,10 +307,8 @@ void D2DWindow::render() {
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
-  d2d_dc->SetTransform(svg_rescale);
-  d2d_dc->DrawSvgDocument(svg_document.get());
-  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
-
+  landscape.toggle_window_group(show_thumbnail())
+           .render(d2d_dc.get());
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());
