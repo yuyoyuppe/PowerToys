@@ -256,7 +256,7 @@ bool D2DWindow::show_thumbnail() {
 }
 void D2DWindow::render() {
   std::unique_lock<std::mutex> lock(mutex);
-  if (!d2d_dc)
+  if (!d2d_bitmap)
     return;
   svg_window_group->SetAttributeValue(L"fill-opacity", show_thumbnail() ? 1.0f : 0.3f);
   d2d_dc->BeginDraw();
