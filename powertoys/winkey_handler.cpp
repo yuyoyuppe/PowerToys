@@ -8,23 +8,19 @@
 namespace {
   D2DWindow *winkey_popup;
   HWND desktop, shell;
+  HWND active_window;
   void on_held() {
-    auto window = GetForegroundWindow();
-    auto parent = GetParent(window);
-
-
-    window = GetAncestor(window, GA_ROOT);
-    if (window == desktop || window == shell)
-      window = nullptr;
-    LONG window_styles = window ? GetWindowLong(window, GWL_STYLE) : 0;
+    auto active_window = GetForegroundWindow();
+    active_window = GetAncestor(active_window, GA_ROOT);
+    if (active_window == desktop || active_window == shell)
+      active_window = nullptr;
+    LONG window_styles = active_window ? GetWindowLong(active_window, GWL_STYLE) : 0;
     if ((window_styles & WS_CHILD) || (window_styles & WS_DISABLED) || (window_styles & WS_POPUP))
-      window = nullptr;
-    winkey_popup->show(window);
+      active_window = nullptr;
+    winkey_popup->show(active_window);
   }
 
-  void on_held_pressed(DWORD vkCode) {
-
-  }
+  void on_held_pressed(DWORD vkCode) { }
 
   void on_release() {
     winkey_popup->hide();

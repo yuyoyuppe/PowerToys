@@ -40,7 +40,7 @@ namespace {
             hook_cv.notify_one();
           }
         }
-      } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+      } else if (winkey_signaled && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
         on_held_pressed_cb(kb_hook->vkCode);
       }
     }
@@ -68,6 +68,16 @@ namespace {
       } else if (winkey_signaled) {
         winkey_signaled = false;
         on_relese_cb();
+        lock.unlock();
+        // Send ESC to close the start menu
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        INPUT input[2] = { {}, {} };
+        input[0].type = INPUT_KEYBOARD;
+        input[0].ki.wVk = VK_ESCAPE;
+        input[1].type = INPUT_KEYBOARD;
+        input[1].ki.wVk = VK_ESCAPE;
+        input[1].ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(2, input, sizeof(INPUT));
       }
     }
   }
