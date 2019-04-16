@@ -71,7 +71,7 @@ void D2DWindow::show(HWND active_window) {
   }
   auto primary_screen = get_primary_monitor();
   SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height(), 0);
-  ShowWindow(hwnd, SW_SHOWNA);
+  ShowWindow(hwnd, SW_SHOWNORMAL);
 }
 
 void D2DWindow::hide() {
