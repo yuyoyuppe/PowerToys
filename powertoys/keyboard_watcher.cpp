@@ -70,13 +70,16 @@ namespace {
         on_relese_cb();
         lock.unlock();
         // Send ESC to close the start menu
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
         INPUT input[2] = { {}, {} };
         input[0].type = INPUT_KEYBOARD;
         input[0].ki.wVk = VK_ESCAPE;
         input[1].type = INPUT_KEYBOARD;
         input[1].ki.wVk = VK_ESCAPE;
         input[1].ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(2, input, sizeof(INPUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        SendInput(2, input, sizeof(INPUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         SendInput(2, input, sizeof(INPUT));
       }
     }
