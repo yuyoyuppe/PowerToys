@@ -24,6 +24,7 @@ private:
   bool show_thumbnail();
   void render();
 
+  std::mutex mutex;
   HWND hwnd;
   D2D1_RECT_F hwnd_rect;
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;

@@ -82,12 +82,13 @@ void D2DWindow::hide() {
 }
 
 void D2DWindow::init() {
+  std::unique_lock<std::mutex> lock(mutex);
   // D2D1Factory is independent from the device, no need to recreate it if
   // we need to recreate the device.
   if (!d2d_factory) {
     D2D1_FACTORY_OPTIONS options = { D2D1_DEBUG_LEVEL_INFORMATION };
     winrt::check_hresult(D2D1CreateFactory(
-      D2D1_FACTORY_TYPE_SINGLE_THREADED,
+      D2D1_FACTORY_TYPE_MULTI_THREADED,
       __uuidof(d2d_factory),
       &options,
       d2d_factory.put_void()));
@@ -157,6 +158,7 @@ void D2DWindow::init() {
 }
 
 void D2DWindow::resize() {
+  std::unique_lock<std::mutex> lock(mutex);
   auto window_rect = *get_window_pos(hwnd);
   hwnd_rect.left = (int)window_rect.left;
   hwnd_rect.top = (int)window_rect.top;
@@ -253,39 +255,25 @@ bool D2DWindow::show_thumbnail() {
   return true;
 }
 void D2DWindow::render() {
- 
-    if (!d2d_dc)
-      return;
+  std::unique_lock<std::mutex> lock(mutex);
+  if (!d2d_dc)
+    return;
+  svg_window_group->SetAttributeValue(L"fill-opacity", show_thumbnail() ? 1.0f : 0.3f);
+  d2d_dc->BeginDraw();
+  d2d_dc->Clear();
+  // Draw background
+  winrt::com_ptr<ID2D1SolidColorBrush> brush;
+  D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
+  winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+  d2d_dc->FillRectangle(hwnd_rect, brush.get());
+  // Draw SVG
+  d2d_dc->SetTransform(svg_rescale);
+  d2d_dc->DrawSvgDocument(svg_document.get());
+  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
 
-    if (show_thumbnail()) {
-      svg_window_group->SetAttributeValue(L"fill-opacity", 1.0f);
-    } else {
-      svg_window_group->SetAttributeValue(L"fill-opacity", 0.3f);
-    }
-
-    d2d_dc->BeginDraw();
-
-    try {
-      d2d_dc->Clear();
-      // Draw background
-      winrt::com_ptr<ID2D1SolidColorBrush> brush;
-      D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
-      winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
-      d2d_dc->FillRectangle(hwnd_rect, brush.get());
-      // Draw SVG
-      d2d_dc->SetTransform(svg_rescale);
-      d2d_dc->DrawSvgDocument(svg_document.get());
-      d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
-    } catch (...) {
-      // If failed, reinit
-      init();
-      return;
-    }
-
-    winrt::check_hresult(d2d_dc->EndDraw());
-
-    winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
-    winrt::check_hresult(composition_device->Commit());
+  winrt::check_hresult(d2d_dc->EndDraw());
+  winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
+  winrt::check_hresult(composition_device->Commit());
 }
 
 D2DWindow::~D2DWindow() {
