@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "d2d_window.h"
 #include "monitors.h"
-
+#include "tasklist_positions.h"
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -309,9 +309,6 @@ void D2DWindow::resize() {
                    thumb_no_active_rect.right - thumb_no_active_rect.left,
                    thumb_no_active_rect.bottom - thumb_no_active_rect.top,
                    1.0f);
-  for (int i = 0; i < arrows.size(); ++i) {
-    arrows[i].resize(i * 300, height - 75, 50, 50, 1.0f);
-  }
 }
 
 bool D2DWindow::show_thumbnail() {
@@ -350,8 +347,13 @@ void D2DWindow::render() {
     use_overlay->toggle_window_group(false);
     no_active.render(d2d_dc.get());
   }
-  for (int i = 0; i < arrows.size(); ++i) {
-    arrows[i].render(d2d_dc.get());
+  auto buttons = get_tasklist_buttons_positions();
+  for (int i = 0; i < buttons.size() && i < arrows.size(); ++i) {
+    arrows[i].resize(buttons[i].left,
+                     buttons[i].top - (buttons[i].bottom - buttons[i].top),
+                     buttons[i].right - buttons[i].left,
+                     buttons[i].bottom - buttons[i].top,
+                     0.95f).render(d2d_dc.get());
   }
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
