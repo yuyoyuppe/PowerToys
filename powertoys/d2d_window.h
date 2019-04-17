@@ -61,6 +61,7 @@ private:
   D2DOverlaySVG landscape, portrait;
   D2DOverlaySVG* use_overlay;
   D2DSVG no_active;
+  std::vector<D2DSVG> arrows;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;

@@ -36,6 +36,9 @@
     <ClCompile Include="virtual_desktops.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="tasklist_positions.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -67,6 +70,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="virtual_desktops.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="tasklist_positions.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
