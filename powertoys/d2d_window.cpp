@@ -238,7 +238,7 @@ void D2DWindow::init() {
            .find_window_group(L"Group-1");
   no_active.load(L"svgs\\no_active_window.svg", d2d_dc.get());
   arrows.resize(9);
-  for (int i = 0; i < arrows.size(); ++i) {
+  for (unsigned i = 0; i < arrows.size(); ++i) {
     arrows[i].load(L"svgs\\" + std::to_wstring(i + 1) + L".svg", d2d_dc.get());
   }
 }
@@ -347,13 +347,12 @@ void D2DWindow::render() {
     use_overlay->toggle_window_group(false);
     no_active.render(d2d_dc.get());
   }
-  auto buttons = get_tasklist_buttons_positions();
-  for (int i = 0; i < buttons.size() && i < arrows.size(); ++i) {
-    arrows[i].resize(buttons[i].left,
-                     buttons[i].top - (buttons[i].bottom - buttons[i].top),
-                     buttons[i].right - buttons[i].left,
-                     buttons[i].bottom - buttons[i].top,
-                     0.95f).render(d2d_dc.get());
+  for (auto&& button : get_tasklist_buttons_positions()) {
+    if ((unsigned) button.keynum - 1 >= arrows.size())
+      continue;
+    auto& arrow = arrows[button.keynum - 1];
+    arrow.resize(button.x, button.y - button.height, button.width, button.height, 0.9f)
+         .render(d2d_dc.get());
   }
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));

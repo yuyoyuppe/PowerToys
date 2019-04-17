@@ -3,8 +3,8 @@
 #include <oleacc.h>
 #pragma comment(lib, "oleacc.lib")
 
-std::vector<RECT> get_tasklist_buttons_positions() {
-  std::vector<RECT> rects;
+std::vector<TasklistButton> get_tasklist_buttons_positions() {
+  std::vector<TasklistButton> rects;
   auto tasklist_hwnd = FindWindow("Shell_TrayWnd", nullptr);
   if (!tasklist_hwnd)
     return rects;
@@ -43,23 +43,50 @@ std::vector<RECT> get_tasklist_buttons_positions() {
   }
   if (!apps_list)
     return rects;
-  // get positions
-  winrt::check_hresult(AccessibleChildren(apps_list.get(), 0, 256, children, &child_count));
+  // Get positions of all buttons
+  winrt::check_hresult(apps_list->get_accChildCount(&child_count));
+  std::vector<TasklistButton> buttons;
+  long min_width = -1, min_height = -1;
   for (int i = 0; i < child_count; ++i) {
-    VARIANT cid;
+    VARIANT cid, role;
     cid.vt = VT_I4;
     cid.lVal = i + 1;
-    winrt::check_hresult(apps_list->accLocation(&left, &top, &width, &height, cid));
-    if (left != 0 && top != 0 && width != 0 && height != 0) {
-      RECT rect;
-      rect.left = left;
-      rect.top = top;
-      rect.right = left + width;
-      rect.bottom = top + height;
-      rects.push_back(rect);
-      if (rects.size() == 9)
+    winrt::check_hresult(apps_list->get_accRole(cid, &role));
+    if (role.vt != VT_I4 || role.lVal != ROLE_SYSTEM_PUSHBUTTON)
+      continue;
+    TasklistButton button;
+    winrt::check_hresult(apps_list->accLocation(&button.x, &button.y, &button.width, &button.height, cid));
+    buttons.push_back(button);
+    if (button.width != 0 && (min_width == -1 || button.width < min_width))
+      min_width = button.width;
+    if (button.height != 0 && (min_height == -1 || button.height < min_height))
+      min_height = button.height;
+  }
+  int last_x = -1, last_y = -1;
+  int keynum = 0;
+  for (auto&& button : buttons) {
+    if (button.width != 0 && button.height != 0) {
+      if (last_x == -1) {
+        last_x = button.x;
+        last_y = button.y;
+      }
+      if (button.x < last_x || button.y < last_y) {
+        // Ignore second row
         break;
+      }
     }
+    if (button.width == 0 || button.height == 0) {
+      ++keynum;
+      continue;
+    }
+    if (button.width == min_width && button.height == min_height) {
+      ++keynum;
+    }
+    button.keynum = keynum;
+    if (keynum == 11)
+      break;
+    if (rects.empty() || rects.back().keynum != keynum)
+      rects.push_back(button);
   }
   return rects;
 }
