@@ -111,7 +111,9 @@ D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill, float ma
   float h_scale = fill  * height / svg_height;
   float v_scale = fill * width / svg_width;
   used_scale = min(h_scale, v_scale);
-  used_scale = min(used_scale, max_scale);
+  if (max_scale > 0) {
+    used_scale = min(used_scale, max_scale);
+  }
   transform = transform * D2D1::Matrix3x2F::Scale(used_scale, used_scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
   transform = transform * D2D1::Matrix3x2F::Translation((float)x, (float)y);
   return *this;
@@ -352,7 +354,9 @@ void D2DWindow::render() {
     if ((unsigned) button.keynum - 1 >= arrows.size())
       continue;
     auto& arrow = arrows[button.keynum - 1];
-    arrow.resize(button.x, button.y - button.height, button.width, button.height, 0.9f)
+    int render_arrow_width = (int)(button.height * 1.25f);
+    int render_arrow_height = (int)((double)render_arrow_width * arrow.height() / arrow.width());
+    arrow.resize(button.x + (button.width - render_arrow_width) / 2, button.y - render_arrow_height, render_arrow_width, render_arrow_height, 0.95f)//, use_overlay->get_scale())
          .render(d2d_dc.get());
   }
   winrt::check_hresult(d2d_dc->EndDraw());
