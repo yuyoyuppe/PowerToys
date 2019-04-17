@@ -253,9 +253,9 @@ void D2DWindow::resize() {
   hwnd_rect.top = (float)window_rect.top;
   hwnd_rect.bottom = (float)window_rect.bottom;
   hwnd_rect.right = (float)window_rect.right;
-  auto width = window_rect.right - window_rect.left;
-  auto height = window_rect.bottom - window_rect.top;
-  if (width == 0 || height == 0)
+  window_width = window_rect.right - window_rect.left;
+  window_height = window_rect.bottom - window_rect.top;
+  if (window_width == 0 || window_height == 0)
     return;
   DXGI_SWAP_CHAIN_DESC1 sc_description = {};
   sc_description.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -264,8 +264,8 @@ void D2DWindow::resize() {
   sc_description.BufferCount = 2;
   sc_description.SampleDesc.Count = 1;
   sc_description.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-  sc_description.Width = width;
-  sc_description.Height = height;
+  sc_description.Width = window_width;
+  sc_description.Height = window_height;
   dxgi_swap_chain = nullptr;
   winrt::check_hresult(dxgi_factory->CreateSwapChainForComposition(
     dxgi_device.get(),
@@ -298,20 +298,46 @@ void D2DWindow::resize() {
   d2d_dc->SetTarget(d2d_bitmap.get());
 
   float no_active_scale;
-  if (width > height) {
+  if (window_width > window_height) {
     use_overlay = &landscape;
     no_active_scale = 0.3f;
   } else {
     use_overlay = &portrait;
     no_active_scale = 0.5f;
   }
-  use_overlay->resize(0, 0, width, height, 0.95f);
+  use_overlay->resize(0, 0, window_width, window_height, 0.95f);
   auto thumb_no_active_rect = use_overlay->get_thumbnail_rect(no_active.width(), no_active.height(), no_active_scale);
   no_active.resize(thumb_no_active_rect.left,
                    thumb_no_active_rect.top,
                    thumb_no_active_rect.right - thumb_no_active_rect.left,
                    thumb_no_active_rect.bottom - thumb_no_active_rect.top,
                    1.0f);
+}
+
+void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, ID2D1DeviceContext5* d2d_dc) {
+  int dx = 0, dy = 0;
+  // Calculate taskbar orientation
+  if (button.x <= window.left) dx = 1;    // taskbar on left
+  if (button.x >= window.right) dx = -1;  // taskbar on right
+  if (button.y <= window.top) dy = 1;     // taskbar on top
+  if (button.y >= window.bottom) dy = -1; // taskbar on bottom
+  double arrow_ratio = (double)arrow.height() / arrow.width();
+  if (dy != 0) {
+    auto render_arrow_width = (int)(button.height * 1.25f);
+    auto render_arrow_height = (int)(render_arrow_width * arrow_ratio);
+    auto y_edge = dy == -1 ? button.y : button.y + button.height;
+    arrow.resize(button.x + (button.width - render_arrow_width) / 2,
+                 dy == -1 ? button.y - render_arrow_height : 0,
+                 render_arrow_width, render_arrow_height, 0.95f)
+         .render(d2d_dc);
+  } else {
+    auto render_arrow_height = button.height;
+    auto render_arrow_width = (int)(render_arrow_height / arrow_ratio);
+    arrow.resize(dx == -1 ? button.x - render_arrow_width : button.x + button.width,
+                 button.y + (button.height - render_arrow_height) / 2,
+                 render_arrow_width, render_arrow_height, 0.95f)
+         .render(d2d_dc);
+  }
 }
 
 bool D2DWindow::show_thumbnail() {
@@ -341,6 +367,9 @@ void D2DWindow::render() {
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
   D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+  D2D1_RECT_F background_rect = {};
+  background_rect.bottom = window_height;
+  background_rect.right = window_width;
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
   use_overlay->render(d2d_dc.get());
@@ -350,14 +379,12 @@ void D2DWindow::render() {
     use_overlay->toggle_window_group(false);
     no_active.render(d2d_dc.get());
   }
-  for (auto&& button : get_tasklist_buttons_positions()) {
-    if ((unsigned) button.keynum - 1 >= arrows.size())
+
+  auto buttons = get_tasklist_buttons_positions();
+  for (auto&& button : buttons) {
+    if ((unsigned)button.keynum - 1 >= arrows.size())
       continue;
-    auto& arrow = arrows[button.keynum - 1];
-    int render_arrow_width = (int)(button.height * 1.25f);
-    int render_arrow_height = (int)((double)render_arrow_width * arrow.height() / arrow.width());
-    arrow.resize(button.x + (button.width - render_arrow_width) / 2, button.y - render_arrow_height, render_arrow_width, render_arrow_height, 0.95f)//, use_overlay->get_scale())
-         .render(d2d_dc.get());
+    render_arrow(arrows[button.keynum - 1], button, hwnd_rect, d2d_dc.get());
   }
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
@@ -380,7 +407,8 @@ LRESULT __stdcall D2DWindow::d2d_window_proc(HWND window, UINT message, WPARAM w
     SetWindowLongPtr(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create_struct->lpCreateParams));
     return TRUE;
   }
-  case WM_SIZE:
+  case WM_MOVE:
+  case WM_SIZE: 
     this_from_hwnd(window)->resize();
   case WM_PAINT:
     this_from_hwnd(window)->render();

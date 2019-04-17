@@ -36,7 +36,7 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
     cid.vt = VT_I4;
     cid.lVal = CHILDID_SELF;
     element->accLocation(&left, &top, &width, &height, cid);
-    if (left != 0 && top != 0 && width != 0 && height != 0) {
+    if (left != 0 || top != 0 || width != 0 || height != 0) {
       apps_list = std::move(element);
       break;
     }

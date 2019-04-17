@@ -58,6 +58,7 @@ private:
   std::mutex mutex;
   HWND hwnd;
   D2D1_RECT_F hwnd_rect;
+  long window_width, window_height;
   HTHUMBNAIL thumbnail;
 
   D2DOverlaySVG landscape, portrait;
