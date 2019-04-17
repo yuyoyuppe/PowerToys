@@ -104,14 +104,15 @@ D2DSVG& D2DSVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) 
   return *this;
 }
 
-D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill) {
+D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill, float max_scale) {
   // Center 
   transform = D2D1::Matrix3x2F::Identity();
   transform = transform * D2D1::Matrix3x2F::Translation((width - svg_width) / 2.0f, (height - svg_height) / 2.0f);
   float h_scale = fill  * height / svg_height;
   float v_scale = fill * width / svg_width;
-  float scale = min(h_scale, v_scale);
-  transform = transform * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
+  used_scale = min(h_scale, v_scale);
+  used_scale = min(used_scale, max_scale);
+  transform = transform * D2D1::Matrix3x2F::Scale(used_scale, used_scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
   transform = transform * D2D1::Matrix3x2F::Translation((float)x, (float)y);
   return *this;
 }
@@ -132,8 +133,8 @@ D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceCont
   return *this;
 }
 
-D2DOverlaySVG& D2DOverlaySVG::resize(int x, int y, int width, int height, float fill) {
-  D2DSVG::resize(x, y, width, height, fill);
+D2DOverlaySVG& D2DOverlaySVG::resize(int x, int y, int width, int height, float fill, float max_scale) {
+  D2DSVG::resize(x, y, width, height, fill, max_scale);
   if (thumbnail_bottom_right.x != 0 && thumbnail_bottom_right.y != 0) {
     auto scaled_top_left = transform.TransformPoint(thumbnail_top_left);
     auto scanled_bottom_right = transform.TransformPoint(thumbnail_bottom_right);

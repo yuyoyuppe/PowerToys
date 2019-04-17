@@ -13,11 +13,13 @@
 class D2DSVG {
 public:
   D2DSVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
-  D2DSVG& resize(int x, int y, int width, int height, float fill);
+  D2DSVG& resize(int x, int y, int width, int height, float fill, float max_scale = 1.0f);
   D2DSVG& render(ID2D1DeviceContext5* d2d_dc);
+  float get_scale() const { return used_scale; }
   int width() const { return svg_width; }
   int height() const { return svg_height; }
 protected:
+  float used_scale;
   winrt::com_ptr<ID2D1SvgDocument> svg;
   int svg_width, svg_height;
   D2D1::Matrix3x2F transform;
@@ -26,7 +28,7 @@ protected:
 class D2DOverlaySVG : public D2DSVG {
 public:
   D2DOverlaySVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
-  D2DOverlaySVG& resize(int x, int y, int width, int height, float fill);
+  D2DOverlaySVG& resize(int x, int y, int width, int height, float fill, float max_scale = 1.0f);
   D2DOverlaySVG& find_thumbnail(const std::wstring& id);
   D2DOverlaySVG& find_window_group(const std::wstring& id);
   RECT get_thumbnail_rect(int window_cx, int window_cy, float scale);
