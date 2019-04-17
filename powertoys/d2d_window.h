@@ -13,19 +13,27 @@
 class D2DSVG {
 public:
   D2DSVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
-  D2DSVG& find_thumbnail(const std::wstring& id);
-  D2DSVG& find_window_group(const std::wstring& id);
   D2DSVG& resize(int x, int y, int width, int height, float fill);
-  RECT get_thumbnail_rect(int window_cx, int window_cy);
-  D2DSVG& toggle_window_group(bool active);
   D2DSVG& render(ID2D1DeviceContext5* d2d_dc);
+protected:
+  winrt::com_ptr<ID2D1SvgDocument> svg;
+  int svg_width, svg_height;
+  D2D1::Matrix3x2F transform;
+};
+
+class D2DOverlaySVG : public D2DSVG {
+public:
+  D2DOverlaySVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
+  D2DOverlaySVG& resize(int x, int y, int width, int height, float fill);
+  D2DOverlaySVG& find_thumbnail(const std::wstring& id);
+  D2DOverlaySVG& find_window_group(const std::wstring& id);
+  RECT get_thumbnail_rect(int window_cx, int window_cy);
+  D2DOverlaySVG& toggle_window_group(bool active);
 private:
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
   RECT thumbnail_scaled_rect;
-  winrt::com_ptr<ID2D1SvgDocument> svg;
   winrt::com_ptr<ID2D1SvgElement> window_group;
-  int svg_width, svg_height;
-  D2D1_MATRIX_3X2_F transform;
+
 };
 
 class D2DWindow
@@ -48,8 +56,8 @@ private:
   D2D1_RECT_F hwnd_rect;
   HTHUMBNAIL thumbnail;
 
-  D2DSVG landscape, portrait;
-  D2DSVG* use_overlay;
+  D2DOverlaySVG landscape, portrait;
+  D2DOverlaySVG* use_overlay;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;

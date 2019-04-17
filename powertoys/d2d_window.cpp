@@ -82,12 +82,7 @@ void D2DWindow::hide() {
 }
 
 D2DSVG& D2DSVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
-  window_group = nullptr;
   svg = nullptr;
-  thumbnail_top_left = {};
-  thumbnail_bottom_right = {};
-  thumbnail_scaled_rect = {};
-  
   winrt::com_ptr<IStream> svg_stream;
   winrt::check_hresult(SHCreateStreamOnFileEx(filename.c_str(),
     STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE,
@@ -108,33 +103,37 @@ D2DSVG& D2DSVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) 
   svg_height = (int)tmp;
   return *this;
 }
-D2DSVG& D2DSVG::find_thumbnail(const std::wstring& id) {
-  winrt::com_ptr<ID2D1SvgElement> thumbnail_box;
-  winrt::check_hresult(svg->FindElementById(id.c_str(), thumbnail_box.put()));
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"x", &thumbnail_top_left.x));
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"y", &thumbnail_top_left.y));
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
-  thumbnail_bottom_right.x += thumbnail_top_left.x;
-  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
-  thumbnail_bottom_right.y += thumbnail_top_left.y;
-  return *this;
-}
-D2DSVG& D2DSVG::find_window_group(const std::wstring& id) {
-  window_group = nullptr;
-  winrt::check_hresult(svg->FindElementById(id.c_str(), window_group.put()));
-  return *this;
-}
+
 D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill) {
-  auto transform = D2D1::Matrix3x2F::Identity();
   // Center 
+  transform = D2D1::Matrix3x2F::Identity();
   transform = transform * D2D1::Matrix3x2F::Translation((width - svg_width) / 2.0f, (height - svg_height) / 2.0f);
   float h_scale = fill  * height / svg_height;
   float v_scale = fill * width / svg_width;
   float scale = min(h_scale, v_scale);
   transform = transform * D2D1::Matrix3x2F::Scale(scale, scale, D2D1::Point2F(width / 2.0f, height / 2.0f));
   transform = transform * D2D1::Matrix3x2F::Translation((float)x, (float)y);
-  this->transform = transform;
+  return *this;
+}
 
+D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
+  d2d_dc->SetTransform(transform);
+  d2d_dc->DrawSvgDocument(svg.get());
+  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+  return *this;
+}
+
+D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
+  D2DSVG::load(filename, d2d_dc);
+  window_group = nullptr;
+  thumbnail_top_left = {};
+  thumbnail_bottom_right = {};
+  thumbnail_scaled_rect = {};
+  return *this;
+}
+
+D2DOverlaySVG& D2DOverlaySVG::resize(int x, int y, int width, int height, float fill) {
+  D2DSVG::resize(x, y, width, height, fill);
   if (thumbnail_bottom_right.x != 0 && thumbnail_bottom_right.y != 0) {
     auto scaled_top_left = transform.TransformPoint(thumbnail_top_left);
     auto scanled_bottom_right = transform.TransformPoint(thumbnail_bottom_right);
@@ -146,13 +145,31 @@ D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill) {
   return *this;
 }
 
-RECT D2DSVG::get_thumbnail_rect(int window_cx, int window_cy) {
+D2DOverlaySVG& D2DOverlaySVG::find_thumbnail(const std::wstring& id) {
+  winrt::com_ptr<ID2D1SvgElement> thumbnail_box;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), thumbnail_box.put()));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"x", &thumbnail_top_left.x));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"y", &thumbnail_top_left.y));
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"width", &thumbnail_bottom_right.x));
+  thumbnail_bottom_right.x += thumbnail_top_left.x;
+  winrt::check_hresult(thumbnail_box->GetAttributeValue(L"height", &thumbnail_bottom_right.y));
+  thumbnail_bottom_right.y += thumbnail_top_left.y;
+  return *this;
+}
+
+D2DOverlaySVG& D2DOverlaySVG::find_window_group(const std::wstring& id) {
+  window_group = nullptr;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), window_group.put()));
+  return *this;
+}
+
+RECT D2DOverlaySVG::get_thumbnail_rect(int window_cx, int window_cy) {
   if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0)
     return {};
   int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
   int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
   if (thumbnail_scaled_rect_heigh == 0 || thumbnail_scaled_rect_width == 0 ||
-      window_cx == 0 || window_cy == 0) {
+    window_cx == 0 || window_cy == 0) {
     return {};
   }
   double scale_h = 0.99f * thumbnail_scaled_rect_width / window_cx;
@@ -165,18 +182,12 @@ RECT D2DSVG::get_thumbnail_rect(int window_cx, int window_cy) {
   thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - scale * window_cy) / 2;
   return thumb_rect;
 }
-D2DSVG& D2DSVG::toggle_window_group(bool active) {
+
+D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   if (window_group)
     window_group->SetAttributeValue(L"fill-opacity", active ? 1.0f : 0.3f);
   return *this;
 }
-D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
-  d2d_dc->SetTransform(transform);
-  d2d_dc->DrawSvgDocument(svg.get());
-  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
-  return *this;
-}
-
 
 void D2DWindow::init() {
   std::unique_lock<std::mutex> lock(mutex);
@@ -222,6 +233,9 @@ void D2DWindow::init() {
   landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
            .find_thumbnail(L"path-1")
            .find_window_group(L"Group-1");
+  portrait.load(L"svgs\\overlay_portrait.svg", d2d_dc.get())
+           .find_thumbnail(L"path-1")
+          .find_window_group(L"Group-1");
 }
 
 void D2DWindow::resize() {
@@ -275,7 +289,12 @@ void D2DWindow::resize() {
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
 
-  landscape.resize(0, 0, width, height, 0.95f);
+  if (width > height) {
+    use_overlay = &landscape;
+  } else {
+    use_overlay = &portrait;
+  }
+  use_overlay->resize(0, 0, width, height, 0.95f);
 }
 
 bool D2DWindow::show_thumbnail() {
@@ -288,7 +307,7 @@ bool D2DWindow::show_thumbnail() {
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  thumb_properties.rcDestination = landscape.get_thumbnail_rect(thumb_size.cx, thumb_size.cy);
+  thumb_properties.rcDestination = use_overlay->get_thumbnail_rect(thumb_size.cx, thumb_size.cy);
   if (thumb_properties.rcDestination.bottom == 0)
     return false;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
@@ -307,8 +326,12 @@ void D2DWindow::render() {
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
-  landscape.toggle_window_group(show_thumbnail())
-           .render(d2d_dc.get());
+  if (show_thumbnail()) {
+    use_overlay->toggle_window_group(true);
+  } else {
+    use_overlay->toggle_window_group(false);
+  }
+  use_overlay->render(d2d_dc.get());
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());
