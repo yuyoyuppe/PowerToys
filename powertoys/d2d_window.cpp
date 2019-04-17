@@ -163,7 +163,7 @@ D2DOverlaySVG& D2DOverlaySVG::find_window_group(const std::wstring& id) {
   return *this;
 }
 
-RECT D2DOverlaySVG::get_thumbnail_rect(int window_cx, int window_cy) {
+RECT D2DOverlaySVG::get_thumbnail_rect(int window_cx, int window_cy, float scale) {
   if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0)
     return {};
   int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
@@ -172,14 +172,14 @@ RECT D2DOverlaySVG::get_thumbnail_rect(int window_cx, int window_cy) {
     window_cx == 0 || window_cy == 0) {
     return {};
   }
-  double scale_h = 0.99f * thumbnail_scaled_rect_width / window_cx;
-  double scale_v = 0.99f * thumbnail_scaled_rect_heigh / window_cy;
-  double scale = min(scale_h, scale_v);
+  float scale_h = scale * thumbnail_scaled_rect_width / window_cx;
+  float scale_v = scale * thumbnail_scaled_rect_heigh / window_cy;
+  float use_scale = min(scale_h, scale_v);
   RECT thumb_rect;
-  thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - scale * window_cx) / 2;
-  thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - scale * window_cx) / 2;
-  thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - scale * window_cy) / 2;
-  thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - scale * window_cy) / 2;
+  thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - use_scale * window_cx) / 2;
+  thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - use_scale * window_cx) / 2;
+  thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - use_scale * window_cy) / 2;
+  thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - use_scale * window_cy) / 2;
   return thumb_rect;
 }
 
@@ -235,7 +235,8 @@ void D2DWindow::init() {
            .find_window_group(L"Group-1");
   portrait.load(L"svgs\\overlay_portrait.svg", d2d_dc.get())
            .find_thumbnail(L"path-1")
-          .find_window_group(L"Group-1");
+           .find_window_group(L"Group-1");
+  no_active.load(L"svgs\\no_active_window.svg", d2d_dc.get());
 }
 
 void D2DWindow::resize() {
@@ -289,12 +290,21 @@ void D2DWindow::resize() {
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
 
+  float no_active_scale;
   if (width > height) {
     use_overlay = &landscape;
+    no_active_scale = 0.3f;
   } else {
     use_overlay = &portrait;
+    no_active_scale = 0.5f;
   }
   use_overlay->resize(0, 0, width, height, 0.95f);
+  auto thumb_no_active_rect = use_overlay->get_thumbnail_rect(no_active.width(), no_active.height(), no_active_scale);
+  no_active.resize(thumb_no_active_rect.left,
+                   thumb_no_active_rect.top,
+                   thumb_no_active_rect.right - thumb_no_active_rect.left,
+                   thumb_no_active_rect.bottom - thumb_no_active_rect.top,
+                   1.0f);
 }
 
 bool D2DWindow::show_thumbnail() {
@@ -307,7 +317,7 @@ bool D2DWindow::show_thumbnail() {
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  thumb_properties.rcDestination = use_overlay->get_thumbnail_rect(thumb_size.cx, thumb_size.cy);
+  thumb_properties.rcDestination = use_overlay->get_thumbnail_rect(thumb_size.cx, thumb_size.cy, 0.99f);
   if (thumb_properties.rcDestination.bottom == 0)
     return false;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
@@ -326,12 +336,13 @@ void D2DWindow::render() {
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
+  use_overlay->render(d2d_dc.get());
   if (show_thumbnail()) {
     use_overlay->toggle_window_group(true);
   } else {
     use_overlay->toggle_window_group(false);
+    no_active.render(d2d_dc.get());
   }
-  use_overlay->render(d2d_dc.get());
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());

@@ -15,6 +15,8 @@ public:
   D2DSVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
   D2DSVG& resize(int x, int y, int width, int height, float fill);
   D2DSVG& render(ID2D1DeviceContext5* d2d_dc);
+  int width() const { return svg_width; }
+  int height() const { return svg_height; }
 protected:
   winrt::com_ptr<ID2D1SvgDocument> svg;
   int svg_width, svg_height;
@@ -27,7 +29,7 @@ public:
   D2DOverlaySVG& resize(int x, int y, int width, int height, float fill);
   D2DOverlaySVG& find_thumbnail(const std::wstring& id);
   D2DOverlaySVG& find_window_group(const std::wstring& id);
-  RECT get_thumbnail_rect(int window_cx, int window_cy);
+  RECT get_thumbnail_rect(int window_cx, int window_cy, float scale);
   D2DOverlaySVG& toggle_window_group(bool active);
 private:
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
@@ -58,6 +60,7 @@ private:
 
   D2DOverlaySVG landscape, portrait;
   D2DOverlaySVG* use_overlay;
+  D2DSVG no_active;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;
