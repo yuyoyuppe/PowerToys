@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="13px" viewBox="0 0 35 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Group 3</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Devices" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1.5-Restore-window-to-primary-desktop-icon-Copy" transform="translate(-1012.000000, -80.000000)" fill="#000000" fill-rule="nonzero">
+            <g id="Group-3" transform="translate(1012.000000, 80.000000)">
+                <g id="Group-2">
+                    <g id="Group">
+                        <path d="M1,1 L1,10 L14,10 L14,1 L1,1 Z M0,0 L15,0 L15,11 L0,11 L0,0 Z" id="Rectangle"></path>
+                        <polygon id="Line-3" points="22.5 3 22.5 2 34.5 2 34.5 3"></polygon>
+                        <path d="M1,1 L1,12 L14,12 L14,1 L1,1 Z M0,0 L15,0 L15,13 L0,13 L0,0 Z" id="Rectangle"></path>
+                        <polygon id="Line-2" points="5 6 5 5 10 5 10 6"></polygon>
+                    </g>
+                </g>
+                <g id="Group-5" transform="translate(25.000000, 6.500000) scale(-1, 1) translate(-25.000000, -6.500000) translate(15.000000, 0.000000)">
+                    <path d="M13,5 L12,5 L12,1 L1,1 L1,12 L12,12 L12,8 L13,8 L13,13 L0,13 L0,0 L13,0 L13,5 Z M13,6 L13,7 L12,7 L12,6 L13,6 Z" id="Combined-Shape"></path>
+                    <g id="Group-4" transform="translate(7.000000, 2.121320)">
+                        <path d="M8,2.29289322 L8.70710678,1.58578644 L11.6213203,4.5 L8.70710678,7.41421356 L8,6.70710678 L10.2071068,4.5 L8,2.29289322 Z M8,2.29289322 L8.70710678,1.58578644 L11.6213203,4.5 L8.70710678,7.41421356 L8,6.70710678 L10.2071068,4.5 L8,2.29289322 Z M0,4.87867966 L0,3.87867966 L10.557617,3.87867966 L10.557617,4.87867966 L0,4.87867966 Z M0,3.87867966 L10.557617,3.87867966 L10.557617,4.87867966 L0,4.87867966 L0,3.87867966 Z" id="Combined-Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

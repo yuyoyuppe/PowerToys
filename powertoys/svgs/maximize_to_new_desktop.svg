@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="13px" viewBox="0 0 35 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Group 3</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Devices" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1.1-Maximize-to-new-desktop-icon" transform="translate(-1012.000000, -80.000000)" fill-rule="nonzero">
+            <g id="Group-3" transform="translate(1012.000000, 80.000000)">
+                <g id="Group-2" transform="translate(20.000000, 0.000000)" fill="#000000">
+                    <g id="Group">
+                        <path d="M1,1 L1,10 L14,10 L14,1 L1,1 Z M0,0 L15,0 L15,11 L0,11 L0,0 Z" id="Rectangle"></path>
+                        <polygon id="Line-2" points="5 6 5 5 10 5 10 6"></polygon>
+                        <polygon id="Line-2" transform="translate(7.500000, 5.500000) rotate(-270.000000) translate(-7.500000, -5.500000) " points="5 6 5 5 10 5 10 6"></polygon>
+                        <path d="M1,1 L1,12 L14,12 L14,1 L1,1 Z M0,0 L15,0 L15,13 L0,13 L0,0 Z" id="Rectangle"></path>
+                    </g>
+                </g>
+                <path d="M13,5 L12,5 L12,1 L1,1 L1,12 L12,12 L12,8 L13,8 L13,13 L0,13 L0,0 L13,0 L13,5 Z" id="Combined-Shape" fill="#24272C"></path>
+                <path d="M15,4.41421356 L15.7071068,3.70710678 L18.6213203,6.62132034 L15.7071068,9.53553391 L15,8.82842712 L17.2071068,6.62132034 L15,4.41421356 Z M15,4.41421356 L15.7071068,3.70710678 L18.6213203,6.62132034 L15.7071068,9.53553391 L15,8.82842712 L17.2071068,6.62132034 L15,4.41421356 Z M7,7 L7,6 L17.557617,6 L17.557617,7 L7,7 Z M7,6 L17.557617,6 L17.557617,7 L7,7 L7,6 Z" id="Combined-Shape" fill="#000000"></path>
+            </g>
+        </g>
+    </g>
+</svg>

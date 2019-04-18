@@ -135,7 +135,64 @@ int GetDesktopGUIDIndex(GUID id) {
   return index;
 }
 
+int GetCurrentDesktopGUIDIndexForWindow(HWND hwnd) {
+  auto manager = get_manager();
+  GUID current_desktopId;
+  winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
+  return GetDesktopGUIDIndex(current_desktopId);
+}
+
+// Adapted from https://gallery.technet.microsoft.com/scriptcenter/Powershell-commands-to-d0e79cc5
+winrt::com_ptr<IVirtualDesktop> GetDesktopAtIndex(int index) {
+  auto manager_internal = get_manager_internal();
+  UINT count;
+  winrt::check_hresult(manager_internal->GetCount(&count));
+  if (index < 0 || index >= count) throw std::out_of_range("GetDesktopGUIDAtIndex : index is out of range.");
+  winrt::com_ptr<IObjectArray> desktops;
+  manager_internal->GetDesktops(desktops.put());
+  winrt::com_ptr<IVirtualDesktop> objdesktop;
+  desktops.get()->GetAt(index, __uuidof(IVirtualDesktop), objdesktop.put_void());
+  //TODO: Verify releases needed with IObjectArray and winrt::com_ptr
+  return objdesktop;
+}
+
 #define MOVETONEWDESKTOPMSGSTR "POWERTOYS_MOVE_TO_NEW_DESKTOP"
+
+void move_window_to_primary_desktop(HWND hwnd) {
+  auto manager_internal = get_manager_internal();
+  auto manager = get_manager();
+  // Restore the Window.
+  ShowWindow(hwnd, SW_RESTORE);
+  UINT msg = RegisterWindowMessage(MOVETONEWDESKTOPMSGSTR);
+
+  int desktop_index = 0;
+  winrt::com_ptr<IVirtualDesktop> objDestkop;
+  try {
+    objDestkop = GetDesktopAtIndex(desktop_index);
+  }
+  catch (std::out_of_range& ex) {
+    // Tried to search the GUID of an out of range index desktop.
+    MessageBox(NULL, "Primary desktop index is out of range.", "Error", MB_OK | MB_ICONERROR);
+    return;
+  }
+
+  // Send custom message, with target desktop index in LPARAM.
+  BOOL res = PostMessage(hwnd, msg, 0, (LPARAM)desktop_index);
+  if (res==0) {
+    DWORD dw = GetLastError();
+    if (dw == 5) {
+      // Access denied. Means Windows UIPI is blocking powertoys from moving the window to another Desktop.
+      MessageBox(NULL, "Couldn't move the window to a new Desktop. Need to start as an Administrator to do that.", "Access Denied", MB_OK | MB_ICONEXCLAMATION);
+    }
+    else {
+      ShowLastErrorMessage((LPTSTR)"PostMessage", dw);
+    }
+    return;
+  }
+
+  // Switch to the new desktop.
+  winrt::check_hresult(manager_internal->SwitchDesktop(objDestkop.get()));
+}
 
 void move_window_to_new_desktop(HWND hwnd) {
   auto manager_internal = get_manager_internal();
