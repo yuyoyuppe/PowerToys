@@ -62,8 +62,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   HHOOK handle = NULL;
   try {
     start_winkey_handler();
-    start_mouse_handler();
-    CreateChildProcesses();
+    //start_mouse_handler();
+    //CreateChildProcesses();
     int result = run_message_loop();
   return result;
   } catch (std::runtime_error err) {

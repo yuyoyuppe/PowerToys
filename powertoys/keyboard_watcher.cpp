@@ -23,6 +23,23 @@ namespace {
   Takes care not to call any of the callbacks more than once for each event.
 */
   bool other_key_was_pressed = false;
+
+  bool only_winkey_key_held() {
+    BYTE keys_state[256];
+    memset(keys_state, 0, 256);
+    GetKeyboardState(keys_state);
+    for (int vk = 0; vk < 256; ++vk) {
+      if (vk == VK_LWIN || vk == VK_RWIN)
+        continue;
+      auto key_held = keys_state[vk] & 0x80; // test high bit
+      // Pressing WinKey + M can get M key stuck in "pressed" state
+      if (key_held)
+        key_held = GetAsyncKeyState(vk) & 0x8000;
+      if (key_held)
+        return false;
+    }
+    return true;
+  }
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
     if (nCode == HC_ACTION) {
@@ -30,19 +47,7 @@ namespace {
       if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
         if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
           // Check if any other key is held
-          BYTE keys_state[256];
-          bool other_key_held = false;
-          memset(keys_state, 0, 256);
-          GetKeyboardState(keys_state);
-          for (int vk = 0; vk < 256 && !other_key_held; ++vk) {
-            if (vk == VK_LWIN || vk == VK_RWIN)
-              continue;
-            other_key_held = keys_state[vk] & 0x80; // test high bit
-            // Pressing WinKey + M can get M key stuck in "pressed" state
-            if (other_key_held)
-              other_key_held = GetAsyncKeyState(vk) & 0x8000;
-          }
-          if (!other_key_held) {
+          if (only_winkey_key_held()) {
             winkey_pressed = true;
             other_key_was_pressed = false;
             winkey_press_timestamp = stdclock::now();
@@ -81,6 +86,8 @@ namespace {
           other_key_was_pressed = true;
         }
         on_held_pressed_cb(kb_hook->vkCode);
+      } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+        winkey_pressed = false;
       }
     }
     return CallNextHookEx(hook_handle, nCode, wParam, lParam);
@@ -100,7 +107,7 @@ namespace {
           wait_time = stdclock::now() - winkey_press_timestamp;
         }
         // Make sure not to call the callback if start menu is visible
-        if (winkey_pressed && !is_start_visible()) {
+        if (winkey_pressed && !is_start_visible() && only_winkey_key_held()) {
           winkey_signaled = true;
           on_held_cb();
         }
