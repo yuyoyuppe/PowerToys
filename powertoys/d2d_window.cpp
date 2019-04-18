@@ -240,9 +240,9 @@ void D2DWindow::init() {
            .find_thumbnail(L"path-1")
            .find_window_group(L"Group-1");
   no_active.load(L"svgs\\no_active_window.svg", d2d_dc.get());
-  arrows.resize(9);
+  arrows.resize(10);
   for (unsigned i = 0; i < arrows.size(); ++i) {
-    arrows[i].load(L"svgs\\" + std::to_wstring(i + 1) + L".svg", d2d_dc.get());
+    arrows[i].load(L"svgs\\" + std::to_wstring((i + 1) % 10) + L".svg", d2d_dc.get());
   }
 }
 
@@ -313,17 +313,41 @@ void D2DWindow::resize() {
                    thumb_no_active_rect.bottom - thumb_no_active_rect.top,
                    1.0f);
 }
+D2DSVG& D2DSVG::toggle_element(const wchar_t* id, bool visible) {
+  winrt::com_ptr<ID2D1SvgElement> element;
+  if (svg->FindElementById(id, element.put()) != S_OK)
+    return *this;
+  element->SetAttributeValue(L"display", visible ? D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE : D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
+  return *this;
+}
 
 void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, float max_scale, ID2D1DeviceContext5* d2d_dc) {
   int dx = 0, dy = 0;
   // Calculate taskbar orientation
-  if (button.x <= window.left) dx = 1;    // taskbar on left
-  if (button.x >= window.right) dx = -1;  // taskbar on right
-  if (button.y <= window.top) dy = 1;     // taskbar on top
-  if (button.y >= window.bottom) dy = -1; // taskbar on bottom
+  arrow.toggle_element(L"left", false);
+  arrow.toggle_element(L"right", false);
+  arrow.toggle_element(L"top", false);
+  arrow.toggle_element(L"bottom", false);
+  if (button.x <= window.left) { // taskbar on left
+    dx = 1;
+    arrow.toggle_element(L"left", true);
+  }
+  if (button.x >= window.right) { // taskbar on right
+    dx = -1;
+    arrow.toggle_element(L"right", true);
+  }
+  if (button.y <= window.top) { // taskbar on top
+    dy = 1;
+    arrow.toggle_element(L"top", true);
+  }
+  if (button.y >= window.bottom) { // taskbar on bottom
+    dy = -1;
+    arrow.toggle_element(L"bottom", true);
+  }
   double arrow_ratio = (double)arrow.height() / arrow.width();
   if (dy != 0) {
-    auto render_arrow_width = (int)(button.height * 1.25f);
+    // assume button is 25% wider than taller, +10% to make room for each of the arrows that are hidden
+    auto render_arrow_width = (int)(button.height * 1.25f * 1.2f);
     auto render_arrow_height = (int)(render_arrow_width * arrow_ratio);
     auto y_edge = dy == -1 ? button.y : button.y + button.height;
     arrow.resize(button.x + (button.width - render_arrow_width) / 2,
@@ -331,7 +355,8 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, flo
                  render_arrow_width, render_arrow_height, 0.95f, max_scale)
          .render(d2d_dc);
   } else {
-    auto render_arrow_height = button.height;
+    // same as above - make room for the hidden arrow
+    auto render_arrow_height = button.height * 1.2f; 
     auto render_arrow_width = (int)(render_arrow_height / arrow_ratio);
     arrow.resize(dx == -1 ? button.x - render_arrow_width : button.x + button.width,
                  button.y + (button.height - render_arrow_height) / 2,
@@ -370,7 +395,7 @@ void D2DWindow::render() {
   D2D1_RECT_F background_rect = {};
   background_rect.bottom = window_height;
   background_rect.right = window_width;
-  d2d_dc->FillRectangle(hwnd_rect, brush.get());
+  d2d_dc->FillRectangle(background_rect, brush.get());
   // Draw SVG
   use_overlay->render(d2d_dc.get());
   if (show_thumbnail()) {
