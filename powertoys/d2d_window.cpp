@@ -30,7 +30,7 @@ pfnSetWindowCompositionAttribute getSetWindowCompositionAttributeFunPtr() {
 }
 
 void enable_acrylic_window(HWND hwnd) {
-  auto SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
+  static auto SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
   ACCENT_POLICY accent = {};
   accent.AccentState = 3; // ACCENT_ENABLE_BLURBEHIND;
   accent.GradientColor = 0xffffff;
