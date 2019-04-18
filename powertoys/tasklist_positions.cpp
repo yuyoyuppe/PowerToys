@@ -62,6 +62,8 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
     if (button.height != 0 && (min_height == -1 || button.height < min_height))
       min_height = button.height;
   }
+  // Get names of pinned windows
+  //auto pinned_list = FindFirstFile("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar")
   int last_x = -1, last_y = -1;
   int keynum = 0;
   for (auto&& button : buttons) {
@@ -76,8 +78,8 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
       }
     }
     if (button.width == 0 || button.height == 0) {
-      ++keynum;
-      continue;
+       ++keynum;
+       continue;
     }
     if (button.width == min_width && button.height == min_height) {
       ++keynum;

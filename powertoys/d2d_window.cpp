@@ -314,7 +314,7 @@ void D2DWindow::resize() {
                    1.0f);
 }
 
-void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, ID2D1DeviceContext5* d2d_dc) {
+void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, float max_scale, ID2D1DeviceContext5* d2d_dc) {
   int dx = 0, dy = 0;
   // Calculate taskbar orientation
   if (button.x <= window.left) dx = 1;    // taskbar on left
@@ -328,14 +328,14 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, D2D1_RECT_F window, ID2
     auto y_edge = dy == -1 ? button.y : button.y + button.height;
     arrow.resize(button.x + (button.width - render_arrow_width) / 2,
                  dy == -1 ? button.y - render_arrow_height : 0,
-                 render_arrow_width, render_arrow_height, 0.95f)
+                 render_arrow_width, render_arrow_height, 0.95f, max_scale)
          .render(d2d_dc);
   } else {
     auto render_arrow_height = button.height;
     auto render_arrow_width = (int)(render_arrow_height / arrow_ratio);
     arrow.resize(dx == -1 ? button.x - render_arrow_width : button.x + button.width,
                  button.y + (button.height - render_arrow_height) / 2,
-                 render_arrow_width, render_arrow_height, 0.95f)
+                 render_arrow_width, render_arrow_height, 0.95f, max_scale)
          .render(d2d_dc);
   }
 }
@@ -384,7 +384,7 @@ void D2DWindow::render() {
   for (auto&& button : buttons) {
     if ((unsigned)button.keynum - 1 >= arrows.size())
       continue;
-    render_arrow(arrows[button.keynum - 1], button, hwnd_rect, d2d_dc.get());
+    render_arrow(arrows[button.keynum - 1], button, hwnd_rect, use_overlay->get_scale(), d2d_dc.get());
   }
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));

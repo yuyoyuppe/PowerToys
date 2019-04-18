@@ -55,7 +55,6 @@ bool CreateChildProcesses() {
   return true;
 }
 
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   winrt::init_apartment();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
@@ -63,8 +62,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   HHOOK handle = NULL;
   try {
     start_winkey_handler();
-    //start_mouse_handler();
-    //CreateChildProcesses();
+    start_mouse_handler();
+    CreateChildProcesses();
     int result = run_message_loop();
   return result;
   } catch (std::runtime_error err) {
