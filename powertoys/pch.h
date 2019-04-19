@@ -19,5 +19,7 @@
 #include <condition_variable>
 #include <stdexcept>
 #include <tuple>
+#include <unordered_set>
+#include <string>
 
 #include "utils.h"
