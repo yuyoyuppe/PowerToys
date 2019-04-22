@@ -84,10 +84,14 @@ D2DWindowManagerPopup* D2DWindowManagerPopup::this_from_hwnd(HWND window) {
 }
 
 void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
+  int currentDesktopIndex = GetCurrentDesktopGUIDIndexForWindow(targetWindow);
+  if (currentDesktopIndex < 0) {
+    // Couldn't find the Desktop.
+    return;
+  }
   target_window = targetWindow;
   //auto primary_screen = get_primary_monitor();
   //SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width()/2, primary_screen.height()/2, 0);
-  int currentDesktopIndex = GetCurrentDesktopGUIDIndexForWindow(targetWindow);
   current_icon = (currentDesktopIndex==0?&maximize_to_new_desktop:&restore_to_primary_desktop);
   target_window_on_primary_desktop = (currentDesktopIndex==0?TRUE:FALSE);
   SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);

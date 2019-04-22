@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "mouse_watcher.h"
+#include "virtual_desktops.h"
 
 namespace {
   using stdclock = std::chrono::system_clock;
@@ -71,6 +72,11 @@ namespace {
       mouse_window = GetAncestor(mouse_window, GA_ROOTOWNER);
       if (GetWindowLong(mouse_window, GWL_STYLE) & WS_CHILD)
         continue;
+      if (GetCurrentDesktopGUIDIndexForWindow(mouse_window) < 0) {
+        // Couldn't get a desktop index for the window.
+        // The windows most likely won't be able to move between desktops.
+        continue;
+      }
       auto window_rect = get_window_pos(mouse_window);
       if (!window_rect)
         continue;

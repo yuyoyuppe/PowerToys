@@ -138,8 +138,12 @@ int GetDesktopGUIDIndex(GUID id) {
 int GetCurrentDesktopGUIDIndexForWindow(HWND hwnd) {
   auto manager = get_manager();
   GUID current_desktopId;
-  winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
-  return GetDesktopGUIDIndex(current_desktopId);
+  if(manager->GetWindowDesktopId(hwnd, &current_desktopId) == S_OK) {
+    return GetDesktopGUIDIndex(current_desktopId);
+  } else {
+    // Unable to get the Desktop ID for the window.
+    return -1;
+  }
 }
 
 // Adapted from https://gallery.technet.microsoft.com/scriptcenter/Powershell-commands-to-d0e79cc5
