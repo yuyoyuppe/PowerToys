@@ -3,12 +3,33 @@
 #include <oleacc.h>
 #pragma comment(lib, "oleacc.lib")
 
+std::unordered_set<std::wstring> get_pinned_items() {
+  std::unordered_set<std::wstring> rval;
+  std::wstring links_folder;
+  links_folder.resize(GetEnvironmentVariableW(L"APPDATA", nullptr, 0));
+  GetEnvironmentVariableW(L"APPDATA", links_folder.data(), links_folder.length());
+  links_folder.pop_back();
+  links_folder.append(L"\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\");
+  // Get names of pinned windows
+  WIN32_FIND_DATAW file_data;
+  auto pinned_list = FindFirstFileW((links_folder + L"*.lnk").c_str(), &file_data);
+  if (pinned_list != INVALID_HANDLE_VALUE) {
+    do {
+      // Get localized file name
+      SHFILEINFOW info;
+      SHGetFileInfoW((links_folder + file_data.cFileName).c_str(), FILE_ATTRIBUTE_NORMAL, &info, sizeof(info), SHGFI_DISPLAYNAME);
+      rval.insert(info.szDisplayName);
+    } while (FindNextFileW(pinned_list, &file_data) != 0);
+  }
+  return rval;
+}
+
 std::vector<char> get_registry_list() {
   std::vector<char> rval;
   DWORD stored_type, data_size = 0;
   if (RegGetValue(HKEY_CURRENT_USER,
                   R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband)",
-                  "Favorites",
+                  "FavoritesResolve",
                   RRF_RT_REG_BINARY,
                   &stored_type,
                   NULL,
@@ -18,7 +39,7 @@ std::vector<char> get_registry_list() {
   rval.resize(data_size);
   RegGetValue(HKEY_CURRENT_USER,
               R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband)",
-              "Favorites",
+              "FavoritesResolve",
               RRF_RT_REG_BINARY,
               &stored_type,
               rval.data(),
@@ -79,8 +100,8 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
     VARIANT cid, role;
     cid.vt = VT_I4;
     cid.lVal = i + 1;
-   // if (apps_list->get_accRole(cid, &role) < 0 || role.vt != VT_I4 || (role.lVal != ROLE_SYSTEM_PUSHBUTTON && role.lVal != ROLE_SYSTEM_BUTTONMENU))
-      //continue;
+    if (apps_list->get_accRole(cid, &role) < 0 || role.vt != VT_I4 || (role.lVal != ROLE_SYSTEM_PUSHBUTTON && role.lVal != ROLE_SYSTEM_BUTTONMENU))
+      continue;
     TasklistButton button; 
     if (apps_list->accLocation(&button.x, &button.y, &button.width, &button.height, cid) < 0)
       continue;
@@ -92,11 +113,15 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
     buttons.push_back(button);
   }
   //auto pinned_items = get_pinned_items();
-  auto pinned_items = get_registry_list();
+  auto pinned_registry_items = get_registry_list();
+  auto pinned_files_items = get_pinned_items();
   auto is_pinned = [&](const std::wstring& name) -> bool {
-    std::string_view registry(pinned_items.data(), pinned_items.size());
+    if (pinned_files_items.find(name) != pinned_files_items.end())
+      return true;
+    std::string_view registry(pinned_registry_items.data(), pinned_registry_items.size());
     std::string_view item_name((const char*)name.data(), name.size() * 2);
     auto pos = registry.find(item_name);
+    return pos != -1;
     if (pos == -1)
       return false;
     // Chek if starts and ends with \0
