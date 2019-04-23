@@ -103,6 +103,7 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
     if (apps_list->get_accRole(cid, &role) < 0 || role.vt != VT_I4 || (role.lVal != ROLE_SYSTEM_PUSHBUTTON && role.lVal != ROLE_SYSTEM_BUTTONMENU))
       continue;
     TasklistButton button; 
+    button.role_id = role.lVal;
     if (apps_list->accLocation(&button.x, &button.y, &button.width, &button.height, cid) < 0)
       continue;
     BSTR name;
@@ -134,6 +135,7 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
   };
   int last_x = -1, last_y = -1;
   int keynum = 0;
+  long prev_role_id = -1;
   for (auto&& button : buttons) {
     if (button.width != 0 && button.height != 0) {
       if (last_x == -1) {
@@ -149,9 +151,10 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
       ++keynum;
       continue;
     }
-    if (is_pinned(button.name)) {
+    if (is_pinned(button.name) || button.role_id != prev_role_id) {
       ++keynum;
     }
+    prev_role_id = button.role_id;
     button.keynum = keynum;
     if (keynum == 11)
       break;
