@@ -14,7 +14,7 @@ D2DWindowManagerPopup::D2DWindowManagerPopup() {
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
   RegisterClass(&wc);
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED,
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_NOACTIVATE,
                         wc.lpszClassName,
                         "PToyD2DWindowManagerPopup",
                         WS_POPUP | WS_VISIBLE,
@@ -96,7 +96,7 @@ void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   target_window_on_primary_desktop = (currentDesktopIndex==0?TRUE:FALSE);
   SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);
   SetWindowPos(hwnd, HWND_TOPMOST, area.left, area.top, area.right-area.left, area.bottom-area.top, 0);
-  ShowWindow(hwnd, SW_SHOWNORMAL);
+  ShowWindow(hwnd, SW_SHOWNOACTIVATE);
 }
 
 void D2DWindowManagerPopup::hide() {
