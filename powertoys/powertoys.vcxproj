@@ -172,6 +172,7 @@
     <ClCompile Include="mouse_watcher.cpp" />
     <ClCompile Include="move_window.cpp" />
     <ClCompile Include="tasklist_positions.cpp" />
+    <ClCompile Include="unhandled_exception_handler.cpp" />
     <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="mouse_watcher.h" />
     <ClInclude Include="move_window.h" />
     <ClInclude Include="tasklist_positions.h" />
+    <ClInclude Include="unhandled_exception_handler.h" />
     <ClInclude Include="virtual_desktops.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="utils.h" />

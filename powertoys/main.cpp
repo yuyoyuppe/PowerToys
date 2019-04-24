@@ -5,6 +5,10 @@
 #pragma comment(lib, "shcore.lib")
 #pragma comment(lib, "windowsapp")
 
+#if _DEBUG && _WIN64
+#include "unhandled_exception_handler.h"
+#endif
+
 //For PathRemoveFileSpec and PathCombine. Evaluate need for it afterwards.
 #include <Shlwapi.h>
 #pragma comment(lib, "shlwapi.lib")
@@ -56,6 +60,10 @@ bool CreateChildProcesses() {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  #if _DEBUG && _WIN64
+  //Global error handlers to diagnose errors.
+    InitGlobalErrorHandlers();
+  #endif
   winrt::init_apartment();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
   // We will handle scaling ourselfs.
