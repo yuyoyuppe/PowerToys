@@ -138,14 +138,12 @@ std::vector<TasklistButton> get_tasklist_buttons_positions() {
   long prev_role_id = -1;
   for (auto&& button : buttons) {
     if (button.width != 0 && button.height != 0) {
-      if (last_x == -1) {
-         last_x = button.x;
-         last_y = button.y;
-      }
-      if (button.x < last_x || button.y < last_y) {
+      if (last_x != -1 && (button.x < last_x || button.y < last_y)) {
         // Ignore second row
         break;
       }
+      last_x = button.x;
+      last_y = button.y;
     }
     if (button.width == 0 || button.height == 0) {
       ++keynum;
