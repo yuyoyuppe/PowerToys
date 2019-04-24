@@ -65,7 +65,7 @@ void D2DWindowManagerPopup::init()
     dxgi_device.put_void()));
   dxgi_factory = nullptr;
   winrt::check_hresult(CreateDXGIFactory2(
-    DXGI_CREATE_FACTORY_DEBUG,
+    0, // DXGI_CREATE_FACTORY_DEBUG for extra output, but might crash in releases    
     __uuidof(dxgi_factory),
     dxgi_factory.put_void()));
   d2d_device = nullptr;
