@@ -114,7 +114,7 @@ namespace {
 }
 
 // Adapted from https://gallery.technet.microsoft.com/scriptcenter/Powershell-commands-to-d0e79cc5
-GUID GetDesktopGUIDAtIndex(int index) {
+winrt::com_ptr<IVirtualDesktop> GetDesktopAtIndex(int index) {
   auto manager_internal = get_manager_internal();
   UINT count;
   winrt::check_hresult(manager_internal->GetCount(&count));
@@ -123,12 +123,26 @@ GUID GetDesktopGUIDAtIndex(int index) {
   manager_internal->GetDesktops(desktops.put());
   winrt::com_ptr<IVirtualDesktop> objdesktop;
   desktops.get()->GetAt(index, __uuidof(IVirtualDesktop), objdesktop.put_void());
-  GUID id;
-  winrt::check_hresult(objdesktop->GetID(&id));
   //TODO: Verify releases needed with IObjectArray and winrt::com_ptr
-  return id;
+  return objdesktop;
 }
 
+BOOL CALLBACK CheckIfWindowInVirtualDesktop(HWND hwnd, LPARAM ptrGUID)  {
+  if (!hwnd) {
+    return TRUE;
+  }
+  auto manager = get_manager();
+  GUID test_desktopId;
+  if(manager->GetWindowDesktopId(hwnd, &test_desktopId) != S_OK) {
+    // Couldn't get the DesktopId for the Window.
+    return TRUE;
+  }
+  if( test_desktopId == *(reinterpret_cast<GUID*>(ptrGUID)) ) {
+    // This Window is in the desktop we're checking against.
+    return FALSE;
+  }
+  return TRUE;
+}
 
 void move_window_to_new_desktop_impl(HWND hwnd, int desktop_index) {
   auto manager_internal = get_manager_internal();
@@ -137,9 +151,11 @@ void move_window_to_new_desktop_impl(HWND hwnd, int desktop_index) {
   GUID current_desktopId;
   winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
 
+  winrt::com_ptr<IVirtualDesktop> target_desktop;
   GUID target_desktopId;
   try {
-    target_desktopId = GetDesktopGUIDAtIndex(desktop_index);
+    target_desktop = GetDesktopAtIndex(desktop_index);
+    winrt::check_hresult(target_desktop->GetID(&target_desktopId));
   }
   catch (std::out_of_range& ex) {
     // Tried to search the GUID of an out of range index desktop.
@@ -154,5 +170,18 @@ void move_window_to_new_desktop_impl(HWND hwnd, int desktop_index) {
 
   // Move Window To Desktop
   winrt::check_hresult(manager->MoveWindowToDesktop(hwnd, target_desktopId));
+  // Switch to the new desktop.
+  winrt::check_hresult(manager_internal->SwitchDesktop(target_desktop.get()));
 
+  if (desktop_index == 0) {
+    // Returning the Window to Primary Desktop. Verify if we can delete it.
+    winrt::com_ptr<IVirtualDesktop> current_desktop;
+    winrt::check_hresult(manager_internal->FindDesktop(&current_desktopId, current_desktop.put()));
+    if (EnumWindows(CheckIfWindowInVirtualDesktop, reinterpret_cast<LPARAM>(&current_desktopId)) != FALSE) {
+      winrt::check_hresult(manager_internal->RemoveDesktop(current_desktop.get(), target_desktop.get()));
+    }
+  }
+
+  // Set The focus to the switched window.
+  SetForegroundWindow(hwnd);
 }

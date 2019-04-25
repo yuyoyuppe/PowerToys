@@ -234,7 +234,4 @@ void move_window_to_new_desktop(HWND hwnd) {
     }
     return;
   }
-
-  // Switch to the new desktop.
-  winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
 }
