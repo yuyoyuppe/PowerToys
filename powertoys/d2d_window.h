@@ -9,6 +9,7 @@
 #include <dcomp.h>
 #include <dwmapi.h>
 #include <string>
+#include "tasklist_positions.h"
 
 class D2DSVG {
 public:
@@ -55,6 +56,8 @@ private:
   void resize();
   bool show_thumbnail();
   void render();
+
+  Tasklist tasklist;
 
   std::mutex mutex;
   HWND hwnd;

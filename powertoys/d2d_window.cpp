@@ -65,6 +65,7 @@ D2DWindow::D2DWindow() {
 }
 
 void D2DWindow::show(HWND active_window) {
+  tasklist.update();
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
     DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
@@ -405,8 +406,7 @@ void D2DWindow::render() {
     no_active.render(d2d_dc.get());
   }
 
-  auto buttons = get_tasklist_buttons_positions();
-  for (auto&& button : buttons) {
+  for (auto&& button : tasklist.get_buttons()) {
     if ((unsigned)button.keynum - 1 >= arrows.size())
       continue;
     render_arrow(arrows[button.keynum - 1], button, hwnd_rect, use_overlay->get_scale(), d2d_dc.get());
