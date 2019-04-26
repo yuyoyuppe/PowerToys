@@ -22,7 +22,7 @@ public:
   void show(HWND active_window);
   void hide();
 private:
-  bool show_thumbnail();
+  bool show_thumbnail(int y_offset);
   void init_overlay();
   virtual std::unique_lock<std::mutex> init() override;
   virtual std::unique_lock<std::mutex> resize() override;

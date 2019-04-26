@@ -178,7 +178,7 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
   }
 }
 
-bool D2DOverlayWindow::show_thumbnail() {
+bool D2DOverlayWindow::show_thumbnail(int y_offset) {
   if (!thumbnail)
     return false;
   SIZE thumb_size;
@@ -189,6 +189,8 @@ bool D2DOverlayWindow::show_thumbnail() {
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
   thumb_properties.rcDestination = use_overlay->get_thumbnail_rect(thumb_size.cx, thumb_size.cy, 0.99f);
+  thumb_properties.rcDestination.bottom += y_offset;
+  thumb_properties.rcDestination.top += y_offset;
   if (thumb_properties.rcDestination.bottom == 0)
     return false;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
@@ -198,6 +200,7 @@ bool D2DOverlayWindow::show_thumbnail() {
 
 void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   d2d_dc->Clear();
+  int y_offset = (1 - animation.value()) * window_height;
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
   D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
@@ -205,12 +208,13 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   D2D1_RECT_F background_rect = {};
   background_rect.bottom = (float)window_height;
   background_rect.right = (float)window_width;
+  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
   d2d_dc->FillRectangle(background_rect, brush.get());
   // Draw SVG
-  auto popin = D2D1::Matrix3x2F::Translation(0, (1 - animation.value()) * window_height);
+  auto popin = D2D1::Matrix3x2F::Translation(0, y_offset);
   d2d_dc->SetTransform(popin);
   use_overlay->render(d2d_dc);
-  if (show_thumbnail()) {
+  if (show_thumbnail(y_offset)) {
     use_overlay->toggle_window_group(true);
   }
   else {

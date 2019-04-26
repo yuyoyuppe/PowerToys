@@ -24,8 +24,9 @@ public:
     auto anim_duration = std::chrono::high_resolution_clock::now() - start;
     double seconds = std::chrono::duration<double>(anim_duration).count() / duration;
     if (seconds > 1)
-      seconds = 1;
-    return 1 - pow(2, -8 * seconds);
+      return 1;
+    seconds -= 1;
+    return sqrt(1 - seconds * seconds);
   }
 private:
   std::chrono::high_resolution_clock::time_point start;
