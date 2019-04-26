@@ -75,8 +75,8 @@ namespace {
           }
         }
       } else if (winkey_signaled && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
-        if (kb_hook->vkCode == VK_OEM_COMMA) {
-          // Special case - on comma hide our window.
+        if (kb_hook->vkCode == VK_OEM_COMMA || kb_hook->vkCode == 0x4C) {
+          // Special case - on comma or L hide our window.
           // We need to hide the window from this thread before OS does that for us.
           winkey_pressed = false;
           winkey_signaled = false;
@@ -109,6 +109,7 @@ namespace {
         // Make sure not to call the callback if start menu is visible
         if (winkey_pressed && !is_start_visible() && only_winkey_key_held()) {
           winkey_signaled = true;
+          lock.unlock();
           on_held_cb();
         }
       } else if (winkey_signaled) {
