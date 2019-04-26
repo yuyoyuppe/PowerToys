@@ -9,6 +9,7 @@ public:
   D2DSVG& load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc);
   D2DSVG& resize(int x, int y, int width, int height, float fill, float max_scale = -1.0f);
   D2DSVG& render(ID2D1DeviceContext5* d2d_dc);
+  D2DSVG& recolor(uint32_t oldcolor, uint32_t newcolor);
   float get_scale() const { return used_scale; }
   int width() const { return svg_width; }
   int height() const { return svg_height; }

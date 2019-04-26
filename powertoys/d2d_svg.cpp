@@ -39,6 +39,35 @@ D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill, float ma
   return *this;
 }
 
+D2DSVG& D2DSVG::recolor(uint32_t oldcolor, uint32_t newcolor) {
+  auto new_color = D2D1::ColorF(newcolor & 0xFFFFFF, 1);
+  auto old_color = D2D1::ColorF(oldcolor & 0xFFFFFF, 1);
+  std::function<void(ID2D1SvgElement* element)> recurse = [&](ID2D1SvgElement* element) {
+    if (element->IsAttributeSpecified(L"fill")) {
+      D2D1_COLOR_F elem_fill;
+      winrt::com_ptr<ID2D1SvgPaint> paint;
+      element->GetAttributeValue(L"fill", paint.put());
+      paint->GetColor(&elem_fill);
+      if (elem_fill.r == old_color.r && elem_fill.g == old_color.g && elem_fill.b == old_color.b) {
+        winrt::check_hresult(element->SetAttributeValue(L"fill", new_color));
+      }
+    }
+    winrt::com_ptr<ID2D1SvgElement> sub;
+    element->GetFirstChild(sub.put());
+    while (sub) {
+      recurse(sub.get());
+      winrt::com_ptr<ID2D1SvgElement> next;
+      element->GetNextChild(sub.get(), next.put());
+      sub = next;
+    }
+  };
+  winrt::com_ptr<ID2D1SvgElement> root;
+  svg->GetRoot(root.put());
+  recurse(root.get());
+  return *this;
+}
+
+
 D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
   D2D1_MATRIX_3X2_F current;
   d2d_dc->GetTransform(&current);

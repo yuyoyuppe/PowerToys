@@ -104,6 +104,7 @@ void D2DOverlayWindow::init_overlay() {
   for (unsigned i = 0; i < arrows.size(); ++i) {
     arrows[i].load(L"svgs\\" + std::to_wstring((i + 1) % 10) + L".svg", d2d_dc.get());
   }
+  landscape.recolor(0x000000, 0xFF0000);
 }
 
 std::unique_lock<std::mutex> D2DOverlayWindow::init() {
