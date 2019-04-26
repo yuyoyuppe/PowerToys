@@ -62,6 +62,15 @@ D2DWindow::D2DWindow() {
 
 void D2DWindow::show(int x, int y, int width, int height) {
   SetWindowPos(hwnd, HWND_TOPMOST, x, y, width, height, 0);
+  resize();
+  if (!d2d_bitmap || !d2d_dc) {
+    d2d_dc->BeginDraw();
+    d2d_dc->Clear();
+    winrt::check_hresult(d2d_dc->EndDraw());
+    winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
+    winrt::check_hresult(composition_device->Commit());
+  }
+  InvalidateRect(hwnd, nullptr, true);
   ShowWindow(hwnd, SW_SHOWNORMAL);
 }
 
@@ -172,7 +181,6 @@ void D2DWindow::render_impl() {
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());
-  InvalidateRect(hwnd, nullptr, false);
 }
 
 D2DWindow::~D2DWindow() {
