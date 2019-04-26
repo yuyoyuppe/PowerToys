@@ -169,12 +169,12 @@ void D2DWindowManagerPopup::render() {
   // Draw SVG
   float width = hwnd_rect.right - hwnd_rect.left;
   float height = hwnd_rect.bottom - hwnd_rect.top;
-  //Apply 10% padding
+  //Apply 15% padding
   current_icon->resize(
-    width*0.1f,
-    height*0.1f,
-    width*0.8f,
-    height*0.8f,
+    width*0.15f,
+    height*0.15f,
+    width*0.7f,
+    height*0.7f,
     1.0f);
   current_icon->render(d2d_dc.get());
   winrt::check_hresult(d2d_dc->EndDraw());
