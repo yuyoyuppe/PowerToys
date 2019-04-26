@@ -45,6 +45,12 @@
     <ClCompile Include="unhandled_exception_handler.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="d2d_svg.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_overlay_window.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -85,6 +91,12 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="unhandled_exception_handler.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_svg.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_overlay_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

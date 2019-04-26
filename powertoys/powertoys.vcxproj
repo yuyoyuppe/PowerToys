@@ -156,6 +156,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="d2d_overlay_window.cpp" />
+    <ClCompile Include="d2d_svg.cpp" />
     <ClCompile Include="d2d_window.cpp" />
     <ClCompile Include="d2d_window_manager_popup.cpp" />
     <ClCompile Include="pch.cpp">
@@ -179,6 +181,8 @@
     <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="d2d_overlay_window.h" />
+    <ClInclude Include="d2d_svg.h" />
     <ClInclude Include="d2d_window.h" />
     <ClInclude Include="d2d_window_manager_popup.h" />
     <ClInclude Include="pch.h" />

@@ -19,7 +19,7 @@ void Tasklist::update() {
   pinned_shortcuts.clear();
   std::wstring links_folder;
   links_folder.resize(GetEnvironmentVariableW(L"APPDATA", nullptr, 0));
-  GetEnvironmentVariableW(L"APPDATA", links_folder.data(), links_folder.length());
+  GetEnvironmentVariableW(L"APPDATA", links_folder.data(), (int)links_folder.length());
   links_folder.pop_back();
   links_folder.append(L"\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\");
   // Get names of pinned windows

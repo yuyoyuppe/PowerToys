@@ -50,9 +50,9 @@ MonitorInfo get_window_monitor(HWND hwnd) {
 int get_monitor_index(const std::vector<MonitorInfo>& monitors, const MonitorInfo& monitor) {
   auto iter = std::find(begin(monitors), end(monitors), monitor);
   if (iter != end(monitors))
-    return iter - begin(monitors);
+    return (int)(iter - begin(monitors));
   // If not found return the middle monitor
-  return monitors.size() / 2;
+  return (int)(monitors.size() / 2);
 }
 
 RECT translate_monitors(const RECT& window, const MonitorInfo& src_monitor, const MonitorInfo& dest_monitor) {

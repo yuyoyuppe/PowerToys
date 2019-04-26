@@ -27,7 +27,7 @@ namespace move_window {
     auto current = get_monitor_index(monitors, current_monitor);
     auto left = current - 1;
     if (left == -1)
-      left = monitors.size() - 1;
+      left = (int)monitors.size() - 1;
     RECT window_pos;
     if (GetWindowRect(hwnd, &window_pos) == 0) {
       window_pos = current_monitor.rect;

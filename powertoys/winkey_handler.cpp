@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "functionalities.h"
-#include "d2d_window.h"
+#include "d2d_overlay_window.h"
 #include "keyboard_watcher.h"
 #include "monitors.h"
 #include <sstream>
 
 namespace {
-  D2DWindow *winkey_popup;
+  D2DOverlayWindow *winkey_popup;
   HWND desktop, shell;
   HWND active_window;
   void on_held() {
@@ -32,6 +32,6 @@ void start_winkey_handler() {
     return;
   desktop = GetDesktopWindow();
   shell = GetShellWindow();
-  winkey_popup = new D2DWindow();
+  winkey_popup = new D2DOverlayWindow();
   start_winkey_watcher(300, on_held, on_held_pressed, on_release);
 }

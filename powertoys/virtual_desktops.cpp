@@ -120,7 +120,7 @@ int GetDesktopGUIDIndex(GUID id) {
   winrt::check_hresult(manager_internal->GetCount(&count));
   winrt::com_ptr<IObjectArray> desktops;
   manager_internal->GetDesktops(desktops.put());
-  for (int i = 0; i < count; i++)
+  for (int i = 0; i < (int)count; i++)
   {
     winrt::com_ptr<IVirtualDesktop> objdesktop;
     desktops.get()->GetAt(i, __uuidof(IVirtualDesktop), objdesktop.put_void());
@@ -151,7 +151,7 @@ winrt::com_ptr<IVirtualDesktop> GetDesktopAtIndex(int index) {
   auto manager_internal = get_manager_internal();
   UINT count;
   winrt::check_hresult(manager_internal->GetCount(&count));
-  if (index < 0 || index >= count) throw std::out_of_range("GetDesktopGUIDAtIndex : index is out of range.");
+  if (index < 0 || index >= (int)count) throw std::out_of_range("GetDesktopGUIDAtIndex : index is out of range.");
   winrt::com_ptr<IObjectArray> desktops;
   manager_internal->GetDesktops(desktops.put());
   winrt::com_ptr<IVirtualDesktop> objdesktop;
@@ -174,7 +174,7 @@ void move_window_to_primary_desktop(HWND hwnd) {
   try {
     objDestkop = GetDesktopAtIndex(desktop_index);
   }
-  catch (std::out_of_range& ex) {
+  catch (std::out_of_range) {
     // Tried to search the GUID of an out of range index desktop.
     MessageBox(NULL, "Primary desktop index is out of range.", "Error", MB_OK | MB_ICONERROR);
     return;
