@@ -4,10 +4,66 @@
 
 const CLSID CLSID_ImmersiveShell = { 0xC2F03A33, 0x21F5, 0x47FA, 0xB4, 0xBB, 0x15, 0x63, 0x62, 0xA2, 0xF2, 0x39 };
 const CLSID CLSID_VirtualDesktopAPI_Unknown = { 0xC5E0CDCA, 0x7B6E, 0x41B2, 0x9F, 0xC4, 0xD9, 0x39, 0x75, 0xCC, 0x46, 0x7B };
-const IID IID_IVirtualDesktopManagerInternal = { 0xF31574D6, 0xB682, 0x4CDC, 0xBD, 0x56, 0x18, 0x27, 0x86, 0x0A, 0xBE, 0xC6 };
+const CLSID CLSID_IVirtualDesktopManagerInternal = { 0xF31574D6, 0xB682, 0x4CDC, 0xBD, 0x56, 0x18, 0x27, 0x86, 0x0A, 0xBE, 0xC6 };
+const CLSID CLSID_IApplicationViewCollection = { 0x1841C6D7, 0x4F9D, 0x42C0, 0xAF, 0x41, 0x87, 0x47, 0x53, 0x8F, 0x10, 0xE5 };
 const CLSID CLSID_IVirtualNotificationService = { 0xA501FDEC, 0x4A09, 0x464C, 0xAE, 0x4E, 0x1B, 0x9C, 0x21, 0xB8, 0x49, 0x18 };
 
-struct IApplicationView : public IUnknown { };
+EXTERN_C const IID IID_IApplicationView;
+MIDL_INTERFACE("372E1D3B-38D3-42E4-A15B-8AB2B178F513") IApplicationView : public IUnknown{
+public:
+  virtual HRESULT STDMETHODCALLTYPE SetFocus() = 0;
+  virtual HRESULT STDMETHODCALLTYPE SwitchTo() = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient003() = 0; // TryInvokeBack
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient004() = 0; // GetThumbnailWindow
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient005() = 0; // GetMonitor
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient006() = 0; // GetVisibility
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient007() = 0; // SetCloak
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient008() = 0; // GetPosition
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient009() = 0; // SetPosition
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient010() = 0; // InsertAfterWindow
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient011() = 0; // GetExtendedFramePosition
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient012() = 0; // GetAppUserModelId
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient013() = 0; // SetAppUserModelId
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient014() = 0; // IsEqualByAppUserModelId
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient015() = 0; // GetViewState
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient016() = 0; // SetViewState
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient017() = 0; // GetNeediness
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient018() = 0; // GetLastActivationTimestamp
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient019() = 0; // SetLastActivationTimestamp
+  virtual HRESULT STDMETHODCALLTYPE GetVirtualDesktopId(GUID **desktopId) = 0;
+  virtual HRESULT STDMETHODCALLTYPE SetVirtualDesktopId(GUID *desktopId) = 0;
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient022() = 0; // GetShowInSwitchers
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient023() = 0; // SetShowInSwitchers
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient024() = 0; // GetScaleFactor
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient025() = 0; // CanReceiveInput
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient026() = 0; // GetCompatibilityPolicyType
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient027() = 0; // SetCompatibilityPolicyType
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient028() = 0; // GetSizeConstraints
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient029() = 0; // GetSizeConstraintsForDpi
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient030() = 0; // SetSizeConstraintsForDpi
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient031() = 0; // OnMinSizePreferencesUpdated
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient032() = 0; // ApplyOperation
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient033() = 0; // IsTray
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient034() = 0; // IsInHighZOrderBand
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient035() = 0; // IsSplashScreenPresented
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient036() = 0; // Flash
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient037() = 0; // GetRootSwitchableOwner
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient038() = 0; // EnumerateOwnershipTree
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient039() = 0; // GetEnterpriseId
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient040() = 0; // IsMirrored
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient041() = 0; // Unknown1
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient042() = 0; // Unknown2
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient043() = 0; // Unknown3
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient044() = 0; // Unknown4
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient045() = 0; // Unknown9
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient046() = 0; // Unknown10
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient047() = 0; // Unknown5
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient048() = 0; // Unknown6
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient049() = 0; // Unknown7
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient050() = 0; // Unknown8
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient051() = 0; // Unknown11
+  virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient052() = 0; // Unknown12
+};
 
 EXTERN_C const IID IID_IVirtualDesktop;
 MIDL_INTERFACE("FF72FFDD-BE7E-43FC-9C03-AD81681E88E4") IVirtualDesktop : public IUnknown{
@@ -67,20 +123,19 @@ public:
 };
 
 EXTERN_C const IID IID_IApplicationViewCollection;
-MIDL_INTERFACE("2c08adf0-a386-4b35-9250-0fe183476fcc") IApplicationViewCollection : public IUnknown
+MIDL_INTERFACE("1841C6D7-4F9D-42C0-AF41-8747538F10E5") IApplicationViewCollection : public IUnknown
 {
 public:
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient3() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient4() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient5() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient6() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient7() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient8() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient9() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient10() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient11() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient12() = 0;
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient13() = 0;
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient001() = 0; // GetViews
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient002() = 0; // GetViewsByZOrder
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient003() = 0; // GetViewsByAppUserModelId
+    virtual HRESULT STDMETHODCALLTYPE GetViewForHwnd(__RPC__in HWND hwnd, IApplicationView** view) = 0;
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient005() = 0; // GetViewForApplication
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient006() = 0; // GetViewForAppUserModelId
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient007() = 0; // GetViewInFocus
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient008() = 0; // outreshCollection
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient009() = 0; // RegisterForApplicationViewChanges
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient010() = 0; // UnregisterForApplicationViewChanges
 };
 
 namespace {
@@ -108,6 +163,15 @@ namespace {
       winrt::check_hresult(provider->QueryService(__uuidof(manager), manager.put()));
     }
     return manager.get();
+  }
+
+  IApplicationViewCollection* get_application_view_collection() {
+    auto provider = get_service_provider();
+    static winrt::com_ptr<IApplicationViewCollection> collection;
+    if(!collection) {
+      winrt::check_hresult(provider->QueryService(CLSID_IApplicationViewCollection, __uuidof(collection), collection.put_void()));
+    }
+    return collection.get();
   }
 }
 
@@ -160,14 +224,32 @@ winrt::com_ptr<IVirtualDesktop> GetDesktopAtIndex(int index) {
   return objdesktop;
 }
 
-#define MOVETONEWDESKTOPMSGSTR "POWERTOYS_MOVE_TO_NEW_DESKTOP"
+BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID)  {
+  if (!hwnd) {
+    return TRUE;
+  }
+  auto manager = get_manager();
+  GUID test_desktopId;
+  if(manager->GetWindowDesktopId(hwnd, &test_desktopId) != S_OK) {
+    // Couldn't get the DesktopId for the Window.
+    return TRUE;
+  }
+  if( test_desktopId == *(reinterpret_cast<GUID*>(ptrGUID)) ) {
+    // This Window is in the desktop we're checking against.
+    return FALSE;
+  }
+  return TRUE;
+}
 
 void move_window_to_primary_desktop(HWND hwnd) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
+
+  GUID current_desktopId;
+  winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
+
   // Restore the Window.
   ShowWindow(hwnd, SW_RESTORE);
-  UINT msg = RegisterWindowMessage(MOVETONEWDESKTOPMSGSTR);
 
   int desktop_index = 0;
   winrt::com_ptr<IVirtualDesktop> objDestkop;
@@ -180,22 +262,24 @@ void move_window_to_primary_desktop(HWND hwnd) {
     return;
   }
 
-  // Send custom message, with target desktop index in LPARAM.
-  BOOL res = PostMessage(hwnd, msg, 0, (LPARAM)desktop_index);
-  if (res==0) {
-    DWORD dw = GetLastError();
-    if (dw == 5) {
-      // Access denied. Means Windows UIPI is blocking powertoys from moving the window to another Desktop.
-      MessageBox(NULL, "Couldn't move the window to a new Desktop. Need to start as an Administrator to do that.", "Access Denied", MB_OK | MB_ICONEXCLAMATION);
-    }
-    else {
-      ShowLastErrorMessage((LPTSTR)"PostMessage", dw);
-    }
-    return;
+  auto collection_view = get_application_view_collection();
+
+  winrt::com_ptr <IApplicationView> view;
+  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
+
+  // Switch to the primary desktop.
+  winrt::check_hresult(manager_internal->SwitchDesktop(objDestkop.get()));
+
+  // Returning the Window to Primary Desktop. Verify if we can delete it.
+  winrt::com_ptr<IVirtualDesktop> current_desktop;
+  winrt::check_hresult(manager_internal->FindDesktop(&current_desktopId, current_desktop.put()));
+  if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&current_desktopId)) != FALSE) {
+    winrt::check_hresult(manager_internal->RemoveDesktop(current_desktop.get(), objDestkop.get()));
   }
 
-  // Switch to the new desktop.
-  winrt::check_hresult(manager_internal->SwitchDesktop(objDestkop.get()));
+  // Set The focus to the moved window.
+  SetForegroundWindow(hwnd);
 }
 
 void move_window_to_new_desktop(HWND hwnd) {
@@ -205,33 +289,18 @@ void move_window_to_new_desktop(HWND hwnd) {
   winrt::check_hresult(manager_internal->CreateDesktopW(new_desktop.put()));
   GUID id;
   winrt::check_hresult(new_desktop->GetID(&id));
-  
+
+  auto collection_view = get_application_view_collection();
+
   // Maximize the Window.
   ShowWindow(hwnd, SW_MAXIMIZE);
 
-  // This fails, because it needs to run in the target Window's process context.
-  // manager->MoveWindowToDesktop(hwnd, id);
-  // Instead, we use executables to install a message hook from 64 and 32 bits dlls
-  // at startup and Post a Message from here.
+  winrt::com_ptr <IApplicationView> view;
+  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), new_desktop.get()));
 
-  UINT msg = RegisterWindowMessage(MOVETONEWDESKTOPMSGSTR);
-  int desktop_index = GetDesktopGUIDIndex(id);
-
-  // Send custom message, with target desktop index in LPARAM.
-  BOOL res = PostMessage(hwnd, msg, 0, (LPARAM)desktop_index);
-  if (res==0) {
-    DWORD dw = GetLastError();
-    // Couldn't ask the Window to Move. Remove the created Desktop.
-    winrt::com_ptr<IVirtualDesktop> curr_desktop;
-    winrt::check_hresult(manager_internal->GetCurrentDesktop(curr_desktop.put()));
-    winrt::check_hresult(manager_internal->RemoveDesktop(new_desktop.get(), curr_desktop.get()));
-    if (dw == 5) {
-      // Access denied. Means Windows UIPI is blocking powertoys from moving the window to another Desktop.
-      MessageBox(NULL, "Couldn't move the window to a new Desktop. Need to start as an Administrator to do that.", "Access Denied", MB_OK | MB_ICONEXCLAMATION);
-    }
-    else {
-      ShowLastErrorMessage((LPTSTR)"PostMessage", dw);
-    }
-    return;
-  }
+  // Switch to the new desktop.
+  winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
+  // Set The focus to the moved window.
+  SetForegroundWindow(hwnd);
 }
