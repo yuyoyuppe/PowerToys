@@ -102,7 +102,8 @@ std::unique_lock<std::mutex> D2DWindow::init() {
                                          nullptr));
   winrt::check_hresult(d3d_device->QueryInterface(__uuidof(dxgi_device), dxgi_device.put_void()));
 #ifdef _DEBUG
-  winrt::check_hresult(CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, __uuidof(dxgi_factory), dxgi_factory.put_void()));
+  // TODO: Change 0 to DXGI_CREATE_FACTORY_DEBUG before releaseing the code.
+  winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
 #else
   winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
 #endif
