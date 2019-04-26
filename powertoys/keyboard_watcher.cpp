@@ -47,7 +47,7 @@ namespace {
       if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
         if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
           // Check if any other key is held
-          if (only_winkey_key_held()) {
+          if (only_winkey_key_held() && !is_start_visible()) {
             winkey_pressed = true;
             other_key_was_pressed = false;
             winkey_press_timestamp = stdclock::now();
@@ -57,8 +57,9 @@ namespace {
         } else { 
           winkey_pressed = false;
           if (winkey_signaled) {
+            winkey_signaled = false;
             lock.unlock();
-            hook_cv.notify_one();
+            on_relese_cb();
             if (!other_key_was_pressed) {
               INPUT input[3] = { {}, {}, {} };
               input[0].type = INPUT_KEYBOARD;
@@ -74,20 +75,20 @@ namespace {
             }
           }
         }
-      } else if (winkey_signaled && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
-        if (kb_hook->vkCode == VK_OEM_COMMA || kb_hook->vkCode == 0x4C) {
-          // Special case - on comma or L hide our window.
-          // We need to hide the window from this thread before OS does that for us.
-          winkey_pressed = false;
-          winkey_signaled = false;
-          lock.unlock();
-          on_relese_cb();
-        } else {
-          other_key_was_pressed = true;
-        }
-        on_held_pressed_cb(kb_hook->vkCode);
       } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-        winkey_pressed = false;
+        other_key_was_pressed = true;
+        if (winkey_signaled) {
+          if (kb_hook->vkCode == VK_OEM_COMMA || kb_hook->vkCode == 0x4C) {
+            // Special case - on L hide our window.
+            winkey_pressed = false;
+            winkey_signaled = false;
+            lock.unlock();
+            on_relese_cb();
+          } else {
+            lock.unlock();
+            on_held_pressed_cb(kb_hook->vkCode);
+          }
+        }
       }
     }
     return CallNextHookEx(hook_handle, nCode, wParam, lParam);
@@ -97,25 +98,18 @@ namespace {
     auto delay = std::chrono::milliseconds(ms);
     while (true) {
       std::unique_lock<std::mutex> lock(hook_mutex);
-      hook_cv.wait(lock, [] { return (winkey_pressed && !winkey_signaled) || (!winkey_pressed && winkey_signaled); });
-      if (winkey_pressed) {
-        auto wait_time = stdclock::now() - winkey_press_timestamp;
-        while (winkey_pressed && wait_time <= delay) {
-          lock.unlock();
-          std::this_thread::sleep_for(delay - wait_time);
-          lock.lock();
-          wait_time = stdclock::now() - winkey_press_timestamp;
-        }
-        // Make sure not to call the callback if start menu is visible
-        if (winkey_pressed && !is_start_visible() && only_winkey_key_held()) {
-          winkey_signaled = true;
-          lock.unlock();
-          on_held_cb();
-        }
-      } else if (winkey_signaled) {
-        winkey_signaled = false;
+      hook_cv.wait(lock, [] { return winkey_pressed && !winkey_signaled; });
+      auto wait_time = stdclock::now() - winkey_press_timestamp;
+      while (winkey_pressed && wait_time <= delay) {
         lock.unlock();
-        on_relese_cb();
+        std::this_thread::sleep_for(delay - wait_time);
+        lock.lock();
+        wait_time = stdclock::now() - winkey_press_timestamp;
+      }
+      if (winkey_pressed && only_winkey_key_held() && !other_key_was_pressed) {
+        winkey_signaled = true;
+        lock.unlock();
+        on_held_cb();
       }
     }
   }
