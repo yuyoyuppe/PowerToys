@@ -133,6 +133,7 @@ std::vector<TasklistButton> Tasklist::assign_keynums(std::vector<TasklistButton>
       last_y = button.y;
 
       if (next_keynum) {
+        next_keynum = false;
         button.keynum = ++keynum;
         rects.push_back(button);
         if (keynum == 10)
