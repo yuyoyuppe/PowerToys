@@ -28,6 +28,7 @@ private:
   virtual std::unique_lock<std::mutex> resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;
 
+  Animation animation;
   RECT window_rect;
   Tasklist tasklist;
   HTHUMBNAIL thumbnail;

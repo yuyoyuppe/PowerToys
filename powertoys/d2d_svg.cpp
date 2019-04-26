@@ -40,9 +40,11 @@ D2DSVG& D2DSVG::resize(int x, int y, int width, int height, float fill, float ma
 }
 
 D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
-  d2d_dc->SetTransform(transform);
+  D2D1_MATRIX_3X2_F current;
+  d2d_dc->GetTransform(&current);
+  d2d_dc->SetTransform(transform * current);
   d2d_dc->DrawSvgDocument(svg.get());
-  d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
+  d2d_dc->SetTransform(current);
   return *this;
 }
 

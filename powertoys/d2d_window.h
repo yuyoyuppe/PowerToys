@@ -12,6 +12,26 @@
 #include "tasklist_positions.h"
 #include "d2d_svg.h"
 
+class Animation {
+public:
+  Animation(double duration) :
+    duration(duration),
+    start(std::chrono::high_resolution_clock::now()) { }
+  void reset() {
+    start = std::chrono::high_resolution_clock::now();
+  }
+  double value() const {
+    auto anim_duration = std::chrono::high_resolution_clock::now() - start;
+    double seconds = std::chrono::duration<double>(anim_duration).count() / duration;
+    if (seconds > 1)
+      seconds = 1;
+    return 1 - pow(2, -8 * seconds);
+  }
+private:
+  std::chrono::high_resolution_clock::time_point start;
+  double duration;
+};
+
 class D2DWindow
 {
 public:

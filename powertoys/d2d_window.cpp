@@ -171,6 +171,7 @@ void D2DWindow::render_impl() {
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());
+  InvalidateRect(hwnd, nullptr, false);
 }
 
 D2DWindow::~D2DWindow() {

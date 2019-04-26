@@ -70,11 +70,12 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() {
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.1) {
   init_overlay();
 }
 
 void D2DOverlayWindow::show(HWND active_window) {
+  animation.reset();
   tasklist.update();
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
@@ -206,6 +207,8 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   background_rect.right = (float)window_width;
   d2d_dc->FillRectangle(background_rect, brush.get());
   // Draw SVG
+  auto popin = D2D1::Matrix3x2F::Translation(0, (1 - animation.value()) * window_height);
+  d2d_dc->SetTransform(popin);
   use_overlay->render(d2d_dc);
   if (show_thumbnail()) {
     use_overlay->toggle_window_group(true);
