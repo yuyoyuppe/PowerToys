@@ -63,9 +63,9 @@ namespace {
             if (!other_key_was_pressed) {
               INPUT input[3] = { {}, {}, {} };
               input[0].type = INPUT_KEYBOARD;
-              input[0].ki.wVk = VK_ESCAPE;
+              input[0].ki.wVk = VK_CONTROL;
               input[1].type = INPUT_KEYBOARD;
-              input[1].ki.wVk = VK_ESCAPE;
+              input[1].ki.wVk = VK_CONTROL;
               input[1].ki.dwFlags = KEYEVENTF_KEYUP;
               input[2].type = INPUT_KEYBOARD;
               input[2].ki.wVk = VK_LWIN;
