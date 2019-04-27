@@ -64,6 +64,7 @@ void D2DWindow::show(int x, int y, int width, int height) {
   }
   base_resize(width, height);
   render_empty();
+  on_show();
   SetWindowPos(hwnd, HWND_TOPMOST, x, y, width, height, 0);
   ShowWindow(hwnd, SW_SHOWNORMAL);
 }
@@ -71,6 +72,7 @@ void D2DWindow::show(int x, int y, int width, int height) {
 void D2DWindow::hide() {
   std::unique_lock<std::recursive_mutex> lock(mutex);
   ShowWindow(hwnd, SW_HIDE);
+  on_hide();
 }
 
 void D2DWindow::initialize() {

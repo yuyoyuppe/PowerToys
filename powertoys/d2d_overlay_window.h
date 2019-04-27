@@ -8,7 +8,7 @@ public:
   D2DOverlaySVG& resize(int x, int y, int width, int height, float fill, float max_scale = -1.0f);
   D2DOverlaySVG& find_thumbnail(const std::wstring& id);
   D2DOverlaySVG& find_window_group(const std::wstring& id);
-  RECT get_thumbnail_rect(int window_cx, int window_cy, float scale);
+  RECT get_thumbnail_rect(int x_offset, int y_offset, int window_cx, int window_cy, float scale);
   D2DOverlaySVG& toggle_window_group(bool active);
 private:
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
@@ -21,7 +21,7 @@ public:
   D2DOverlayWindow();
   void show(HWND active_window);
 private:
-  bool show_thumbnail(int y_offset);
+  bool show_thumbnail(int x_offset, int y_offset);
   virtual void init() override;
   virtual void resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;
