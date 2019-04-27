@@ -27,7 +27,7 @@ public:
   D2DOverlayWindow();
   void show(HWND active_window);
 private:
-  bool show_thumbnail(const ScaleResult& rect_and_scale);
+  bool show_thumbnail(const RECT& rect_and_scale);
   virtual void init() override;
   virtual void resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;

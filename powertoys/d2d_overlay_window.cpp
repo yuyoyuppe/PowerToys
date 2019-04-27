@@ -233,7 +233,7 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
   }
 }
 
-bool D2DOverlayWindow::show_thumbnail(const ScaleResult& rect_and_scale) {
+bool D2DOverlayWindow::show_thumbnail(const RECT& rect) {
   if (!thumbnail)
     return false;
   SIZE thumb_size;
@@ -241,13 +241,7 @@ bool D2DOverlayWindow::show_thumbnail(const ScaleResult& rect_and_scale) {
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  auto window_pos = get_window_pos(active_window);
-  if (!window_pos)
-    return false;
-  thumb_properties.rcDestination.left = (window_pos->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-  thumb_properties.rcDestination.top = (window_pos->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
-  thumb_properties.rcDestination.right = (window_pos->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-  thumb_properties.rcDestination.bottom = (window_pos->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+  thumb_properties.rcDestination = rect;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
     return false;
   return true;
@@ -284,31 +278,62 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   background_rect.right = (float)window_width;
   d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
   d2d_dc->FillRectangle(background_rect, brush.get());
-  // Draw SVG
+ 
+  // Set the animation - move the draw window according to annimation step
   auto popin = D2D1::Matrix3x2F::Translation(x_offset, y_offset);
   d2d_dc->SetTransform(popin);
-  bool minature_shown = active_window != nullptr && thumbnail != nullptr;
+
+  // Thumbnail logic:
+  auto thumb_window = get_window_pos(active_window);
+  bool minature_shown = active_window != nullptr && thumbnail != nullptr && thumb_window;
+  if (minature_shown && thumb_window->right - thumb_window->left <= 0 || thumb_window->bottom - thumb_window->top <= 0)
+    minature_shown = false;
+  bool render_monitors = true;
   auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor.width(), total_monitor.height(), 1);
-  if (anim_value == 0) {
-    minature_shown = show_thumbnail(rect_and_scale);
+  if (minature_shown) {
+    RECT thumbnail_pos;
+    thumbnail_pos.left = (thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+    thumbnail_pos.top = (thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+    thumbnail_pos.right = (thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+    thumbnail_pos.bottom = (thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+    // See if the thumbnail is out of bounds - this can happen if a very big window is moved almost entirely off screen
+    //  (give some headspace though, some windows do not render entire area)
+    if (thumbnail_pos.left < rect_and_scale.rect.left * 0.9 ||
+        thumbnail_pos.top < rect_and_scale.rect.top * 0.9 ||
+        thumbnail_pos.right > rect_and_scale.rect.right * 1.1||
+        thumbnail_pos.bottom > rect_and_scale.rect.bottom * 1.1) {
+      // we will just render the thumbnail keeping the aspect ratio, but no monitors
+      render_monitors = false;
+      thumbnail_pos = use_overlay->get_thumbnail_rect_and_scale(0, 0, thumb_window->right - thumb_window->left, thumb_window->bottom - thumb_window->top, 1).rect;
+    }
+    // If the animation is done show the thumbnail
+    //   we cannot animate the thumbnail, the animation lags behind
+    if (anim_value == 0) {
+      minature_shown = show_thumbnail(thumbnail_pos);
+    }
   }
-  use_overlay->toggle_window_group(minature_shown);
-  use_overlay->render(d2d_dc);
   // render the monitors
-  brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0 : 0.3);
-  brush = nullptr;
-  winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
-  for (auto& monitor : monitors) {
-    D2D1_RECT_F monitor_rect;
-    monitor_rect.left = monitor.rect.left * rect_and_scale.scale + rect_and_scale.rect.left;
-    monitor_rect.top = monitor.rect.top * rect_and_scale.scale + rect_and_scale.rect.top;
-    monitor_rect.right = monitor.rect.right * rect_and_scale.scale + rect_and_scale.rect.left;
-    monitor_rect.bottom = monitor.rect.bottom * rect_and_scale.scale + rect_and_scale.rect.top;
-    d2d_dc->FillRectangle(monitor_rect, brush.get());
+  if (render_monitors) {
+    brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0 : 0.3);
+    brush = nullptr;
+    winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+    for (auto& monitor : monitors) {
+      D2D1_RECT_F monitor_rect;
+      monitor_rect.left = monitor.rect.left * rect_and_scale.scale + rect_and_scale.rect.left;
+      monitor_rect.top = monitor.rect.top * rect_and_scale.scale + rect_and_scale.rect.top;
+      monitor_rect.right = monitor.rect.right * rect_and_scale.scale + rect_and_scale.rect.left;
+      monitor_rect.bottom = monitor.rect.bottom * rect_and_scale.scale + rect_and_scale.rect.top;
+      d2d_dc->FillRectangle(monitor_rect, brush.get());
+    }
   }
+  // Finalize the overlay - dimm the buttons if no thumbnail is present and show "No active window"
+  use_overlay->toggle_window_group(minature_shown);
   if (!minature_shown) {
     no_active.render(d2d_dc);
   }
+  // Finally: render the overlay...
+  use_overlay->render(d2d_dc);
+  // ... and the arrows with numbers
   for (auto&& button : tasklist_buttons) {
     if ((unsigned)button.keynum - 1 >= arrows.size())
       continue;
