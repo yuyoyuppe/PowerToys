@@ -15,7 +15,7 @@ namespace {
     if (active_window == desktop || active_window == shell)
       active_window = nullptr;
     LONG window_styles = active_window ? GetWindowLong(active_window, GWL_STYLE) : 0;
-    if ((window_styles & WS_CHILD) || (window_styles & WS_DISABLED) || (window_styles & WS_POPUP))
+    if ((window_styles & WS_CHILD) || (window_styles & WS_DISABLED))
       active_window = nullptr;
     winkey_popup->show(active_window);
   }

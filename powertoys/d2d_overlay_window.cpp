@@ -237,8 +237,6 @@ bool D2DOverlayWindow::show_thumbnail(const ScaleResult& rect_and_scale) {
   if (!thumbnail)
     return false;
   SIZE thumb_size;
-  if (DwmQueryThumbnailSourceSize(thumbnail, &thumb_size) != S_OK)
-    return false;
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
