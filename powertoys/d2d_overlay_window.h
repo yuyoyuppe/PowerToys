@@ -16,18 +16,19 @@ private:
   winrt::com_ptr<ID2D1SvgElement> window_group;
 };
 
-class D2DOverlayWindow : D2DWindow {
+class D2DOverlayWindow : public D2DWindow {
 public:
   D2DOverlayWindow();
   void show(HWND active_window);
-  void hide();
 private:
   bool show_thumbnail(int y_offset);
-  void init_overlay();
-  virtual std::unique_lock<std::mutex> init() override;
-  virtual std::unique_lock<std::mutex> resize() override;
+  virtual void init() override;
+  virtual void resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;
+  virtual void on_show() override;
+  virtual void on_hide() override;
 
+  WindowsColors colors;
   Animation animation;
   RECT window_rect;
   Tasklist tasklist;

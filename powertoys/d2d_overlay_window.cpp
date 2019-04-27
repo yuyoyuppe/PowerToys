@@ -70,11 +70,32 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.1) {
-  init_overlay();
-}
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.1)
+{ }
 
 void D2DOverlayWindow::show(HWND active_window) {
+  auto old_bck = colors.start_color_menu;
+  if (initialized && colors.update()) {
+    // update background colors
+    landscape.recolor(old_bck, colors.start_color_menu);
+    portrait.recolor(old_bck, colors.start_color_menu);
+    for (auto& arrow : arrows) {
+      arrow.recolor(old_bck, colors.start_color_menu);
+    }
+    if (colors.light_mode) {
+      landscape.recolor(0xDDDDDD, 0x222222);
+      portrait.recolor(0xDDDDDD, 0x222222);
+      for (auto& arrow : arrows) {
+        arrow.recolor(0xDDDDDD, 0x222222);
+      }
+    } else {
+      landscape.recolor(0x222222, 0xDDDDDD);
+      portrait.recolor(0x222222, 0xDDDDDD);
+      for (auto& arrow : arrows) {
+        arrow.recolor(0x222222, 0xDDDDDD);
+      }
+    }
+  }
   animation.reset();
   tasklist.update();
   if (active_window) {
@@ -85,36 +106,42 @@ void D2DOverlayWindow::show(HWND active_window) {
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
 
-void D2DOverlayWindow::hide() {
+void D2DOverlayWindow::on_show() { 
+  // show override does everything
+}
+
+void D2DOverlayWindow::on_hide() {
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
-  D2DWindow::hide();
 }
 
-void D2DOverlayWindow::init_overlay() {
+void D2DOverlayWindow::init() {
+  colors.update();
   landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
            .find_thumbnail(L"path-1")
-           .find_window_group(L"Group-1");
+           .find_window_group(L"Group-1")
+           .recolor(0x000000, colors.start_color_menu);
   portrait.load(L"svgs\\overlay_portrait.svg", d2d_dc.get())
           .find_thumbnail(L"path-1")
-          .find_window_group(L"Group-1");
+          .find_window_group(L"Group-1")
+          .recolor(0x000000, colors.start_color_menu);
   no_active.load(L"svgs\\no_active_window.svg", d2d_dc.get());
   arrows.resize(10);
   for (unsigned i = 0; i < arrows.size(); ++i) {
-    arrows[i].load(L"svgs\\" + std::to_wstring((i + 1) % 10) + L".svg", d2d_dc.get());
+    arrows[i].load(L"svgs\\" + std::to_wstring((i + 1) % 10) + L".svg", d2d_dc.get())
+             .recolor(0x000000, colors.start_color_menu);
   }
-  landscape.recolor(0x000000, 0xFF0000);
+  if (!colors.light_mode) {
+    landscape.recolor(0x222222, 0xDDDDDD);
+    portrait.recolor(0x222222, 0xDDDDDD);
+    for (auto& arrow : arrows) {
+      arrow.recolor(0x222222, 0xDDDDDD);
+    }
+  }
 }
 
-std::unique_lock<std::mutex> D2DOverlayWindow::init() {
-  auto lock = D2DWindow::init();
-  init_overlay();
-  return lock;
-}
-
-std::unique_lock<std::mutex> D2DOverlayWindow::resize() {
-  auto lock = D2DWindow::resize();
+void D2DOverlayWindow::resize() {
   window_rect = *get_window_pos(hwnd);
   float no_active_scale;
   if (window_width > window_height) {
@@ -131,7 +158,6 @@ std::unique_lock<std::mutex> D2DOverlayWindow::resize() {
                    thumb_no_active_rect.right - thumb_no_active_rect.left,
                    thumb_no_active_rect.bottom - thumb_no_active_rect.top,
                    1.0f);
-  return lock;
 }
 
 void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_scale, ID2D1DeviceContext5* d2d_dc) {
@@ -204,7 +230,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   int y_offset = (1 - animation.value()) * window_height;
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
-  D2D1_COLOR_F const brushColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
+  D2D1_COLOR_F const brushColor = colors.light_mode ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f) : D2D1::ColorF(0, 0, 0, 0.8f);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   D2D1_RECT_F background_rect = {};
   background_rect.bottom = (float)window_height;

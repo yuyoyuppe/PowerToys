@@ -17,6 +17,6 @@ public:
 protected:
   float used_scale;
   winrt::com_ptr<ID2D1SvgDocument> svg;
-  int svg_width, svg_height;
+  int svg_width = -1, svg_height = -1;
   D2D1::Matrix3x2F transform;
 };

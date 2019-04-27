@@ -56,30 +56,29 @@ D2DWindow::D2DWindow() {
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         nullptr, nullptr, wc.hInstance, this);
   WINRT_VERIFY(hwnd);
-  init();
-  enable_acrylic_window(hwnd);
 }
 
 void D2DWindow::show(int x, int y, int width, int height) {
-  SetWindowPos(hwnd, HWND_TOPMOST, x, y, width, height, 0);
-  resize();
-  if (!d2d_bitmap || !d2d_dc) {
-    d2d_dc->BeginDraw();
-    d2d_dc->Clear();
-    winrt::check_hresult(d2d_dc->EndDraw());
-    winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
-    winrt::check_hresult(composition_device->Commit());
+  if (!initialized) {
+    base_init();
   }
-  InvalidateRect(hwnd, nullptr, true);
+  base_resize(width, height);
+  render_empty();
+  SetWindowPos(hwnd, HWND_TOPMOST, x, y, width, height, 0);
   ShowWindow(hwnd, SW_SHOWNORMAL);
 }
 
 void D2DWindow::hide() {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   ShowWindow(hwnd, SW_HIDE);
 }
 
-std::unique_lock<std::mutex> D2DWindow::init() {
-  std::unique_lock<std::mutex> lock(mutex);
+void D2DWindow::initialize() {
+  base_init();
+}
+
+void D2DWindow::base_init() {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   // D2D1Factory is independent from the device, no need to recreate it if we need to recreate the device.
   if (!d2d_factory) {
 #ifdef _DEBUG
@@ -118,16 +117,19 @@ std::unique_lock<std::mutex> D2DWindow::init() {
 #endif
   winrt::check_hresult(d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
   winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d_dc.put()));
-  return lock;
+  enable_acrylic_window(hwnd);
+  init();
+  initialized = true;
 }
 
-std::unique_lock<std::mutex> D2DWindow::resize() {
-  std::unique_lock<std::mutex> lock(mutex);
-  auto window_rect = *get_window_pos(hwnd);
-  window_width = window_rect.right - window_rect.left;
-  window_height = window_rect.bottom - window_rect.top;
+void D2DWindow::base_resize(int width, int height) {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
+  if (!initialized)
+    return;
+  window_width = width;
+  window_height = height;
   if (window_width == 0 || window_height == 0)
-    return lock;
+    return;
   DXGI_SWAP_CHAIN_DESC1 sc_description = {};
   sc_description.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
   sc_description.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -167,17 +169,26 @@ std::unique_lock<std::mutex> D2DWindow::resize() {
     properties,
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
-  return lock;
+  resize();
 }
 
-void D2DWindow::render(ID2D1DeviceContext5*) {}
-
-void D2DWindow::render_impl() {
-  std::unique_lock<std::mutex> lock(mutex);
-  if (!d2d_bitmap || !d2d_dc)
+void D2DWindow::base_render() {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
+  if (!initialized || !d2d_dc || !d2d_bitmap)
     return;
   d2d_dc->BeginDraw();
   render(d2d_dc.get());
+  winrt::check_hresult(d2d_dc->EndDraw());
+  winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
+  winrt::check_hresult(composition_device->Commit());
+}
+
+void D2DWindow::render_empty() {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
+  if (!initialized || !d2d_dc || !d2d_bitmap)
+    return;
+  d2d_dc->BeginDraw();
+  d2d_dc->Clear();
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
   winrt::check_hresult(composition_device->Commit());
@@ -200,10 +211,10 @@ LRESULT __stdcall D2DWindow::d2d_window_proc(HWND window, UINT message, WPARAM w
     return TRUE;
   }
   case WM_MOVE:
-  case WM_SIZE: 
-    this_from_hwnd(window)->resize();
+  case WM_SIZE:
+    this_from_hwnd(window)->base_resize(lparam & 0xFFFF, lparam >> 16);
   case WM_PAINT:
-    this_from_hwnd(window)->render_impl();
+    this_from_hwnd(window)->base_render();
     return 0;
   case WM_DESTROY:
     PostQuitMessage(0);

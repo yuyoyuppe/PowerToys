@@ -33,5 +33,6 @@ void start_winkey_handler() {
   desktop = GetDesktopWindow();
   shell = GetShellWindow();
   winkey_popup = new D2DOverlayWindow();
+  winkey_popup->initialize();
   start_winkey_watcher(300, on_held, on_held_pressed, on_release);
 }
