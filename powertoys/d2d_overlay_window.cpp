@@ -100,7 +100,7 @@ void D2DOverlayWindow::show(HWND active_window) {
       }
     }
   }
-  monitors = get_monitors();
+  monitors = get_monitors(true);
   // calculate the rect covering all the screens
   total_monitor = monitors[0];
   for (auto& monitor : monitors) {

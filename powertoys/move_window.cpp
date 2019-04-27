@@ -22,7 +22,7 @@ namespace move_window {
   void snap_bottom_right(HWND hwnd) {}
 
   void to_screen_left(HWND hwnd) {
-    auto monitors = get_monitors();
+    auto monitors = get_monitors(false);
     auto current_monitor = get_window_monitor(hwnd);
     auto current = get_monitor_index(monitors, current_monitor);
     auto left = current - 1;
@@ -37,7 +37,7 @@ namespace move_window {
     SetWindowPos(hwnd, HWND_TOP, new_pos.left, new_pos.top, new_pos.right - new_pos.left, new_pos.bottom - new_pos.top, SWP_NOREDRAW);
   }
   void to_screen_right(HWND hwnd) {
-    auto monitors = get_monitors();
+    auto monitors = get_monitors(false);
     auto current_monitor = get_window_monitor(hwnd);
     auto current = get_monitor_index(monitors, current_monitor);
     auto right = current + 1;

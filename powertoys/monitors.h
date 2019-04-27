@@ -26,7 +26,7 @@ bool operator==(const MonitorInfo& lhs, const MonitorInfo& rhs);
 
 
 // Returns monitor rects ordered from left to right
-std::vector<MonitorInfo> get_monitors();
+std::vector<MonitorInfo> get_monitors(bool include_toolbar);
 // Return primary display
 MonitorInfo get_primary_monitor();
 // Return monitor on which hwnd window is displayed

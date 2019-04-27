@@ -15,9 +15,17 @@ static BOOL CALLBACK get_displays_enum_cb(HMONITOR monitor, HDC hdc, LPRECT rect
   return true;
 };
 
-std::vector<MonitorInfo> get_monitors() {
+static BOOL CALLBACK get_displays_enum_cb_with_toolbar(HMONITOR monitor, HDC hdc, LPRECT rect, LPARAM data) {
+  MONITORINFOEX monitor_info;
+  monitor_info.cbSize = sizeof(MONITORINFOEX);
+  GetMonitorInfo(monitor, &monitor_info);
+  reinterpret_cast<std::vector<MonitorInfo>*>(data)->emplace_back(monitor_info.rcMonitor);
+  return true;
+};
+
+std::vector<MonitorInfo> get_monitors(bool include_toolbars) {
   std::vector<MonitorInfo> monitors;
-  EnumDisplayMonitors(NULL, NULL, get_displays_enum_cb, reinterpret_cast<LPARAM>(&monitors));
+  EnumDisplayMonitors(NULL, NULL, include_toolbars ? get_displays_enum_cb_with_toolbar :  get_displays_enum_cb, reinterpret_cast<LPARAM>(&monitors));
   std::sort(begin(monitors), end(monitors), [](const MonitorInfo& lhs, const MonitorInfo& rhs) {
     return lhs.rect < rhs.rect;
   });
