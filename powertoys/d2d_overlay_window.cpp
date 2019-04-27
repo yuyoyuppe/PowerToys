@@ -44,7 +44,7 @@ D2DOverlaySVG& D2DOverlaySVG::find_window_group(const std::wstring& id) {
   return *this;
 }
 
-RECT D2DOverlaySVG::get_thumbnail_rect(int x_offset, int y_offset, int window_cx, int window_cy, float scale) {
+ScaleResult D2DOverlaySVG::get_thumbnail_rect_and_scale(int x_offset, int y_offset, int window_cx, int window_cy, float fill) {
   if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0)
     return {};
   int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
@@ -53,15 +53,18 @@ RECT D2DOverlaySVG::get_thumbnail_rect(int x_offset, int y_offset, int window_cx
     window_cx == 0 || window_cy == 0) {
     return {};
   }
-  float scale_h = scale * thumbnail_scaled_rect_width / window_cx;
-  float scale_v = scale * thumbnail_scaled_rect_heigh / window_cy;
+  float scale_h = fill * thumbnail_scaled_rect_width / window_cx;
+  float scale_v = fill * thumbnail_scaled_rect_heigh / window_cy;
   float use_scale = min(scale_h, scale_v);
   RECT thumb_rect;
   thumb_rect.left = thumbnail_scaled_rect.left + (int)(thumbnail_scaled_rect_width - use_scale * window_cx) / 2 + x_offset;
   thumb_rect.right = thumbnail_scaled_rect.right - (int)(thumbnail_scaled_rect_width - use_scale * window_cx) / 2 + x_offset;
   thumb_rect.top = thumbnail_scaled_rect.top + (int)(thumbnail_scaled_rect_heigh - use_scale * window_cy) / 2 + y_offset;
   thumb_rect.bottom = thumbnail_scaled_rect.bottom - (int)(thumbnail_scaled_rect_heigh - use_scale * window_cy) / 2 + y_offset;
-  return thumb_rect;
+  ScaleResult result;
+  result.scale = use_scale;
+  result.rect = thumb_rect;
+  return result;
 }
 
 D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
@@ -70,10 +73,11 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.2)
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.2), total_monitor({})
 { }
 
 void D2DOverlayWindow::show(HWND active_window) {
+  this->active_window = active_window;
   auto old_bck = colors.start_color_menu;
   if (initialized && colors.update()) {
     // update background colors
@@ -96,12 +100,34 @@ void D2DOverlayWindow::show(HWND active_window) {
       }
     }
   }
-  animation.reset();
+  monitors = get_monitors();
+  // calculate the rect covering all the screens
+  total_monitor = monitors[0];
+  for (auto& monitor : monitors) {
+    total_monitor.rect.left = min(total_monitor.rect.left, monitor.rect.left);
+    total_monitor.rect.top = min(total_monitor.rect.top, monitor.rect.top);
+    total_monitor.rect.right = max(total_monitor.rect.right, monitor.rect.right);
+    total_monitor.rect.bottom = max(total_monitor.rect.bottom, monitor.rect.bottom);
+  }
+  // make sure top-right corner of all the monitor rects is (0,0)
+  monitor_dx = -total_monitor.left();
+  monitor_dy = -total_monitor.top();
+  total_monitor.rect.left += monitor_dx;
+  total_monitor.rect.right += monitor_dx;
+  total_monitor.rect.top += monitor_dy;
+  total_monitor.rect.bottom += monitor_dy;
+  for (auto& monitor : monitors) {
+    monitor.rect.left += monitor_dx;
+    monitor.rect.right += monitor_dx;
+    monitor.rect.top += monitor_dy;
+    monitor.rect.bottom += monitor_dy;
+  }
   tasklist.update();
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
     DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
   }
+  animation.reset();
   auto primary_screen = get_primary_monitor();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
@@ -121,10 +147,12 @@ void D2DOverlayWindow::init() {
   landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
            .find_thumbnail(L"path-1")
            .find_window_group(L"Group-1")
+           //.toggle_element(L"windows_bg", false)
            .recolor(0x000000, colors.start_color_menu);
   portrait.load(L"svgs\\overlay_portrait.svg", d2d_dc.get())
           .find_thumbnail(L"path-1")
           .find_window_group(L"Group-1")
+          //.toggle_element(L"windows_bg", false)
           .recolor(0x000000, colors.start_color_menu);
   no_active.load(L"svgs\\no_active_window.svg", d2d_dc.get());
   arrows.resize(10);
@@ -152,7 +180,7 @@ void D2DOverlayWindow::resize() {
     no_active_scale = 0.5f;
   }
   use_overlay->resize(0, 0, window_width, window_height, 0.8f);
-  auto thumb_no_active_rect = use_overlay->get_thumbnail_rect(0, 0, no_active.width(), no_active.height(), no_active_scale);
+  auto thumb_no_active_rect = use_overlay->get_thumbnail_rect_and_scale(0, 0, no_active.width(), no_active.height(), no_active_scale).rect;
   no_active.resize(thumb_no_active_rect.left,
                    thumb_no_active_rect.top,
                    thumb_no_active_rect.right - thumb_no_active_rect.left,
@@ -205,7 +233,7 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
   }
 }
 
-bool D2DOverlayWindow::show_thumbnail(int x_offset, int y_offset) {
+bool D2DOverlayWindow::show_thumbnail(const ScaleResult& rect_and_scale) {
   if (!thumbnail)
     return false;
   SIZE thumb_size;
@@ -215,9 +243,13 @@ bool D2DOverlayWindow::show_thumbnail(int x_offset, int y_offset) {
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  thumb_properties.rcDestination = use_overlay->get_thumbnail_rect(x_offset, y_offset, thumb_size.cx, thumb_size.cy, 0.99f);
-  if (thumb_properties.rcDestination.bottom == 0)
+  auto window_pos = get_window_pos(active_window);
+  if (!window_pos)
     return false;
+  thumb_properties.rcDestination.left = (window_pos->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+  thumb_properties.rcDestination.top = (window_pos->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+  thumb_properties.rcDestination.right = (window_pos->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+  thumb_properties.rcDestination.bottom = (window_pos->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
     return false;
   return true;
@@ -247,7 +279,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   }
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
-  D2D1_COLOR_F const brushColor = colors.light_mode ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f) : D2D1::ColorF(0, 0, 0, 0.8f);
+  D2D1_COLOR_F brushColor = colors.light_mode ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f) : D2D1::ColorF(0, 0, 0, 0.8f);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   D2D1_RECT_F background_rect = {};
   background_rect.bottom = (float)window_height;
@@ -257,17 +289,28 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   // Draw SVG
   auto popin = D2D1::Matrix3x2F::Translation(x_offset, y_offset);
   d2d_dc->SetTransform(popin);
-  use_overlay->toggle_window_group(false);
+  bool minature_shown = active_window != nullptr && thumbnail != nullptr;
+  auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor.width(), total_monitor.height(), 1);
   if (anim_value == 0) {
-    // We cannot keepup thumbnail animation with the overlay, so just
-    // display it when the animation is done
-    if (show_thumbnail(x_offset, y_offset)) {
-      use_overlay->toggle_window_group(true);
-    } else {
-      no_active.render(d2d_dc);
-    }
+    minature_shown = show_thumbnail(rect_and_scale);
   }
+  use_overlay->toggle_window_group(minature_shown);
   use_overlay->render(d2d_dc);
+  // render the monitors
+  brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0 : 0.3);
+  brush = nullptr;
+  winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
+  for (auto& monitor : monitors) {
+    D2D1_RECT_F monitor_rect;
+    monitor_rect.left = monitor.rect.left * rect_and_scale.scale + rect_and_scale.rect.left;
+    monitor_rect.top = monitor.rect.top * rect_and_scale.scale + rect_and_scale.rect.top;
+    monitor_rect.right = monitor.rect.right * rect_and_scale.scale + rect_and_scale.rect.left;
+    monitor_rect.bottom = monitor.rect.bottom * rect_and_scale.scale + rect_and_scale.rect.top;
+    d2d_dc->FillRectangle(monitor_rect, brush.get());
+  }
+  if (!minature_shown) {
+    no_active.render(d2d_dc);
+  }
   for (auto&& button : tasklist_buttons) {
     if ((unsigned)button.keynum - 1 >= arrows.size())
       continue;
