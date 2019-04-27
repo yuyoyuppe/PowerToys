@@ -2,12 +2,13 @@
 #include <functional>
 #include <Windows.h>
 /*
-  In: HWND - of the window on which mouse is hovering
-      RECT - rect with the positions of the buttons
+  In: HWND hwnd - of the window on which mouse is hovering
+      RECT buttons - rect with the positions of the buttons
+      RECT monitor - rect with the monitor to clip the popup window to
   Out: Rect of the created popup window, mouse out will be signalled when the
        mouse leaves it.
 */
-typedef std::function<RECT(HWND, RECT)> MouseInProc;
+typedef std::function<RECT(HWND hwnd, RECT buttons, RECT monitor)> MouseInProc;
 typedef std::function<void()> MouseOutProc;
 
 

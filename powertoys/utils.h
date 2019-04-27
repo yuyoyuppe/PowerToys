@@ -13,6 +13,8 @@ std::optional<POINT> get_mouse_pos();
 bool operator==(const RECT& lhs, const RECT& rhs);
 bool operator!=(const RECT& lhs, const RECT& rhs);
 bool operator<(const RECT& lhs, const RECT& rhs);
+// Moves and/or resizes small_rect to fit inside big_rect.
+RECT keep_rect_inside_rect(const RECT& small_rect, const RECT& big_rect);
 // Initializes and runs windows message loop
 int run_message_loop();
 void ShowLastErrorMessage(LPTSTR lpszFunction, DWORD dw);

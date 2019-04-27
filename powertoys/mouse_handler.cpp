@@ -7,7 +7,7 @@
 
 namespace {
   D2DWindowManagerPopup* maximize_poup = NULL;
-  RECT on_mouse_in(HWND hwnd, RECT buttons) {
+  RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
     auto dpi = GetDpiForWindow(hwnd);
     int width = (buttons.right - buttons.left) * 3 / 4;
     int height = width / 3;
@@ -16,6 +16,8 @@ namespace {
     result.top = buttons.bottom;
     result.right = buttons.right - width/4;
     result.bottom = buttons.bottom + height;
+    // Make sure resulting rect is inside monitor.
+    result = keep_rect_inside_rect(result, monitor);
     maximize_poup->show(hwnd, result);
     return result;
   }

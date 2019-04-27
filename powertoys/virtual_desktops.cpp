@@ -133,7 +133,7 @@ public:
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient005() = 0; // GetViewForApplication
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient006() = 0; // GetViewForAppUserModelId
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient007() = 0; // GetViewInFocus
-    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient008() = 0; // outreshCollection
+    virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient008() = 0; // RefreshCollection
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient009() = 0; // RegisterForApplicationViewChanges
     virtual HRESULT STDMETHODCALLTYPE _ObjectStublessClient010() = 0; // UnregisterForApplicationViewChanges
 };

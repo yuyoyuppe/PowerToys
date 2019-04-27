@@ -49,6 +49,15 @@ MonitorInfo get_primary_monitor() {
 
 MonitorInfo get_window_monitor(HWND hwnd) {
   auto monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+  return get_monitor_info(monitor);
+}
+
+MonitorInfo get_point_monitor(POINT p) {
+  auto monitor = MonitorFromPoint(p, MONITOR_DEFAULTTONEAREST);
+  return get_monitor_info(monitor);
+}
+
+MonitorInfo get_monitor_info(HMONITOR monitor) {
   MONITORINFOEX monitor_info;
   monitor_info.cbSize = sizeof(MONITORINFOEX);
   GetMonitorInfo(monitor, &monitor_info);

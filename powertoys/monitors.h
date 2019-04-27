@@ -31,6 +31,10 @@ std::vector<MonitorInfo> get_monitors(bool include_toolbar);
 MonitorInfo get_primary_monitor();
 // Return monitor on which hwnd window is displayed
 MonitorInfo get_window_monitor(HWND hwnd);
+// Return monitor nearest to a point
+MonitorInfo get_point_monitor(POINT p);
+// Return monitor info given a HMONITOR
+MonitorInfo get_monitor_info(HMONITOR monitor);
 // Gets numeric index of the given monitor, for easy access to the screens on the left and right
 int get_monitor_index(const std::vector<MonitorInfo>& monitors, const MonitorInfo& monitor);
 // Scales window from src_monitor coordinates to des_monitor coordinates. Returned RECT will show the window
