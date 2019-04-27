@@ -162,6 +162,7 @@
     <ClInclude Include="d2d_window.h" />
     <ClInclude Include="d2d_window_manager_popup.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="start_visible.h" />
     <ClInclude Include="functionalities.h" />
     <ClInclude Include="keyboard_watcher.h" />
@@ -173,6 +174,9 @@
     <ClInclude Include="virtual_desktops.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="powertoys.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -99,6 +99,7 @@
     <ClInclude Include="d2d_overlay_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">
@@ -107,5 +108,8 @@
     <Filter Include="Functionality">
       <UniqueIdentifier>{ba8e1409-9389-41e1-a864-2df96b242c1d}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="powertoys.rc" />
   </ItemGroup>
 </Project>
