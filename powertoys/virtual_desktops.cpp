@@ -224,6 +224,9 @@ winrt::com_ptr<IVirtualDesktop> GetDesktopAtIndex(int index) {
   return objdesktop;
 }
 
+// TODO: Add a synchronized map instead, after testing this technique.
+std::map<HWND, WINDOWPLACEMENT> moved_window_original_positions;
+
 BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID)  {
   if (!hwnd) {
     return TRUE;
@@ -248,8 +251,12 @@ void move_window_to_primary_desktop(HWND hwnd) {
   GUID current_desktopId;
   winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
 
-  // Restore the Window.
-  ShowWindow(hwnd, SW_RESTORE);
+  // Restore the window to the original position.
+  if (moved_window_original_positions.find(hwnd) != moved_window_original_positions.end()) {
+    WINDOWPLACEMENT original_placement = moved_window_original_positions[hwnd];
+  SetWindowPlacement(hwnd, &original_placement);
+  moved_window_original_positions.erase(hwnd);
+  }
 
   int desktop_index = 0;
   winrt::com_ptr<IVirtualDesktop> objDestkop;
@@ -292,6 +299,12 @@ void move_window_to_new_desktop(HWND hwnd) {
 
   auto collection_view = get_application_view_collection();
 
+  WINDOWPLACEMENT original_placement;
+  original_placement.length = sizeof(WINDOWPLACEMENT);
+  if (GetWindowPlacement(hwnd, &original_placement)) {
+    moved_window_original_positions[hwnd] = original_placement;
+  }
+  
   // Maximize the Window.
   ShowWindow(hwnd, SW_MAXIMIZE);
 
