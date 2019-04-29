@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClCompile Include="d2d_overlay_window.cpp" />
     <ClCompile Include="d2d_svg.cpp" />
+    <ClCompile Include="d2d_text.cpp" />
     <ClCompile Include="d2d_window.cpp" />
     <ClCompile Include="d2d_window_manager_popup.cpp" />
     <ClCompile Include="pch.cpp">
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="d2d_overlay_window.h" />
     <ClInclude Include="d2d_svg.h" />
+    <ClInclude Include="d2d_text.h" />
     <ClInclude Include="d2d_window.h" />
     <ClInclude Include="d2d_window_manager_popup.h" />
     <ClInclude Include="pch.h" />

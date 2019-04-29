@@ -1,6 +1,7 @@
 #pragma once
 #include "d2d_svg.h"
 #include "d2d_window.h"
+#include "d2d_text.h"
 #include "monitors.h"
 
 struct ScaleResult {
@@ -49,6 +50,7 @@ private:
   std::vector<MonitorInfo> monitors;
   MonitorInfo total_monitor;
   int monitor_dx = 0, monitor_dy = 0;
+  D2DText text;
   WindowsColors colors;
   Animation animation;
   RECT window_rect = {};
