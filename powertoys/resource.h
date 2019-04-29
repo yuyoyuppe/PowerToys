@@ -1,1 +1,3 @@
 #define APPICON 101
+#define ID_TRAY_MENU 102
+#define ID_EXIT_MENU_COMMAND 40001

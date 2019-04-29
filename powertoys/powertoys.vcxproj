@@ -150,6 +150,7 @@
     <ClCompile Include="mouse_watcher.cpp" />
     <ClCompile Include="move_window.cpp" />
     <ClCompile Include="tasklist_positions.cpp" />
+    <ClCompile Include="tray_icon.cpp" />
     <ClCompile Include="unhandled_exception_handler.cpp" />
     <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="window.cpp" />

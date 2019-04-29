@@ -19,6 +19,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   // We will handle scaling ourselfs.
   HHOOK handle = NULL;
   try {
+    start_tray_icon();
     start_winkey_handler();
     start_mouse_handler();
     int result = run_message_loop();
