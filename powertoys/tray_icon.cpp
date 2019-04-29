@@ -78,7 +78,7 @@ void start_tray_icon() {
   tray_icon_data.hWnd = hwnd;
   tray_icon_data.uID = id_tray_icon;
   tray_icon_data.uCallbackMessage = wm_icon_notify;
-  strcpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip), "Power Toys");
+  strcpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip), "PowerToys");
   tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
 
   Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
