@@ -62,8 +62,10 @@ namespace {
       } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
         other_key_was_pressed = true;
         if (winkey_signaled) {
-          if (kb_hook->vkCode == VK_OEM_COMMA || kb_hook->vkCode == 0x4C) {
-            // Special case - on L hide our window.
+          if (kb_hook->vkCode == VK_OEM_COMMA ||
+              kb_hook->vkCode == 0x4C ||
+              (kb_hook->vkCode >= 0x30 && kb_hook->vkCode <= 0x39)) {
+            // Special case - on L hide our window. Also for keys 0-9
             winkey_pressed = false;
             winkey_signaled = false;
             lock.unlock();
