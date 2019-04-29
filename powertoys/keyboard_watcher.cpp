@@ -3,12 +3,12 @@
 #include "start_visible.h"
 
 namespace {
-  using stdclock = std::chrono::system_clock;
+  using stdclock = std::chrono::steady_clock;
 
   HHOOK hook_handle = NULL;
   std::mutex hook_mutex;
   std::condition_variable hook_cv;
-  stdclock::time_point winkey_press_timestamp;
+  stdclock::time_point winkey_press_timestamp, signalled_timestamp;
   bool winkey_pressed = false;
   bool winkey_signaled = false;
   std::function<void()> on_held_cb, on_relese_cb;
@@ -44,7 +44,7 @@ namespace {
             winkey_signaled = false;
             lock.unlock();
             on_relese_cb();
-            if (!other_key_was_pressed) {
+            if (!other_key_was_pressed && (stdclock::now() - signalled_timestamp > std::chrono::seconds(1))) {
               INPUT input[3] = { {}, {}, {} };
               input[0].type = INPUT_KEYBOARD;
               input[0].ki.wVk = VK_CONTROL;
@@ -96,6 +96,7 @@ namespace {
       if (winkey_pressed && only_winkey_key_held() && !other_key_was_pressed) {
         winkey_signaled = true;
         lock.unlock();
+        signalled_timestamp = stdclock::now();
         on_held_cb();
       }
     }
