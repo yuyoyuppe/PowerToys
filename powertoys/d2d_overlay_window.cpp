@@ -2,6 +2,7 @@
 #include "d2d_overlay_window.h"
 #include "monitors.h"
 #include "tasklist_positions.h"
+#include "keyboard_watcher.h"
 
 
 D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
@@ -77,6 +78,10 @@ D2DOverlayWindow::D2DOverlayWindow() : animation(0.2), total_monitor({})
 { }
 
 void D2DOverlayWindow::show(HWND active_window) {
+  if (visible) {
+    return;
+  }
+  visible = true;
   this->active_window = active_window;
   auto old_bck = colors.start_color_menu;
   if (initialized && colors.update()) {
@@ -131,6 +136,7 @@ void D2DOverlayWindow::on_show() {
 }
 
 void D2DOverlayWindow::on_hide() {
+  visible = false;
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
@@ -242,6 +248,10 @@ bool D2DOverlayWindow::show_thumbnail(const RECT& rect) {
 }
 
 void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
+  if (!visible || !winkey_held()) {
+    hide();
+    return;
+  }
   d2d_dc->Clear();
   auto tasklist_buttons = tasklist.get_buttons();
   int x_offset = 0, y_offset = 0;

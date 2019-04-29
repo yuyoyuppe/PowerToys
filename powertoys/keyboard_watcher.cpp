@@ -24,22 +24,6 @@ namespace {
 */
   bool other_key_was_pressed = false;
 
-  bool only_winkey_key_held() {
-    BYTE keys_state[256];
-    memset(keys_state, 0, 256);
-    GetKeyboardState(keys_state);
-    for (int vk = 0; vk < 256; ++vk) {
-      if (vk == VK_LWIN || vk == VK_RWIN)
-        continue;
-      auto key_held = keys_state[vk] & 0x80; // test high bit
-      // Pressing WinKey + M can get M key stuck in "pressed" state
-      if (key_held)
-        key_held = GetAsyncKeyState(vk) & 0x8000;
-      if (key_held)
-        return false;
-    }
-    return true;
-  }
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
     if (nCode == HC_ACTION) {
@@ -98,7 +82,7 @@ namespace {
     auto delay = std::chrono::milliseconds(ms);
     while (true) {
       std::unique_lock<std::mutex> lock(hook_mutex);
-      hook_cv.wait(lock, [] { return winkey_pressed && !winkey_signaled; });
+      hook_cv.wait(lock, [] { return winkey_pressed; });
       auto wait_time = stdclock::now() - winkey_press_timestamp;
       while (winkey_pressed && wait_time <= delay) {
         lock.unlock();
@@ -128,4 +112,27 @@ void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::func
       throw std::runtime_error("Cannot install keyboard listener");
     }
   }
+}
+
+bool winkey_held() {
+  auto left = GetAsyncKeyState(VK_LWIN);
+  auto right = GetAsyncKeyState(VK_RWIN);
+  return (left & 0x8000) || (right & 0x8000);
+}
+
+bool only_winkey_key_held() {
+  BYTE keys_state[256];
+  memset(keys_state, 0, 256);
+  GetKeyboardState(keys_state);
+  for (int vk = 0; vk < 256; ++vk) {
+    if (vk == VK_LWIN || vk == VK_RWIN)
+      continue;
+    auto key_held = keys_state[vk] & 0x80; // test high bit
+    // Pressing WinKey + M can get M key stuck in "pressed" state
+    if (key_held)
+      key_held = GetAsyncKeyState(vk) & 0x8000;
+    if (key_held)
+      return false;
+  }
+  return true;
 }

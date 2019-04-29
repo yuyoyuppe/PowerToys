@@ -34,6 +34,7 @@ private:
   virtual void on_show() override;
   virtual void on_hide() override;
 
+  bool visible = false;
   std::vector<MonitorInfo> monitors;
   MonitorInfo total_monitor;
   int monitor_dx = 0, monitor_dy = 0;

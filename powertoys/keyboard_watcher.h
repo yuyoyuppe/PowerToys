@@ -18,3 +18,6 @@ void start_winkey_watcher(int ms_delay,
                           std::function<void()> on_held,
                           std::function<void(unsigned long)> on_held_pressed,
                           std::function<void()> on_released);
+
+bool winkey_held();
+bool only_winkey_key_held();
