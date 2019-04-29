@@ -116,12 +116,6 @@ void D2DOverlayWindow::show(HWND active_window) {
   total_monitor.rect.right += monitor_dx;
   total_monitor.rect.top += monitor_dy;
   total_monitor.rect.bottom += monitor_dy;
-  for (auto& monitor : monitors) {
-    monitor.rect.left += monitor_dx;
-    monitor.rect.right += monitor_dx;
-    monitor.rect.top += monitor_dy;
-    monitor.rect.bottom += monitor_dy;
-  }
   tasklist.update();
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
@@ -289,23 +283,20 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   if (minature_shown && thumb_window->right - thumb_window->left <= 0 || thumb_window->bottom - thumb_window->top <= 0)
     minature_shown = false;
   bool render_monitors = true;
-  auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor.width(), total_monitor.height(), 1);
+  auto total_monitor_with_screen = total_monitor;
+  if (thumb_window) {
+    total_monitor_with_screen.rect.left = min(total_monitor_with_screen.rect.left, thumb_window->left + monitor_dx);
+    total_monitor_with_screen.rect.top = min(total_monitor_with_screen.rect.top, thumb_window->top + monitor_dy);
+    total_monitor_with_screen.rect.right = max(total_monitor_with_screen.rect.right, thumb_window->right + monitor_dx);
+    total_monitor_with_screen.rect.bottom = max(total_monitor_with_screen.rect.bottom, thumb_window->bottom + monitor_dy);
+  }
+  auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor_with_screen.width(), total_monitor_with_screen.height(), 1);
   if (minature_shown) {
     RECT thumbnail_pos;
     thumbnail_pos.left = (thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
     thumbnail_pos.top = (thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
     thumbnail_pos.right = (thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
     thumbnail_pos.bottom = (thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
-    // See if the thumbnail is out of bounds - this can happen if a very big window is moved almost entirely off screen
-    //  (give some headspace though, some windows do not render entire area)
-    if (thumbnail_pos.left < rect_and_scale.rect.left * 0.9 ||
-        thumbnail_pos.top < rect_and_scale.rect.top * 0.9 ||
-        thumbnail_pos.right > rect_and_scale.rect.right * 1.1||
-        thumbnail_pos.bottom > rect_and_scale.rect.bottom * 1.1) {
-      // we will just render the thumbnail keeping the aspect ratio, but no monitors
-      render_monitors = false;
-      thumbnail_pos = use_overlay->get_thumbnail_rect_and_scale(0, 0, thumb_window->right - thumb_window->left, thumb_window->bottom - thumb_window->top, 1).rect;
-    }
     // If the animation is done show the thumbnail
     //   we cannot animate the thumbnail, the animation lags behind
     if (anim_value == 0) {
@@ -319,10 +310,10 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
     for (auto& monitor : monitors) {
       D2D1_RECT_F monitor_rect;
-      monitor_rect.left = monitor.rect.left * rect_and_scale.scale + rect_and_scale.rect.left;
-      monitor_rect.top = monitor.rect.top * rect_and_scale.scale + rect_and_scale.rect.top;
-      monitor_rect.right = monitor.rect.right * rect_and_scale.scale + rect_and_scale.rect.left;
-      monitor_rect.bottom = monitor.rect.bottom * rect_and_scale.scale + rect_and_scale.rect.top;
+      monitor_rect.left = (monitor.rect.left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+      monitor_rect.top = (monitor.rect.top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+      monitor_rect.right = (monitor.rect.right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+      monitor_rect.bottom = (monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top;
       d2d_dc->FillRectangle(monitor_rect, brush.get());
     }
   }
