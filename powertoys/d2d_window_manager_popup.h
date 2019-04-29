@@ -24,11 +24,13 @@ private:
   static D2DWindowManagerPopup* this_from_hwnd(HWND window);
   void resize();
   void render();
+  void create_tooltip(HWND window);
 
   HWND target_window;
   BOOL target_window_on_primary_desktop;
 
   HWND hwnd;
+  HWND hwnd_tooltip;
   std::mutex mutex;
   D2D1_RECT_F hwnd_rect;
 

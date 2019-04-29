@@ -5,6 +5,9 @@
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
+LPSTR maximize_tooltip_message = (LPSTR)"Maximize to new desktop";
+LPSTR restore_tooltip_message = (LPSTR)"Return to primary desktop";
+
 D2DWindowManagerPopup::D2DWindowManagerPopup() {
   static const char* class_name = "PToyD2DWindowManagerPopup";
   WNDCLASS wc = {};
@@ -65,7 +68,7 @@ void D2DWindowManagerPopup::init()
     dxgi_device.put_void()));
   dxgi_factory = nullptr;
   winrt::check_hresult(CreateDXGIFactory2(
-    0, // DXGI_CREATE_FACTORY_DEBUG for extra output, but might crash in releases    
+    0, // DXGI_CREATE_FACTORY_DEBUG for extra output, but might crash in releases
     __uuidof(dxgi_factory),
     dxgi_factory.put_void()));
   d2d_device = nullptr;
@@ -83,6 +86,33 @@ D2DWindowManagerPopup* D2DWindowManagerPopup::this_from_hwnd(HWND window) {
   return reinterpret_cast<D2DWindowManagerPopup*>(GetWindowLongPtr(window, GWLP_USERDATA));
 }
 
+void D2DWindowManagerPopup::create_tooltip(HWND window) {
+  //Create a tooltip.
+  hwnd_tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
+    WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX ,
+    CW_USEDEFAULT, CW_USEDEFAULT,
+    CW_USEDEFAULT, CW_USEDEFAULT,
+    window, NULL,
+    reinterpret_cast<HINSTANCE>(&__ImageBase), NULL);
+
+  SetWindowPos(hwnd_tooltip, HWND_TOPMOST,0, 0, 0, 0,
+    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+  // Associate the tooltip with the tool.
+  TOOLINFO tool_info = { 0 };
+  tool_info.cbSize = TTTOOLINFO_V1_SIZE; // sizeof(TOOLINFO) doesn't work...
+  tool_info.hwnd = window;
+  tool_info.uFlags = TTF_SUBCLASS;
+  tool_info.lpszText = maximize_tooltip_message;
+  tool_info.hinst = reinterpret_cast<HINSTANCE>(&__ImageBase);
+  GetClientRect(hwnd, &tool_info.rect);
+  if(!SendMessage(hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM)&tool_info)) {
+    MessageBox(NULL, "Couldn't create the ToolTip control.", "Error", MB_OK);
+  }
+
+}
+
+
 void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   int currentDesktopIndex = GetCurrentDesktopGUIDIndexForWindow(targetWindow);
   if (currentDesktopIndex < 0) {
@@ -95,6 +125,18 @@ void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   current_icon = (currentDesktopIndex==0?&maximize_to_new_desktop:&restore_to_primary_desktop);
   target_window_on_primary_desktop = (currentDesktopIndex==0?TRUE:FALSE);
   SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);
+
+  TOOLINFO tool_info = { 0 };
+  tool_info.cbSize = TTTOOLINFO_V1_SIZE;
+  tool_info.hwnd = hwnd;
+  // Get the current tooltip definition.
+  if( SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info) )
+  {
+    // Change the tooltip text.
+    tool_info.lpszText = target_window_on_primary_desktop ? maximize_tooltip_message : restore_tooltip_message;
+    SendMessage(hwnd_tooltip, TTM_UPDATETIPTEXT, 0, (LPARAM)&tool_info);
+  }
+
   SetWindowPos(hwnd, HWND_TOPMOST, area.left, area.top, area.right-area.left, area.bottom-area.top, 0);
   ShowWindow(hwnd, SW_SHOWNOACTIVATE);
 }
@@ -153,6 +195,17 @@ if (width == 0 || height == 0)
     properties,
     d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
+
+  TOOLINFO tool_info = { 0 };
+  tool_info.cbSize = TTTOOLINFO_V1_SIZE;
+  tool_info.hwnd = hwnd;
+  // Get the current tooltip definition.
+  if( SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info) )
+  {
+    // Resize the tooltip rect.
+    GetClientRect(hwnd, &tool_info.rect);
+    SendMessage(hwnd_tooltip, TTM_NEWTOOLRECT, 0, (LPARAM)&tool_info);
+  }
 }
 
 void D2DWindowManagerPopup::render() {
@@ -190,6 +243,10 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     SetWindowLongPtr(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create_struct->lpCreateParams));
     return TRUE;
   }
+  case WM_CREATE: {
+    this_from_hwnd(window)->create_tooltip(window);
+    return DefWindowProc(window, message, wparam, lparam);
+  }
 /*
   case WM_NCACTIVATE:
     // don't activate
@@ -201,7 +258,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     this_from_hwnd(window)->resize();
   case WM_PAINT:
     this_from_hwnd(window)->render();
-    return 0;
+    return DefWindowProc(window, message, wparam, lparam);
   case WM_LBUTTONDOWN:
     //this_from_hwnd(window)->hide();
     if (this_from_hwnd(window)->target_window_on_primary_desktop) {
