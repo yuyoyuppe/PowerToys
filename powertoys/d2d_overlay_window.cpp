@@ -80,7 +80,7 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.2), total_monitor({})
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), total_monitor({})
 { }
 
 void D2DOverlayWindow::show(HWND active_window) {
