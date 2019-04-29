@@ -236,7 +236,6 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
 bool D2DOverlayWindow::show_thumbnail(const RECT& rect) {
   if (!thumbnail)
     return false;
-  SIZE thumb_size;
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
   thumb_properties.fSourceClientAreaOnly = FALSE;
@@ -271,7 +270,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     }
   } else {
     x_offset = 0;
-    y_offset = anim_value * window_height;
+    y_offset = (int)(anim_value * window_height);
   }
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
@@ -284,7 +283,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   d2d_dc->FillRectangle(background_rect, brush.get());
  
   // Set the animation - move the draw window according to annimation step
-  auto popin = D2D1::Matrix3x2F::Translation(x_offset, y_offset);
+  auto popin = D2D1::Matrix3x2F::Translation((float)x_offset, (float)y_offset);
   d2d_dc->SetTransform(popin);
 
   // Thumbnail logic:
@@ -309,10 +308,10 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   if (minature_shown) {
     RECT thumbnail_pos;
     if (render_monitors) {
-      thumbnail_pos.left = (thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-      thumbnail_pos.top = (thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
-      thumbnail_pos.right = (thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-      thumbnail_pos.bottom = (thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+      thumbnail_pos.left = (int)((thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left);
+      thumbnail_pos.top = (int)((thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top);
+      thumbnail_pos.right = (int)((thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left);
+      thumbnail_pos.bottom = (int)((thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top);
     } else {
       thumbnail_pos = use_overlay->get_thumbnail_rect_and_scale(0, 0, thumb_window->right - thumb_window->left, thumb_window->bottom - thumb_window->top, 1).rect;
     }
@@ -324,15 +323,15 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   }
   // render the monitors
   if (render_monitors) {
-    brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0 : 0.3);
+    brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0f : 0.3f);
     brush = nullptr;
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
     for (auto& monitor : monitors) {
       D2D1_RECT_F monitor_rect;
-      monitor_rect.left = (monitor.rect.left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-      monitor_rect.top = (monitor.rect.top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
-      monitor_rect.right = (monitor.rect.right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-      monitor_rect.bottom = (monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top;
+      monitor_rect.left = (float)((monitor.rect.left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left);
+      monitor_rect.top = (float)((monitor.rect.top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top);
+      monitor_rect.right = (float)((monitor.rect.right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left);
+      monitor_rect.bottom = (float)((monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top);
       d2d_dc->FillRectangle(monitor_rect, brush.get());
     }
   }
