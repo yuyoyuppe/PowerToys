@@ -190,6 +190,9 @@ void D2DOverlayWindow::animate(int vk_code, int offset) {
     case VK_TAB:
       id = L"Tab";
       break;
+    case VK_RETURN:
+      id = L"Enter";
+      break;
     default:
       return;
     }
