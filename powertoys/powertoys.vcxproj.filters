@@ -48,10 +48,10 @@
     <ClCompile Include="d2d_svg.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="d2d_overlay_window.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="tray_icon.cpp">
+      <Filter>Functionality</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_overlay_window.cpp">
       <Filter>Functionality</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,10 +99,10 @@
     <ClInclude Include="d2d_svg.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="d2d_overlay_window.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="d2d_overlay_window.h">
+      <Filter>Functionality</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">

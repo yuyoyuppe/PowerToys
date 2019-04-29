@@ -289,6 +289,15 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   // Thumbnail logic:
   auto thumb_window = get_window_pos(active_window);
   bool minature_shown = active_window != nullptr && thumbnail != nullptr && thumb_window;
+  RECT client_rect;
+  if (thumb_window && GetClientRect(active_window, &client_rect)) {
+    int dx = ((thumb_window->right - thumb_window->left) - (client_rect.right - client_rect.left)) / 2;
+    int dy = ((thumb_window->bottom - thumb_window->top) - (client_rect.bottom - client_rect.top)) / 2;
+    thumb_window->left += dx;
+    thumb_window->right -= dx;
+    thumb_window->top += dy;
+    thumb_window->bottom -= dy;
+  }
   if (minature_shown && thumb_window->right - thumb_window->left <= 0 || thumb_window->bottom - thumb_window->top <= 0)
     minature_shown = false;
   bool render_monitors = true;
