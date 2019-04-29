@@ -290,13 +290,22 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     total_monitor_with_screen.rect.right = max(total_monitor_with_screen.rect.right, thumb_window->right + monitor_dx);
     total_monitor_with_screen.rect.bottom = max(total_monitor_with_screen.rect.bottom, thumb_window->bottom + monitor_dy);
   }
+  // Only allow the new rect beeing slight bigger.
+  if (total_monitor_with_screen.width() - total_monitor.width() > (thumb_window->right - thumb_window->left) / 2 ||
+      total_monitor_with_screen.height() - total_monitor.height() > (thumb_window->bottom - thumb_window->top) / 2) {
+    render_monitors = false;
+  }
   auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor_with_screen.width(), total_monitor_with_screen.height(), 1);
   if (minature_shown) {
     RECT thumbnail_pos;
-    thumbnail_pos.left = (thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-    thumbnail_pos.top = (thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
-    thumbnail_pos.right = (thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
-    thumbnail_pos.bottom = (thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+    if (render_monitors) {
+      thumbnail_pos.left = (thumb_window->left + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+      thumbnail_pos.top = (thumb_window->top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+      thumbnail_pos.right = (thumb_window->right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left;
+      thumbnail_pos.bottom = (thumb_window->bottom + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top;
+    } else {
+      thumbnail_pos = use_overlay->get_thumbnail_rect_and_scale(0, 0, thumb_window->right - thumb_window->left, thumb_window->bottom - thumb_window->top, 1).rect;
+    }
     // If the animation is done show the thumbnail
     //   we cannot animate the thumbnail, the animation lags behind
     if (anim_value == 0) {
