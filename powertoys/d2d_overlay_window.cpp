@@ -68,6 +68,12 @@ ScaleResult D2DOverlaySVG::get_thumbnail_rect_and_scale(int x_offset, int y_offs
   return result;
 }
 
+winrt::com_ptr<ID2D1SvgElement> D2DOverlaySVG::find_element(const std::wstring& id) {
+  winrt::com_ptr< ID2D1SvgElement> element;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), element.put()));
+  return element;
+}
+
 D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   if (window_group)
     window_group->SetAttributeValue(L"fill-opacity", active ? 1.0f : 0.3f);
@@ -131,6 +137,85 @@ void D2DOverlayWindow::show(HWND active_window) {
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
 
+void D2DOverlayWindow::animate(int vk_code) {
+  animate(vk_code, 0);
+}
+void D2DOverlayWindow::animate(int vk_code, int offset) {
+  bool done = false;
+  for (auto& animation : key_animations) {
+    if (animation.vk_code == vk_code) {
+      animation.animation.reset(0.1, 0, 1);
+      done = true;
+    }
+  }
+  if (done)
+    return;
+  AnimateKeys animation;
+  std::wstring id;
+  animation.vk_code = vk_code;
+  winrt::com_ptr<ID2D1SvgElement> button_letter, parrent;
+  if (vk_code >= 0x41 && vk_code <= 0x5A) {
+    id.push_back('A' + (vk_code - 0x41));
+  } else {
+    switch (vk_code) {
+    case VK_SNAPSHOT:
+    case VK_PRINT:
+      id = L"PrnScr";
+      break;
+    case VK_CONTROL:
+    case VK_LCONTROL:
+    case VK_RCONTROL:
+      id = L"Ctrl";
+      break;
+    case VK_UP:
+      id = L"KeyUp";
+      break;
+    case VK_LEFT:
+      id = L"KeyLeft";
+      break;
+    case VK_DOWN:
+      id = L"KeyDown";
+      break;
+    case VK_RIGHT:
+      id = L"KeyRight";
+      break;
+    case VK_OEM_PLUS:
+    case VK_ADD:
+      id = L"KeyPlus";
+      break;
+    case VK_OEM_MINUS:
+    case VK_SUBTRACT:
+      id = L"KeyMinus";
+      break;
+    case VK_TAB:
+      id = L"Tab";
+      break;
+    default:
+      return;
+    }
+  }
+  if (offset > 0)
+    id += L"_" + std::to_wstring(offset);
+  button_letter = use_overlay->find_element(id);
+  if (!button_letter) return;
+  button_letter->GetParent(parrent.put());
+  if (!parrent) return;
+  parrent->GetPreviousChild(button_letter.get(), animation.button.put());
+  if (!animation.button || !animation.button->IsAttributeSpecified(L"fill")) {
+    animation.button = nullptr;
+    parrent->GetNextChild(button_letter.get(), animation.button.put());
+  }
+  if (!animation.button || !animation.button->IsAttributeSpecified(L"fill"))
+    return;
+  winrt::com_ptr<ID2D1SvgPaint> paint;
+  animation.button->GetAttributeValue(L"fill", paint.put());
+  paint->GetColor(&animation.original);
+  animate(vk_code, offset + 1);
+  std::unique_lock<std::recursive_mutex> lock(mutex);
+  animation.animation.reset(0.1, 0, 1);
+  key_animations.push_back(animation);
+}
+
 void D2DOverlayWindow::on_show() { 
   // show override does everything
 }
@@ -172,7 +257,7 @@ void D2DOverlayWindow::init() {
 void D2DOverlayWindow::resize() {
   window_rect = *get_window_pos(hwnd);
   float no_active_scale;
-  if (window_width > window_height) {
+  if (window_width >= window_height) {
     use_overlay = &landscape;
     no_active_scale = 0.3f;
   } else {
@@ -348,6 +433,27 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   use_overlay->toggle_window_group(minature_shown);
   if (!minature_shown) {
     no_active.render(d2d_dc);
+  }
+  // Animate keys
+  for (unsigned id = 0; id < key_animations.size();) {
+    auto& animation = key_animations[id];
+    D2D1_COLOR_F color;
+    auto value = (float)animation.animation.value();
+    color.a = 1.0f;
+    color.r = animation.original.r + (1.0f - animation.original.r) * value;
+    color.g = animation.original.g + (1.0f - animation.original.g) * value;
+    color.b = animation.original.b + (1.0f - animation.original.b) * value;
+    animation.button->SetAttributeValue(L"fill", color);
+    if (animation.animation.done()) {
+      if (value == 1) {
+        animation.animation.reset(0.05, 1, 0);
+        animation.animation.value();
+      } else {
+        key_animations.erase(key_animations.begin() + id);
+        continue;
+      }
+    }
+    ++id;
   }
   // Finally: render the overlay...
   use_overlay->render(d2d_dc);

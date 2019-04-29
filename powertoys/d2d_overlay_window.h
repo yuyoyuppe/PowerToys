@@ -16,17 +16,27 @@ public:
   D2DOverlaySVG& find_window_group(const std::wstring& id);
   ScaleResult get_thumbnail_rect_and_scale(int x_offset, int y_offset, int window_cx, int window_cy, float fill);
   D2DOverlaySVG& toggle_window_group(bool active);
+  winrt::com_ptr<ID2D1SvgElement> find_element(const std::wstring& id);
 private:
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
   RECT thumbnail_scaled_rect;
   winrt::com_ptr<ID2D1SvgElement> window_group;
 };
 
+struct AnimateKeys {
+  Animation animation;
+  D2D1_COLOR_F original;
+  winrt::com_ptr<ID2D1SvgElement> button;
+  int vk_code;
+};
+
 class D2DOverlayWindow : public D2DWindow {
 public:
   D2DOverlayWindow();
   void show(HWND active_window);
+  void animate(int vk_code);
 private:
+  void animate(int vk_code, int offset);
   bool show_thumbnail(const RECT& rect_and_scale);
   virtual void init() override;
   virtual void resize() override;
@@ -35,6 +45,7 @@ private:
   virtual void on_hide() override;
 
   bool visible = false;
+  std::vector<AnimateKeys> key_animations;
   std::vector<MonitorInfo> monitors;
   MonitorInfo total_monitor;
   int monitor_dx = 0, monitor_dy = 0;

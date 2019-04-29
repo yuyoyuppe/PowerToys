@@ -24,7 +24,9 @@ namespace {
     winkey_popup->show(active_window);
   }
 
-  void on_held_pressed(DWORD vkCode) { }
+  void on_held_pressed(DWORD vkCode) {
+    winkey_popup->animate(vkCode);
+  }
 
   void on_release() {
     winkey_popup->hide();

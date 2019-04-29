@@ -24,23 +24,35 @@
 */
 class Animation {
 public:
-  Animation(double duration) :
-    duration(duration),
+  Animation(double duration = 1, double start = 0, double stop = 1) :
+    start_value(start), end_value(stop), duration(duration),
     start(std::chrono::high_resolution_clock::now()) { }
   void reset() {
     start = std::chrono::high_resolution_clock::now();
+  }
+  void reset(double duration) {
+    this->duration = duration;
+    reset();
+  }
+  void reset(double duration, double start, double stop) {
+    start_value = start;
+    end_value = stop;
+    reset(duration);
   }
   double value() const {
     auto anim_duration = std::chrono::high_resolution_clock::now() - start;
     double seconds = std::chrono::duration<double>(anim_duration).count() / duration;
     if (seconds > 1)
-      return 1;
+      return end_value;
     seconds -= 1;
-    return sqrt(1 - seconds * seconds);
+    return start_value + (end_value - start_value) * sqrt(1 - seconds * seconds);
+  }
+  bool done() const {
+    return std::chrono::high_resolution_clock::now() - start >= std::chrono::duration<double>(duration);
   }
 private:
   std::chrono::high_resolution_clock::time_point start;
-  double duration;
+  double start_value, end_value, duration;
 };
 
 struct WindowsColors {

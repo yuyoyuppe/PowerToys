@@ -63,9 +63,10 @@ namespace {
         other_key_was_pressed = true;
         if (winkey_signaled) {
           if (kb_hook->vkCode == VK_OEM_COMMA ||
-              kb_hook->vkCode == 0x4C ||
-              (kb_hook->vkCode >= 0x30 && kb_hook->vkCode <= 0x39)) {
-            // Special case - on L hide our window. Also for keys 0-9
+              kb_hook->vkCode == 0x4C || // L
+              kb_hook->vkCode == 0x54 || // T
+              (kb_hook->vkCode >= 0x30 && kb_hook->vkCode <= 0x39)) { // 0 -9
+            // Special case - hide our window
             winkey_pressed = false;
             winkey_signaled = false;
             lock.unlock();
