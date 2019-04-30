@@ -99,6 +99,7 @@ private:
   Tasklist tasklist;
   std::vector<TasklistButton> tasklist_buttons;
   std::chrono::system_clock::time_point update_timestamp;
+  std::thread tasklist_thread;
   HTHUMBNAIL thumbnail;
   HWND active_window = nullptr;
   D2DOverlaySVG landscape, portrait;

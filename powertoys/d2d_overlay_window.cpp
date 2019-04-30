@@ -137,6 +137,14 @@ void D2DOverlayWindow::show(HWND active_window) {
   tasklist_buttons = tasklist.get_buttons();
   auto primary_screen = get_primary_monitor();
   update_timestamp = std::chrono::system_clock::now();
+  tasklist_thread = std::thread([&] {
+    while (visible) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      auto buttons = tasklist.get_buttons();
+      std::unique_lock<std::recursive_mutex> lock(mutex);
+      tasklist_buttons.swap(buttons);
+    }
+  });
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
@@ -145,6 +153,8 @@ void D2DOverlayWindow::animate(int vk_code) {
   animate(vk_code, 0);
 }
 void D2DOverlayWindow::animate(int vk_code, int offset) {
+  if (!initialized || !use_overlay)
+    return;
   bool done = false;
   for (auto& animation : key_animations) {
     if (animation.vk_code == vk_code) {
@@ -228,7 +238,10 @@ void D2DOverlayWindow::on_show() {
 }
 
 void D2DOverlayWindow::on_hide() {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   visible = false;
+  if (tasklist_thread.joinable())
+    tasklist_thread.join();
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
