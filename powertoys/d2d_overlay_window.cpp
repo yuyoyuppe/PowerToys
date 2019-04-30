@@ -284,7 +284,7 @@ void D2DOverlayWindow::init() {
 void D2DOverlayWindow::resize() {
   window_rect = *get_window_pos(hwnd);
   float no_active_scale;
-  if (window_width >= window_height) {
+  if (true || window_width >= window_height) { // portriat is broke right now
     use_overlay = &landscape;
     no_active_scale = 0.3f;
   } else {
@@ -374,7 +374,6 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   bool time_to_update = std::chrono::system_clock::now() - update_timestamp > std::chrono::milliseconds(250);
   if (time_to_update) {
     update_timestamp = std::chrono::system_clock::now();
-    tasklist_buttons = tasklist.get_buttons();
   }
   d2d_dc->Clear();
   int x_offset = 0, y_offset = 0;
