@@ -522,7 +522,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     down = L"Snap left";
     break;
   case SNAPED_LEFT:
-    left = L"Snap to right";
+    left = L"Snap right";
     right = L"Restore";
     up = L"Snap upper left";
     down = L"Snap lower left";
