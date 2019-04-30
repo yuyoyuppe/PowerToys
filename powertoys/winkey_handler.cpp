@@ -19,7 +19,10 @@ namespace {
       active_window = nullptr;
     char class_name[256] = "";
     GetClassNameA(active_window, class_name, 256);
-    if (strcmp(class_name, "SysListView32") == 0 || strcmp(class_name, "WorkerW") == 0)
+    if (strcmp(class_name, "SysListView32") == 0 ||
+        strcmp(class_name, "WorkerW") == 0 ||
+        strcmp(class_name, "Shell_TrayWnd") == 0 ||
+        strcmp(class_name, "Shell_SecondaryTrayWnd") == 0)
       active_window = nullptr;
     winkey_popup->show(active_window);
   }
