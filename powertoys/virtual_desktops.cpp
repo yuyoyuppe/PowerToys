@@ -263,7 +263,6 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
     if(!move_success) {
       // Couldn't set hwnd as the ForegroundWindow or it was the same window.
       // Will have to switch desktop manually, without animation.
-      winrt::com_ptr<IVirtualDesktop> primary_desktop;
       winrt::check_hresult(manager_internal->SwitchDesktop(primary_desktop.get()));
     } else {
       // Give time for the animation to play before trying to remove the old desktop.
