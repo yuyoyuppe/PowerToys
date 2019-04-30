@@ -97,6 +97,8 @@ private:
   Animation animation;
   RECT window_rect = {};
   Tasklist tasklist;
+  std::vector<TasklistButton> tasklist_buttons;
+  std::chrono::system_clock::time_point update_timestamp;
   HTHUMBNAIL thumbnail;
   HWND active_window = nullptr;
   D2DOverlaySVG landscape, portrait;
