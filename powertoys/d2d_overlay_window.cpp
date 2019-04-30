@@ -277,13 +277,15 @@ void D2DOverlayWindow::init() {
 
 void D2DOverlayWindow::resize() {
   window_rect = *get_window_pos(hwnd);
-  float no_active_scale;
-  if (true || window_width >= window_height) { // portriat is broke right now
+  float no_active_scale, font;
+  if (window_width >= window_height) { // portriat is broke right now
     use_overlay = &landscape;
     no_active_scale = 0.3f;
+    font = 15.0f;
   } else {
     use_overlay = &portrait;
     no_active_scale = 0.5f;
+    font = 16.0f;
   }
   use_overlay->resize(0, 0, window_width, window_height, 0.8f);
   auto thumb_no_active_rect = use_overlay->get_thumbnail_rect_and_scale(0, 0, no_active.width(), no_active.height(), no_active_scale).rect;
@@ -292,7 +294,7 @@ void D2DOverlayWindow::resize() {
                    thumb_no_active_rect.right - thumb_no_active_rect.left,
                    thumb_no_active_rect.bottom - thumb_no_active_rect.top,
                    1.0f);
-  text.resize(15.0f, use_overlay->get_scale());
+  text.resize(font, use_overlay->get_scale());
 }
 
 void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_scale, ID2D1DeviceContext5* d2d_dc) {
@@ -473,6 +475,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   use_overlay->toggle_window_group(minature_shown || window_state == MINIMIZED);
   if (!minature_shown && window_state != MINIMIZED) {
     no_active.render(d2d_dc);
+    window_state = UNKNONW;
   }
   // Animate keys
   for (unsigned id = 0; id < key_animations.size();) {
@@ -515,7 +518,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   case SNAPED_TOP_LEFT:
     left = L"Snap upper right";
     right = L"Snap upper right";
-    up = L"Maimize";
+    up = L"Minimize";
     down = L"Snap left";
     break;
   case SNAPED_LEFT:
