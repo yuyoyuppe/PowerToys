@@ -537,7 +537,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     left = L"Snap upper left";
     right = L"Snap upper left";
     up = L"Maximize";
-    down = L"Stap right";
+    down = L"Snap right";
     break;
   case SNAPED_RIGHT:
     left = L"Restore";
