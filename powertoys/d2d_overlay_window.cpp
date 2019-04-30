@@ -85,17 +85,11 @@ D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), total_monitor({}) {
     while (running) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       if (visible) {
-        // First check if mouse is not over start menu, it causes problems
-        POINT mouse;
-        GetCursorPos(&mouse);
-        wchar_t class_name[32];
-        GetClassNameW(WindowFromPoint(mouse), class_name, 32);
-        class_name[31] = 0;
-        if (wcscmp(class_name, L"MSTaskListWClass") == 0)
-          continue;
-        auto buttons = tasklist.get_buttons();
-        std::unique_lock<std::recursive_mutex> lock(mutex);
-        tasklist_buttons.swap(buttons);
+        std::vector<TasklistButton> buttons;
+        if (tasklist.update_buttons(buttons)) {
+          std::unique_lock<std::recursive_mutex> lock(mutex);
+          tasklist_buttons.swap(buttons);
+        }
       }
     }
   });

@@ -144,14 +144,14 @@ std::vector<TasklistButton> Tasklist::assign_keynums(std::vector<TasklistButton>
   return rects;
 }
 
-std::vector<TasklistButton> Tasklist::get_buttons() const {
+bool Tasklist::update_buttons(std::vector<TasklistButton>& buttons) const {
   // It looks like this can ocasionally fail. In such cases just return empty list.
   if (!tasklist)
-    return {};
+    return false;
   VARIANT children[256];
   long child_count;
   if (AccessibleChildren(tasklist.get(), 0, 256, children, &child_count) < 0)
-    return {};
+    return false;
   winrt::com_ptr<IAccessible> apps_list;
   // look for child with x/y set
   long left, top, width, height;
@@ -174,21 +174,23 @@ std::vector<TasklistButton> Tasklist::get_buttons() const {
     }
   }
   if (!apps_list)
-    return {};
+    return false;
   // Get positions of all buttons
   if (apps_list->get_accChildCount(&child_count) < 0)
-    return {};
-  std::vector<TasklistButton> buttons;
+    return false;
+  std::vector<TasklistButton> new_buttons;
   int last_x = -1, last_y = -1;
   for (int i = 0; i < child_count; ++i) {
     VARIANT cid, role;
     cid.vt = VT_I4;
     cid.lVal = i + 1;
-    if (apps_list->get_accRole(cid, &role) < 0 || role.vt != VT_I4 || (role.lVal != ROLE_SYSTEM_PUSHBUTTON && role.lVal != ROLE_SYSTEM_BUTTONMENU))
+    if (apps_list->get_accRole(cid, &role) < 0)
+      return false;
+    if (role.vt != VT_I4 || (role.lVal != ROLE_SYSTEM_PUSHBUTTON && role.lVal != ROLE_SYSTEM_BUTTONMENU))
       continue;
     TasklistButton button;
     if (apps_list->accLocation(&button.x, &button.y, &button.width, &button.height, cid) < 0)
-      continue;
+      return false;
     if (button.width != 0 && button.height != 0) {
       if (last_x != -1 && (button.x < last_x || button.y < last_y)) {
         // Ignore second row
@@ -202,7 +204,14 @@ std::vector<TasklistButton> Tasklist::get_buttons() const {
       button.name = name;
       SysFreeString(name);
     }
-    buttons.push_back(button);
+    new_buttons.push_back(button);
   }
-  return assign_keynums(std::move(buttons));
+  buttons = assign_keynums(std::move(new_buttons));
+  return true;
+}
+
+std::vector<TasklistButton> Tasklist::get_buttons() const {
+  std::vector<TasklistButton> buttons;
+  update_buttons(buttons);
+  return buttons;
 }

@@ -14,6 +14,7 @@ class Tasklist {
 public:
   void update();
   std::vector<TasklistButton> get_buttons() const;
+  bool update_buttons(std::vector<TasklistButton>& buttons) const;
 private:
   bool is_pinned(const std::wstring& name) const;
   std::vector<TasklistButton> assign_keynums(std::vector<TasklistButton> buttons) const;
