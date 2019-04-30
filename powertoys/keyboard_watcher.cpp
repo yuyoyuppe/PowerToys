@@ -1,117 +1,185 @@
 #include "pch.h"
 #include "keyboard_watcher.h"
 #include "start_visible.h"
+#include <deque>
 
 namespace {
-  using stdclock = std::chrono::steady_clock;
+  struct KeyEvent {
+    bool key_down;
+    unsigned vk_code;
+  };
+  class TargetState {
+  public:
+    TargetState(std::function<void()> on_held, int ms_delay,
+                std::function<void()> on_relese,
+                std::function<void(unsigned long)> on_held_pressed_cb) :
+      on_held_cb(on_held), delay(ms_delay),
+      on_relese_cb(on_relese),
+      on_held_pressed_cb(on_held_pressed_cb),
+      thread(&TargetState::thread_proc, this)
+    { }
+
+    bool signal(unsigned vk_code, bool key_down) {
+      std::unique_lock<std::mutex> lock(mutex);
+      // some special case:
+      if (state == Shown && key_down &&
+          (vk_code == VK_OEM_COMMA ||
+           vk_code == 0x4C || // L
+           vk_code == 0x54 || // T
+           (vk_code >= 0x30 && vk_code <= 0x39))) {
+        state = Hidden;
+        on_relese_cb();
+      }
+      if (!events.empty() && events.back().key_down == key_down && events.back().vk_code == vk_code)
+        return false;
+      bool supress = false;
+      if (!key_down && (vk_code == VK_LWIN || vk_code == VK_RWIN) &&
+          state == Shown &&
+          std::chrono::system_clock::now() - singnal_timestamp > std::chrono::seconds(1) &&
+          !key_was_pressed) {
+        supress = true;
+      }
+      events.push_back({ key_down, vk_code });
+      lock.unlock();
+      cv.notify_one();
+      if (supress) {
+        INPUT input[3] = { {}, {}, {} };
+        input[0].type = INPUT_KEYBOARD;
+        input[0].ki.wVk = VK_CONTROL;
+        input[1].type = INPUT_KEYBOARD;
+        input[1].ki.wVk = VK_CONTROL;
+        input[1].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[2].type = INPUT_KEYBOARD;
+        input[2].ki.wVk = VK_LWIN;
+        input[2].ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(3, input, sizeof(INPUT));
+      }
+      return supress;
+    }
+
+    void was_hiden() {
+      std::lock_guard<std::mutex> lock(mutex);
+      state = Hidden;
+      events.clear();
+    }
+
+    void exit() {  
+      std::lock_guard<std::mutex> lock(mutex);
+      events.clear();
+      state = Exiting;
+      cv.notify_one();
+      thread.join();
+    }
+  private:
+    KeyEvent next() {
+      auto e = events.front();
+      events.pop_front();
+      return e;
+    }
+
+    void handle_hidden() {
+      std::unique_lock<std::mutex> lock(mutex);
+      if (events.empty())
+        cv.wait(lock);
+      if (events.empty() || state == Exiting)
+        return;
+      auto event = next();
+      if (event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN)) {
+        state = Timeout;
+        winkey_timestamp = std::chrono::system_clock::now();
+      }
+    }
+
+    void handle_timeout() {
+      std::unique_lock<std::mutex> lock(mutex);
+      auto wait_time = delay - (std::chrono::system_clock::now() - winkey_timestamp);
+      if (events.empty())
+        cv.wait_for(lock, delay);
+      if (state == Exiting)
+        return;
+      if (!events.empty() || !only_winkey_key_held() || is_start_visible()) {
+        state = Hidden;
+        return;
+      }
+      if (std::chrono::system_clock::now() - winkey_timestamp < delay)
+        return;
+      singnal_timestamp = std::chrono::system_clock::now();
+      key_was_pressed = false;
+      lock.unlock();
+      on_held_cb();
+    }
+
+    void handle_shown() {
+      std::unique_lock<std::mutex> lock(mutex);
+      if (events.empty())
+        cv.wait(lock);
+      if (events.empty() || state == Exiting)
+        return;
+      auto event = next();
+      if (!event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN) || !winkey_held()) {
+        state = Hidden;
+        lock.unlock();
+        on_relese_cb();
+        return;
+      }
+      if (event.key_down) {
+        key_was_pressed = true;
+        lock.unlock();
+        on_held_pressed_cb(event.vk_code);
+      }
+    }
+
+    void thread_proc() {
+      while (true) {
+        switch (state) {
+        case Hidden:
+          handle_hidden();
+          break;
+        case Timeout:
+          handle_timeout();
+          break;
+        case Shown:
+          handle_shown();
+          break;
+        case Exiting:
+        default:
+          return;
+        }
+      }
+    }
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::chrono::system_clock::time_point winkey_timestamp, singnal_timestamp;
+    std::chrono::milliseconds delay;
+    std::function<void()> on_held_cb, on_relese_cb;
+    std::function<void(unsigned long)> on_held_pressed_cb;
+    std::deque<KeyEvent> events;
+    enum { Hidden, Timeout, Shown, Exiting } state = Hidden;
+    bool key_was_pressed = false;
+    std::thread thread;
+  };
 
   HHOOK hook_handle = NULL;
-  std::mutex hook_mutex;
-  std::condition_variable hook_cv;
-  stdclock::time_point winkey_press_timestamp, signalled_timestamp;
-  bool winkey_pressed = false;
-  bool winkey_signaled = false;
-  std::function<void()> on_held_cb, on_relese_cb;
-  std::function<void(unsigned long)> on_held_pressed_cb;
-
-/*
-  Uses SetWindowsHookEx to install system-wide hook that intercepts keyboard
-  events. After WinKey is pressed, conditional variable is signaled and
-  held_delay_thread_proc thread waits for specified amount of time. If the key
-  is still pressed on_held callback is called.
-
-  Takes care not to call any of the callbacks more than once for each event.
-*/
-  bool other_key_was_pressed = false;
+  TargetState* target_state;
 
   LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     auto kb_hook = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    if (nCode == HC_ACTION) {
-      std::unique_lock<std::mutex> lock(hook_mutex);
-      if (kb_hook->vkCode == VK_LWIN || kb_hook->vkCode == VK_RWIN) {
-        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-          // Check if any other key is held
-          if (only_winkey_key_held() && !is_start_visible()) {
-            winkey_pressed = true;
-            other_key_was_pressed = false;
-            winkey_press_timestamp = stdclock::now();
-            lock.unlock();
-            hook_cv.notify_one();
-          }
-        } else { 
-          winkey_pressed = false;
-          if (winkey_signaled) {
-            winkey_signaled = false;
-            lock.unlock();
-            on_relese_cb();
-            if (!other_key_was_pressed && (stdclock::now() - signalled_timestamp > std::chrono::seconds(1))) {
-              INPUT input[3] = { {}, {}, {} };
-              input[0].type = INPUT_KEYBOARD;
-              input[0].ki.wVk = VK_CONTROL;
-              input[1].type = INPUT_KEYBOARD;
-              input[1].ki.wVk = VK_CONTROL;
-              input[1].ki.dwFlags = KEYEVENTF_KEYUP;
-              input[2].type = INPUT_KEYBOARD;
-              input[2].ki.wVk = VK_LWIN;
-              input[2].ki.dwFlags = KEYEVENTF_KEYUP;
-              SendInput(3, input, sizeof(INPUT));
-              return 1;
-            }
-          }
-        }
-      } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-        other_key_was_pressed = true;
-        if (winkey_signaled) {
-          if (kb_hook->vkCode == VK_OEM_COMMA ||
-              kb_hook->vkCode == 0x4C || // L
-              kb_hook->vkCode == 0x54 || // T
-              (kb_hook->vkCode >= 0x30 && kb_hook->vkCode <= 0x39)) { // 0 -9
-            // Special case - hide our window
-            winkey_pressed = false;
-            winkey_signaled = false;
-            lock.unlock();
-            on_relese_cb();
-          } else {
-            lock.unlock();
-            on_held_pressed_cb(kb_hook->vkCode);
-          }
-        }
-      }
-    }
-    return CallNextHookEx(hook_handle, nCode, wParam, lParam);
-  }
-
-  void held_delay_thread_proc(int ms) {
-    auto delay = std::chrono::milliseconds(ms);
-    while (true) {
-      std::unique_lock<std::mutex> lock(hook_mutex);
-      hook_cv.wait(lock, [] { return winkey_pressed; });
-      auto wait_time = stdclock::now() - winkey_press_timestamp;
-      while (winkey_pressed && wait_time <= delay) {
-        lock.unlock();
-        std::this_thread::sleep_for(delay - wait_time);
-        lock.lock();
-        wait_time = stdclock::now() - winkey_press_timestamp;
-      }
-      winkey_pressed = winkey_held();
-      if (winkey_pressed && only_winkey_key_held() && !other_key_was_pressed) {
-        winkey_signaled = true;
-        lock.unlock();
-        signalled_timestamp = stdclock::now();
-        on_held_cb();
-      }
+    if (nCode == HC_ACTION &&
+        (wParam == WM_KEYDOWN ||
+         wParam == WM_SYSKEYDOWN ||
+         wParam == WM_KEYUP ||
+         wParam == WM_SYSKEYUP)) {
+      bool supress = target_state->signal(kb_hook->vkCode, wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+      return supress;
+    } else {
+      return CallNextHookEx(hook_handle, nCode, wParam, lParam);
     }
   }
 }
- 
+
 void start_winkey_watcher(int ms_delay, std::function<void()> on_held, std::function<void(unsigned long)> on_held_pressed, std::function<void()> on_released) {
   if (hook_handle == NULL) {
-    on_held_cb = on_held;
-    on_held_pressed_cb = on_held_pressed;
-    on_relese_cb = on_released;
-    winkey_pressed = false;
-    winkey_signaled = false;
-    std::thread(held_delay_thread_proc, ms_delay).detach();
+    target_state = new TargetState(on_held, ms_delay, on_released, on_held_pressed);
     hook_handle = SetWindowsHookEx(WH_KEYBOARD_LL, hook_proc, GetModuleHandle(NULL), NULL);
     if (hook_handle == NULL) {
       throw std::runtime_error("Cannot install keyboard listener");
@@ -140,4 +208,9 @@ bool only_winkey_key_held() {
       return false;
   }
   return true;
+}
+
+void signal_hide() {
+  if (target_state)
+    target_state->was_hiden();
 }
