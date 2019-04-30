@@ -30,12 +30,15 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
   default:
     if (message == wm_icon_notify) {
       switch(lparam) {
-        case WM_RBUTTONDOWN: {
+        case WM_RBUTTONUP:
+        case WM_CONTEXTMENU:
+        {
           HMENU h_menu, h_sub_menu;
           h_menu = LoadMenu(reinterpret_cast<HINSTANCE>(&__ImageBase), MAKEINTRESOURCE(ID_TRAY_MENU));
           h_sub_menu = GetSubMenu(h_menu, 0);
           POINT mouse_pointer;
           GetCursorPos(&mouse_pointer);
+          SetForegroundWindow(window); // Needed for the context menu to disappear.
           TrackPopupMenu(h_sub_menu, TPM_CENTERALIGN|TPM_BOTTOMALIGN, mouse_pointer.x, mouse_pointer.y, 0, window, nullptr);
           DestroyMenu(h_menu);
         }
@@ -63,10 +66,9 @@ void start_tray_icon() {
   wc.lpfnWndProc = tray_icon_window_proc;
   wc.hIcon = icon;
   RegisterClass(&wc);
-  HWND hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,
-                        wc.lpszClassName,
+  HWND hwnd = CreateWindow( wc.lpszClassName,
                         "PToyTrayIconWindow",
-                        WS_OVERLAPPEDWINDOW,
+                        WS_OVERLAPPEDWINDOW | WS_POPUP,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         nullptr, nullptr, wc.hInstance, nullptr);
