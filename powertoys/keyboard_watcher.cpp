@@ -93,6 +93,7 @@ namespace {
         lock.lock();
         wait_time = stdclock::now() - winkey_press_timestamp;
       }
+      winkey_pressed = winkey_held();
       if (winkey_pressed && only_winkey_key_held() && !other_key_was_pressed) {
         winkey_signaled = true;
         lock.unlock();
