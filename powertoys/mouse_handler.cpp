@@ -6,7 +6,7 @@
 #include "virtual_desktops.h"
 
 namespace {
-  D2DWindowManagerPopup* maximize_poup = NULL;
+  D2DWindowManagerPopup* maximize_popup = NULL;
   RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
     auto dpi = GetDpiForWindow(hwnd);
     int width = (buttons.right - buttons.left) * 3 / 4;
@@ -18,20 +18,20 @@ namespace {
     result.bottom = buttons.bottom + height;
     // Make sure resulting rect is inside monitor.
     result = keep_rect_inside_rect(result, monitor);
-    maximize_poup->show(hwnd, result);
+    maximize_popup->show(hwnd, result);
     return result;
   }
 
   void on_mouse_out() {
-    maximize_poup->hide();
+    maximize_popup->hide();
   }
 }
 
 
 
 void start_mouse_handler() {
-  if (maximize_poup == NULL) {
-    maximize_poup = new D2DWindowManagerPopup();
-    start_mouse_watcher(300, 100, on_mouse_in, on_mouse_out);
+  if (maximize_popup == NULL) {
+    maximize_popup = new D2DWindowManagerPopup();
+    start_mouse_watcher(300, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
   }
 }

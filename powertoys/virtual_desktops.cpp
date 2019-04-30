@@ -244,6 +244,37 @@ BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID)  {
   return TRUE;
 }
 
+void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_desktop_id, GUID primary_desktop_id, int ms) {
+  if (ms>0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+  }
+
+  BOOL move_success = FALSE;
+  auto current_foreground_window = GetForegroundWindow();
+  if ( current_foreground_window != hwnd) {
+    move_success=SetForegroundWindow(hwnd);
+  }
+
+  auto manager_internal = get_manager_internal();
+  winrt::com_ptr<IVirtualDesktop> primary_desktop = nullptr;
+  winrt::com_ptr<IVirtualDesktop> old_desktop = nullptr;
+  if (manager_internal->FindDesktop(&primary_desktop_id, primary_desktop.put()) == S_OK &&
+      manager_internal->FindDesktop(&old_desktop_id, old_desktop.put()) == S_OK) {
+    if(!move_success) {
+      // Couldn't set hwnd as the ForegroundWindow or it was the same window.
+      // Will have to switch desktop manually, without animation.
+      winrt::com_ptr<IVirtualDesktop> primary_desktop;
+      winrt::check_hresult(manager_internal->SwitchDesktop(primary_desktop.get()));
+    } else {
+      // Give time for the animation to play before trying to remove the old desktop.
+      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    }
+    if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
+      manager_internal->RemoveDesktop(old_desktop.get(), primary_desktop.get());
+    }
+  }
+}
+
 void move_window_to_primary_desktop(HWND hwnd) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
@@ -268,6 +299,8 @@ void move_window_to_primary_desktop(HWND hwnd) {
     MessageBox(NULL, "Primary desktop index is out of range.", "Error", MB_OK | MB_ICONERROR);
     return;
   }
+  GUID primary_desktopId;
+  winrt::check_hresult(objDestkop->GetID(&primary_desktopId));
 
   auto collection_view = get_application_view_collection();
 
@@ -275,19 +308,45 @@ void move_window_to_primary_desktop(HWND hwnd) {
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
   winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
 
-  // Switch to the primary desktop.
-  winrt::check_hresult(manager_internal->SwitchDesktop(objDestkop.get()));
-
-  // Returning the Window to Primary Desktop. Verify if we can delete it.
-  winrt::com_ptr<IVirtualDesktop> current_desktop;
-  winrt::check_hresult(manager_internal->FindDesktop(&current_desktopId, current_desktop.put()));
-  if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&current_desktopId)) != FALSE) {
-    winrt::check_hresult(manager_internal->RemoveDesktop(current_desktop.get(), objDestkop.get()));
+  auto current_foreground_window = GetForegroundWindow();
+  if ( current_foreground_window != hwnd) {
+    // Switching the moved window to the foreground will animate the transition.
+    std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktopId, 50).detach();
+  } else {
+    auto tasklist_hwnd = FindWindow("Shell_TrayWnd", nullptr);
+    if (!SetForegroundWindow(tasklist_hwnd)) {
+      // Couldn't set TaskBar as the foreground Window. Will just move to new Desktop regardless.
+      std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktopId, 50).detach();
+    } else {
+      // Try to switch to new Desktop after a bit.
+      std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktopId, 50).detach();
+    }
   }
 
-  // Set The focus to the moved window.
-  SetForegroundWindow(hwnd);
 }
+
+void switch_to_window_desktop_after_delay(HWND hwnd, GUID new_desktop_id, int ms) {
+  if (ms>0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+  }
+  BOOL move_success = FALSE;
+  auto current_foreground_window = GetForegroundWindow();
+  if ( current_foreground_window != hwnd) {
+    move_success=SetForegroundWindow(hwnd);
+  }
+
+  if(!move_success) {
+    // Couldn't set hwnd as the ForegroundWindow or it was the same window.
+    // Will have to switch desktop manually, without animation.
+    auto manager_internal = get_manager_internal();
+    winrt::com_ptr<IVirtualDesktop> new_desktop;
+    if (manager_internal->FindDesktop(&new_desktop_id, new_desktop.put()) == S_OK) {
+      winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
+    }
+  }
+
+  ShowWindow(hwnd, SW_MAXIMIZE);
+};
 
 void move_window_to_new_desktop(HWND hwnd) {
   auto manager_internal = get_manager_internal();
@@ -305,15 +364,22 @@ void move_window_to_new_desktop(HWND hwnd) {
     moved_window_original_positions[hwnd] = original_placement;
   }
   
-  // Maximize the Window.
-  ShowWindow(hwnd, SW_MAXIMIZE);
-
   winrt::com_ptr <IApplicationView> view;
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
   winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), new_desktop.get()));
 
-  // Switch to the new desktop.
-  winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
-  // Set The focus to the moved window.
-  SetForegroundWindow(hwnd);
+  auto current_foreground_window = GetForegroundWindow();
+  if ( current_foreground_window != hwnd) {
+    // Switching the moved window to the foreground will animate the transition.
+    switch_to_window_desktop_after_delay(hwnd, id, 50);
+  } else {
+    auto tasklist_hwnd = FindWindow("Shell_TrayWnd", nullptr);
+    if (!SetForegroundWindow(tasklist_hwnd)) {
+      // Couldn't set TaskBar as the foreground Window. Will just move to new Desktop regardless.
+      switch_to_window_desktop_after_delay(hwnd, id, 50);
+    } else {
+      // Try to switch to new Desktop after a bit.
+      std::thread(switch_to_window_desktop_after_delay, hwnd, id, 50).detach();
+    }
+  }
 }

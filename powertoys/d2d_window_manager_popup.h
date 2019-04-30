@@ -17,6 +17,7 @@ public:
   D2DWindowManagerPopup();
   void show(HWND targetWindow, RECT area);
   void hide();
+  HWND get_hwnd();
   ~D2DWindowManagerPopup();
 private:
   void init();

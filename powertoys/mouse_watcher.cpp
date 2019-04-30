@@ -13,6 +13,7 @@ namespace {
   MouseOutProc mouse_out_cb;
   stdclock::time_point mousein_timestamp;
   stdclock::duration mousein_wait, mousein_sleep;
+  HWND popup_hwnd=nullptr;
   RECT popup_rect, buttons_rect;
   RECT mouse_window_rect;
   HWND mouse_window_hwnd;
@@ -59,7 +60,9 @@ namespace {
       }
       if (mousein_signalled) {
         auto current_mouse_window_rect = get_window_pos(mouse_window_hwnd);
-        if (!current_mouse_window_rect
+        if (
+          !IsWindowVisible(popup_hwnd)
+          || !current_mouse_window_rect
           || *current_mouse_window_rect != mouse_window_rect
           || !mouse_in_bounds(*mouse_pos, buttons_rect, popup_rect)) {
           mousein_signalled = false;
@@ -108,8 +111,9 @@ namespace {
 
 }
 
-void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out) {
+void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out, HWND popup) {
   if (!mouse_initialized) {
+    popup_hwnd = popup;
     mouse_initialized = true;
     mouse_in_cb = on_mouse_in;
     mouse_out_cb = on_mouse_out;

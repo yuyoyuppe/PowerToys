@@ -112,6 +112,9 @@ void D2DWindowManagerPopup::create_tooltip(HWND window) {
 
 }
 
+HWND D2DWindowManagerPopup::get_hwnd() {
+  return hwnd;
+}
 
 void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   int currentDesktopIndex = GetCurrentDesktopGUIDIndexForWindow(targetWindow);
@@ -260,7 +263,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     this_from_hwnd(window)->render();
     return DefWindowProc(window, message, wparam, lparam);
   case WM_LBUTTONDOWN:
-    //this_from_hwnd(window)->hide();
+    this_from_hwnd(window)->hide();
     if (this_from_hwnd(window)->target_window_on_primary_desktop) {
       move_window_to_new_desktop(this_from_hwnd(window)->target_window);
     } else {
