@@ -14,6 +14,7 @@ public:
   int width() const { return svg_width; }
   int height() const { return svg_height; }
   D2DSVG& toggle_element(const wchar_t* id, bool visible);
+  D2D1_RECT_F rescale(D2D1_RECT_F rect);
 protected:
   float used_scale;
   winrt::com_ptr<ID2D1SvgDocument> svg;

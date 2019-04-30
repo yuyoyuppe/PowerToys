@@ -10,7 +10,7 @@ public:
     winrt::check_hresult(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
     winrt::check_hresult(format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
   }
-  void resize(float text_size, float scale) {
+  D2DText& resize(float text_size, float scale) {
     format = nullptr;
     winrt::check_hresult(factory->CreateTextFormat(L"Segoe UI",
                                                    nullptr,
@@ -20,8 +20,20 @@ public:
                                                    text_size * scale,
                                                    L"en-us",
                                                    format.put()));
-    winrt::check_hresult(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
     winrt::check_hresult(format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+    return *this;
+  }
+  D2DText& set_aligment_left() {
+    winrt::check_hresult(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
+    return *this;
+  }
+  D2DText& set_aligment_center() {
+    winrt::check_hresult(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
+    return *this;
+  }
+  D2DText& set_aligment_right() {
+    winrt::check_hresult(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
+    return *this;
   }
   void write(ID2D1DeviceContext5* d2d_dc, D2D1_COLOR_F color, D2D1_RECT_F rect, std::wstring text) {
     winrt::com_ptr<ID2D1SolidColorBrush> brush;

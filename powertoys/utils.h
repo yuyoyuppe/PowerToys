@@ -18,3 +18,18 @@ RECT keep_rect_inside_rect(const RECT& small_rect, const RECT& big_rect);
 // Initializes and runs windows message loop
 int run_message_loop();
 void ShowLastErrorMessage(LPTSTR lpszFunction, DWORD dw);
+
+enum WindowState {
+  UNKNONW,
+  MINIMIZED,
+  MAXIMIZED,
+  SNAPED_TOP_LEFT,
+  SNAPED_LEFT,
+  SNAPED_BOTTOM_LEFT,
+  SNAPED_TOP_RIGHT,
+  SNAPED_RIGHT,
+  SNAPED_BOTTOM_RIGHT,
+  RESTORED
+};
+
+WindowState get_window_state(HWND hwnd);

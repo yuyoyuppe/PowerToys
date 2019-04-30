@@ -84,3 +84,12 @@ D2DSVG& D2DSVG::toggle_element(const wchar_t* id, bool visible) {
   element->SetAttributeValue(L"display", visible ? D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE : D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
   return *this;
 }
+
+D2D1_RECT_F D2DSVG::rescale(D2D1_RECT_F rect) {
+  D2D1_RECT_F result;
+  auto src = reinterpret_cast<D2D1_POINT_2F*>(&rect);
+  auto dst = reinterpret_cast<D2D1_POINT_2F*>(&result);
+  dst[0] = src[0] * transform;
+  dst[1] = src[1] * transform;
+  return result;
+}
