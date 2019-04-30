@@ -29,6 +29,7 @@ namespace {
            (vk_code >= 0x30 && vk_code <= 0x39))) {
         state = Hidden;
         on_relese_cb();
+        return false;
       }
       if (!events.empty() && events.back().key_down == key_down && events.back().vk_code == vk_code)
         return false;
@@ -97,6 +98,13 @@ namespace {
         cv.wait_for(lock, delay);
       if (state == Exiting)
         return;
+      while (!events.empty()) {
+        auto event = events.front();
+        if (event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN))
+          events.pop_front();
+        else
+          break;
+      }
       if (!events.empty() || !only_winkey_key_held() || is_start_visible()) {
         state = Hidden;
         return;
@@ -105,6 +113,7 @@ namespace {
         return;
       singnal_timestamp = std::chrono::system_clock::now();
       key_was_pressed = false;
+      state = Shown;
       lock.unlock();
       on_held_cb();
     }
