@@ -3,7 +3,7 @@
 #include "monitors.h"
 #include "tasklist_positions.h"
 #include "keyboard_watcher.h"
-
+#include "start_visible.h"
 
 D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
   D2DSVG::load(filename, d2d_dc);
@@ -80,15 +80,34 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), total_monitor({})
-{ }
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), total_monitor({}) {
+  tasklist_thread = std::thread([&] {
+    while (running) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      if (visible) {
+        // First check if mouse is not over start menu, it causes problems
+        POINT mouse;
+        GetCursorPos(&mouse);
+        wchar_t class_name[32];
+        GetClassNameW(WindowFromPoint(mouse), class_name, 32);
+        class_name[31] = 0;
+        if (wcscmp(class_name, L"MSTaskListWClass") == 0)
+          continue;
+        auto buttons = tasklist.get_buttons();
+        std::unique_lock<std::recursive_mutex> lock(mutex);
+        tasklist_buttons.swap(buttons);
+      }
+    }
+  });
+}
 
 void D2DOverlayWindow::show(HWND active_window) {
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   if (visible) {
     return;
   }
+  tasklist_buttons.clear();
   visible = true;
-  std::unique_lock<std::recursive_mutex> lock(mutex);
   this->active_window = active_window;
   auto old_bck = colors.start_color_menu;
   if (initialized && colors.update()) {
@@ -134,17 +153,8 @@ void D2DOverlayWindow::show(HWND active_window) {
     DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
   }
   animation.reset();
-  tasklist_buttons = tasklist.get_buttons();
   auto primary_screen = get_primary_monitor();
   update_timestamp = std::chrono::system_clock::now();
-  tasklist_thread = std::thread([&] {
-    while (visible) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      auto buttons = tasklist.get_buttons();
-      std::unique_lock<std::recursive_mutex> lock(mutex);
-      tasklist_buttons.swap(buttons);
-    }
-  });
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
@@ -238,10 +248,9 @@ void D2DOverlayWindow::on_show() {
 }
 
 void D2DOverlayWindow::on_hide() {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  if (!visible)
+    return;
   visible = false;
-  if (tasklist_thread.joinable())
-    tasklist_thread.join();
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
@@ -358,7 +367,7 @@ void D2DOverlayWindow::hide_thumbnail() {
 }
 
 void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
-  if (!visible || !winkey_held()) {
+  if (!visible || !winkey_held() || is_start_visible()) {
     hide();
     return;
   }

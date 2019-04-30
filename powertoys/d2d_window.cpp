@@ -70,7 +70,6 @@ void D2DWindow::show(int x, int y, int width, int height) {
 }
 
 void D2DWindow::hide() {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
   ShowWindow(hwnd, SW_HIDE);
   on_hide();
 }

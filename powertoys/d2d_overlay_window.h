@@ -77,6 +77,10 @@ public:
   D2DOverlayWindow();
   void show(HWND active_window);
   void animate(int vk_code);
+  ~D2DOverlayWindow() {
+    running = false;
+    tasklist_thread.join();
+  }
 private:
   void animate(int vk_code, int offset);
   bool show_thumbnail(const RECT& rect_and_scale);
@@ -88,6 +92,7 @@ private:
   virtual void on_hide() override;
 
   bool visible = false;
+  bool running = true;
   std::vector<AnimateKeys> key_animations;
   std::vector<MonitorInfo> monitors;
   MonitorInfo total_monitor;
