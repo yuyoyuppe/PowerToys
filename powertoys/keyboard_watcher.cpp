@@ -125,6 +125,8 @@ namespace {
       if (events.empty() || state == Exiting)
         return;
       auto event = next();
+      if (event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN))
+        return;
       if (!event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN) || !winkey_held()) {
         state = Hidden;
         lock.unlock();
@@ -179,7 +181,7 @@ namespace {
          wParam == WM_KEYUP ||
          wParam == WM_SYSKEYUP)) {
       bool supress = target_state->signal(kb_hook->vkCode, wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
-      return supress;
+      return supress ? 1 : 0;
     } else {
       return CallNextHookEx(hook_handle, nCode, wParam, lParam);
     }
