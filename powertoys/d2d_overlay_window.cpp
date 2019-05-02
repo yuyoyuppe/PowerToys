@@ -80,7 +80,7 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), total_monitor({}) {
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), tumbnail_fadein(0.15, 0, 255), total_monitor({}) {
   tasklist_thread = std::thread([&] {
     while (running) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -149,6 +149,7 @@ void D2DOverlayWindow::show(HWND active_window) {
   animation.reset();
   auto primary_screen = get_primary_monitor();
   update_timestamp = std::chrono::system_clock::now();
+  thubnail_fadein_started = false;
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
@@ -346,9 +347,10 @@ bool D2DOverlayWindow::show_thumbnail(const RECT& rect) {
   if (!thumbnail)
     return false;
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
-  thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION;
+  thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION | DWM_TNP_OPACITY;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
+  thumb_properties.opacity = (int)tumbnail_fadein.value();
   thumb_properties.rcDestination = rect;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
     return false;
@@ -450,6 +452,10 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     // If the animation is done show the thumbnail
     //   we cannot animate the thumbnail, the animation lags behind
     if (anim_value == 0) {
+      if (!thubnail_fadein_started) {
+        tumbnail_fadein.reset();
+        thubnail_fadein_started = true;
+      }
       minature_shown = show_thumbnail(thumbnail_pos);
     }
   } else {

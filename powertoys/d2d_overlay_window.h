@@ -126,7 +126,8 @@ private:
   int monitor_dx = 0, monitor_dy = 0;
   D2DText text;
   WindowsColors colors;
-  Animation animation;
+  bool thubnail_fadein_started = false;
+  Animation animation, tumbnail_fadein;
   RECT window_rect = {};
   Tasklist tasklist;
   std::vector<TasklistButton> tasklist_buttons;
