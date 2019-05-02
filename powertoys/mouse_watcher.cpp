@@ -60,17 +60,12 @@ namespace {
     return mouse_pos.x >= px_left && mouse_pos.x <= px_right;
   }
 
-  RECT use_dwmwa_caption_strategy (HWND hwnd) {
+  RECT use_dwmwa_caption_strategy (HWND hwnd, std::optional<RECT>& window_rect) {
     // Try to get caption buttons by using DWMWA_CAPTION_BUTTON_BOUNDS.
     RECT result = { 0 };
     DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &result, sizeof(RECT));
 
-    if (result.bottom == result.top && result.left == result.right) {
-      return result;
-    }
-
-    auto window_rect = get_window_pos(hwnd);
-    if (!window_rect) {
+    if (result.bottom == result.top || result.left == result.right) {
       return result;
     }
 
@@ -86,13 +81,9 @@ namespace {
     return result;
   }
 
-  RECT use_top_right_zone_strategy(HWND hwnd) {
+  RECT use_top_right_zone_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
     RECT result = { 0 };
 
-    auto window_rect = get_window_pos(hwnd);
-    if (!window_rect) {
-      return result;
-    }
     auto dpi = GetDpiForWindow(hwnd);
     int buttons_width = 170 * dpi / 120;
     int horizontal_padding = 20 * dpi / 120;
@@ -105,6 +96,7 @@ namespace {
   }
 
   void initialize_ui_automation_strategy() {
+    //TODO: Definitely clean this up after experimentation.
     IUIAutomationCondition* p_condition_maximize_restore_id = NULL;
     IUIAutomationCondition* p_condition_maximize_restore_name = NULL;
     VARIANT var_prop_maximize_restore_string;
@@ -120,6 +112,16 @@ namespace {
     VARIANT var_prop_restore_string;
     var_prop_restore_string.vt = VT_BSTR;
     var_prop_restore_string.bstrVal = SysAllocString(L"Restore");
+    IUIAutomationCondition* p_condition_maximizerestore_id = NULL;
+    IUIAutomationCondition* p_condition_maximizerestore_name = NULL;
+    VARIANT var_prop_maximizerestore_string;
+    var_prop_maximizerestore_string.vt = VT_BSTR;
+    var_prop_maximizerestore_string.bstrVal = SysAllocString(L"MaximizeRestore");
+    IUIAutomationCondition* p_condition_maximizerestorebutton_id = NULL;
+    IUIAutomationCondition* p_condition_maximizerestorebutton_name = NULL;
+    VARIANT var_prop_maximizerestorebutton_string;
+    var_prop_maximizerestorebutton_string.vt = VT_BSTR;
+    var_prop_maximizerestorebutton_string.bstrVal = SysAllocString(L"MaximizeRestoreButton");
     IUIAutomationCondition* p_conditions_is_offscreen = NULL;
     VARIANT var_prop_false_bool;
     var_prop_false_bool.vt = VT_BOOL;
@@ -129,8 +131,12 @@ namespace {
     var_prop_true_bool.vt = VT_BOOL;
     var_prop_true_bool.boolVal = VARIANT_TRUE;
     IUIAutomationCondition* p_conditions_joined_name_1 = NULL;
+    IUIAutomationCondition* p_conditions_joined_name_2 = NULL;
+    IUIAutomationCondition* p_conditions_joined_name_3 = NULL;
     IUIAutomationCondition* p_conditions_joined_name_top = NULL;
     IUIAutomationCondition* p_conditions_joined_id_1 = NULL;
+    IUIAutomationCondition* p_conditions_joined_id_2 = NULL;
+    IUIAutomationCondition* p_conditions_joined_id_3 = NULL;
     IUIAutomationCondition* p_conditions_joined_id_top = NULL;
     IUIAutomationCondition* p_conditions_joined_visible_and_condition = NULL;
     HRESULT hr;
@@ -158,6 +164,14 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximizerestore_string, &p_condition_maximizerestore_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximizerestorebutton_string, &p_condition_maximizerestorebutton_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
     hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_name);
     if (FAILED(hr)) {
       goto cleanup;
@@ -170,7 +184,23 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_id, p_condition_restore_id, &p_conditions_joined_id_1);
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximizerestore_string, &p_condition_maximizerestore_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximizerestorebutton_string, &p_condition_maximizerestorebutton_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximizerestore_id, p_condition_maximizerestorebutton_id, &p_conditions_joined_id_3);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_restore_id, p_conditions_joined_id_3, &p_conditions_joined_id_2);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_id, p_conditions_joined_id_2, &p_conditions_joined_id_1);
     if (FAILED(hr)) {
       goto cleanup;
     }
@@ -178,7 +208,15 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_name, p_condition_restore_name, &p_conditions_joined_name_1);
+    hr = ui_automation->CreateOrCondition(p_condition_maximizerestore_name, p_condition_maximizerestorebutton_name, &p_conditions_joined_name_3);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_restore_name, p_conditions_joined_name_3, &p_conditions_joined_name_2);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_name, p_conditions_joined_name_2, &p_conditions_joined_name_1);
     if (FAILED(hr)) {
       goto cleanup;
     }
@@ -213,16 +251,32 @@ namespace {
       p_condition_maximize_id->Release();
     if (p_condition_restore_id != NULL)
       p_condition_restore_id->Release();
+    if (p_condition_maximizerestore_id != NULL)
+      p_condition_maximizerestore_id->Release();
+    if (p_condition_maximizerestorebutton_id != NULL)
+      p_condition_maximizerestorebutton_id->Release();
     if (p_condition_maximize_restore_name != NULL)
       p_condition_maximize_restore_name->Release();
     if (p_condition_maximize_name != NULL)
       p_condition_maximize_name->Release();
     if (p_condition_restore_name != NULL)
       p_condition_restore_name->Release();
+    if (p_condition_maximizerestore_name != NULL)
+      p_condition_maximizerestore_name->Release();
+    if (p_condition_maximizerestorebutton_name != NULL)
+      p_condition_maximizerestorebutton_name->Release();
+    if (p_conditions_joined_id_3 != NULL)
+      p_conditions_joined_id_3->Release();
+    if (p_conditions_joined_id_2 != NULL)
+      p_conditions_joined_id_2->Release();
     if (p_conditions_joined_id_1 != NULL)
       p_conditions_joined_id_1->Release();
     if (p_conditions_joined_id_top != NULL)
       p_conditions_joined_id_top->Release();
+    if (p_conditions_joined_name_3 != NULL)
+      p_conditions_joined_name_3->Release();
+    if (p_conditions_joined_name_2 != NULL)
+      p_conditions_joined_name_2->Release();
     if (p_conditions_joined_name_1 != NULL)
       p_conditions_joined_name_1->Release();
     if (p_conditions_joined_name_top != NULL)
@@ -285,7 +339,7 @@ namespace {
     return p_found;
   }
 
-  RECT use_ui_automation_strategy(HWND hwnd) {
+  RECT use_ui_automation_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
     // A strategy to find the maximize button using UIAutomation.
     RECT result = { 0 };
     IUIAutomationElement* hwnd_UI_element = NULL;
@@ -310,6 +364,10 @@ namespace {
     }
     if (ui_automation_strategy_element_found != NULL) {
       result = get_bounding_rectangle_from_hwnd_UI_element(ui_automation_strategy_element_found);
+      if (result.left != result.right && result.bottom != result.top) {
+        // Adjust top to the top of the Window. UIAutomation seems to detect the lower half of the button sometimes.
+        result.top = window_rect->top;
+      }
     }
   cleanup:
     if (hwnd_UI_element != NULL)
@@ -359,14 +417,14 @@ namespace {
         continue;
       }
 
-      buttons_rect = use_ui_automation_strategy(mouse_window);
-      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
-        buttons_rect = use_dwmwa_caption_strategy(mouse_window);
+      buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
+        buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
       }
-      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
-        buttons_rect = use_top_right_zone_strategy(mouse_window);
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
+        buttons_rect = use_top_right_zone_strategy(mouse_window, window_rect);
       }
-      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         continue;
       }
 
