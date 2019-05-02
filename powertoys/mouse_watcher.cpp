@@ -2,6 +2,7 @@
 #include "mouse_watcher.h"
 #include "virtual_desktops.h"
 #include "monitors.h"
+#include <uiautomation.h>
 
 namespace {
   using stdclock = std::chrono::system_clock;
@@ -17,6 +18,18 @@ namespace {
   RECT popup_rect, buttons_rect;
   RECT mouse_window_rect;
   HWND mouse_window_hwnd;
+
+  IUIAutomation* ui_automation = nullptr;
+  IUIAutomationCondition* p_conditions_joined_top_idAutomation = NULL;
+  IUIAutomationCondition* p_conditions_joined_top_nameAutomation = NULL;
+
+  HRESULT InitializeUIAutomation(IUIAutomation **ppAutomation)
+  {
+    return CoCreateInstance(CLSID_CUIAutomation, NULL,
+      CLSCTX_INPROC_SERVER, IID_IUIAutomation,
+      reinterpret_cast<void**>(ppAutomation));
+  };
+
 
   bool mouse_in_rect(POINT mouse_pos, RECT rect) {
     return mouse_pos.x >= rect.left && mouse_pos.x <= rect.right &&
@@ -47,7 +60,267 @@ namespace {
     return mouse_pos.x >= px_left && mouse_pos.x <= px_right;
   }
 
+  RECT use_dwmwa_caption_strategy (HWND hwnd) {
+    // Try to get caption buttons by using DWMWA_CAPTION_BUTTON_BOUNDS.
+    RECT result = { 0 };
+    DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &result, sizeof(RECT));
+
+    if (result.bottom == result.top && result.left == result.right) {
+      return result;
+    }
+
+    auto window_rect = get_window_pos(hwnd);
+    if (!window_rect) {
+      return result;
+    }
+
+    result.right += window_rect->left;
+    result.left += window_rect->left;
+    result.bottom += window_rect->top;
+    result.top += window_rect->top;
+
+    long width = result.right - result.left;
+    result.left += width / 3;
+    result.right -= width / 3;
+
+    return result;
+  }
+
+  RECT use_top_right_zone_strategy(HWND hwnd) {
+    RECT result = { 0 };
+
+    auto window_rect = get_window_pos(hwnd);
+    if (!window_rect) {
+      return result;
+    }
+    auto dpi = GetDpiForWindow(hwnd);
+    int buttons_width = 170 * dpi / 120;
+    int horizontal_padding = 20 * dpi / 120;
+    int buttons_height = 37 * dpi / 120;
+    result.left = window_rect->right - buttons_width + horizontal_padding;
+    result.top = window_rect->top;
+    result.right = window_rect->right - horizontal_padding;
+    result.bottom = window_rect->top + buttons_height;
+    return result;
+  }
+
+  void initialize_ui_automation_strategy() {
+    IUIAutomationCondition* p_condition_maximize_restore_id = NULL;
+    IUIAutomationCondition* p_condition_maximize_restore_name = NULL;
+    VARIANT var_prop_maximize_restore_string;
+    var_prop_maximize_restore_string.vt = VT_BSTR;
+    var_prop_maximize_restore_string.bstrVal = SysAllocString(L"Maximize-Restore");
+    IUIAutomationCondition* p_condition_maximize_id = NULL;
+    IUIAutomationCondition* p_condition_maximize_name = NULL;
+    VARIANT var_prop_maximize_string;
+    var_prop_maximize_string.vt = VT_BSTR;
+    var_prop_maximize_string.bstrVal = SysAllocString(L"Maximize");
+    IUIAutomationCondition* p_condition_restore_id = NULL;
+    IUIAutomationCondition* p_condition_restore_name = NULL;
+    VARIANT var_prop_restore_string;
+    var_prop_restore_string.vt = VT_BSTR;
+    var_prop_restore_string.bstrVal = SysAllocString(L"Restore");
+    IUIAutomationCondition* p_conditions_is_offscreen = NULL;
+    VARIANT var_prop_false_bool;
+    var_prop_false_bool.vt = VT_BOOL;
+    var_prop_false_bool.boolVal = VARIANT_FALSE;
+    IUIAutomationCondition* p_conditions_is_enabled = NULL;
+    VARIANT var_prop_true_bool;
+    var_prop_true_bool.vt = VT_BOOL;
+    var_prop_true_bool.boolVal = VARIANT_TRUE;
+    IUIAutomationCondition* p_conditions_joined_name_1 = NULL;
+    IUIAutomationCondition* p_conditions_joined_name_top = NULL;
+    IUIAutomationCondition* p_conditions_joined_id_1 = NULL;
+    IUIAutomationCondition* p_conditions_joined_id_top = NULL;
+    IUIAutomationCondition* p_conditions_joined_visible_and_condition = NULL;
+    HRESULT hr;
+    /*
+    if (var_prop_maximize_restore_string.bstrVal == NULL) {
+      goto cleanup;
+    }
+    */
+
+    CoInitialize(nullptr);
+    hr = InitializeUIAutomation(&ui_automation);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximize_string, &p_condition_maximize_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_restore_string, &p_condition_restore_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximize_string, &p_condition_maximize_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_restore_string, &p_condition_restore_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_id, p_condition_restore_id, &p_conditions_joined_id_1);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_restore_id, p_conditions_joined_id_1, &p_conditions_joined_id_top);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_name, p_condition_restore_name, &p_conditions_joined_name_1);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_maximize_restore_name, p_conditions_joined_name_1, &p_conditions_joined_name_top);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_IsOffscreenPropertyId, var_prop_false_bool, &p_conditions_is_offscreen);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_IsEnabledPropertyId, var_prop_true_bool, &p_conditions_is_enabled);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateAndCondition(p_conditions_is_enabled, p_conditions_is_offscreen, &p_conditions_joined_visible_and_condition);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateAndCondition(p_conditions_joined_id_top, p_conditions_joined_visible_and_condition, &p_conditions_joined_top_idAutomation);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateAndCondition(p_conditions_joined_name_top, p_conditions_joined_visible_and_condition, &p_conditions_joined_top_nameAutomation);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+  cleanup:
+    if (p_condition_maximize_restore_id != NULL)
+      p_condition_maximize_restore_id->Release();
+    if (p_condition_maximize_id != NULL)
+      p_condition_maximize_id->Release();
+    if (p_condition_restore_id != NULL)
+      p_condition_restore_id->Release();
+    if (p_condition_maximize_restore_name != NULL)
+      p_condition_maximize_restore_name->Release();
+    if (p_condition_maximize_name != NULL)
+      p_condition_maximize_name->Release();
+    if (p_condition_restore_name != NULL)
+      p_condition_restore_name->Release();
+    if (p_conditions_joined_id_1 != NULL)
+      p_conditions_joined_id_1->Release();
+    if (p_conditions_joined_id_top != NULL)
+      p_conditions_joined_id_top->Release();
+    if (p_conditions_joined_name_1 != NULL)
+      p_conditions_joined_name_1->Release();
+    if (p_conditions_joined_name_top != NULL)
+      p_conditions_joined_name_top->Release();
+    if (p_conditions_is_offscreen != NULL)
+      p_conditions_is_offscreen->Release();
+    if (p_conditions_is_enabled != NULL)
+      p_conditions_is_enabled->Release();
+    if (p_conditions_joined_visible_and_condition != NULL)
+      p_conditions_joined_visible_and_condition->Release();
+    //VariantClear(&var_prop_maximize_restore_string);
+    //VariantClear(&var_prop_maximize_string);
+    //VariantClear(&var_prop_restore_string);
+  }
+
+  HWND ui_automation_strategy_last_hwnd = NULL;
+  IUIAutomationElement* ui_automation_strategy_element_found = NULL;
+
+  RECT get_bounding_rectangle_from_hwnd_UI_element(IUIAutomationElement* query_ui_element) {
+    RECT result = { 0 };
+    VARIANT varBoundedRectProp;
+    varBoundedRectProp.vt = VT_NULL;
+    DOUBLE coord_value;
+    LONG pos;
+    HRESULT hr;
+
+    if (query_ui_element == NULL) {
+      goto cleanup;
+    }
+
+    hr = query_ui_element->GetCurrentPropertyValue(UIA_BoundingRectanglePropertyId, &varBoundedRectProp);
+    if (FAILED(hr) || varBoundedRectProp.vt != (VT_R8 | VT_ARRAY)) {
+      goto cleanup;
+    }
+
+    pos = 0;
+    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    result.left = coord_value;
+    pos = 1;
+    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    result.top = coord_value;
+    pos = 2;
+    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    result.right = result.left + coord_value;
+    pos = 3;
+    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    result.bottom = result.top + coord_value;
+
+  cleanup:
+    VariantClear(&varBoundedRectProp);
+    return result;
+  }
+
+  IUIAutomationElement* find_element_ui_automation_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* pcondition) {
+    RECT result = { 0 };
+    IUIAutomationElement* p_found = NULL;
+
+    hwnd_UI_element->FindFirst(TreeScope_Descendants, pcondition, &p_found);
+
+    return p_found;
+  }
+
+  RECT use_ui_automation_strategy(HWND hwnd) {
+    // A strategy to find the maximize button using UIAutomation.
+    RECT result = { 0 };
+    IUIAutomationElement* hwnd_UI_element = NULL;
+    HRESULT hr;
+
+    if (ui_automation_strategy_last_hwnd != hwnd) {
+      ui_automation_strategy_last_hwnd = hwnd;
+      // We haven't searched this window for the maximize button recently. Query it.
+      // This is an expensive operation for some Windows and may block them.
+      if (ui_automation_strategy_element_found != NULL) {
+        ui_automation_strategy_element_found->Release();
+        ui_automation_strategy_element_found = NULL;
+      }
+      hr = ui_automation->ElementFromHandle(hwnd, &hwnd_UI_element);
+      if (hr != S_OK || hwnd_UI_element == NULL) {
+        goto cleanup;
+      }
+      ui_automation_strategy_element_found = find_element_ui_automation_strategy(hwnd_UI_element, p_conditions_joined_top_idAutomation);
+      if (ui_automation_strategy_element_found == NULL) {
+        ui_automation_strategy_element_found = find_element_ui_automation_strategy(hwnd_UI_element, p_conditions_joined_top_nameAutomation);
+      }
+    }
+    if (ui_automation_strategy_element_found != NULL) {
+      result = get_bounding_rectangle_from_hwnd_UI_element(ui_automation_strategy_element_found);
+    }
+  cleanup:
+    if (hwnd_UI_element != NULL)
+      hwnd_UI_element->Release();
+    return result;
+  }
+
+
   void mouse_thread_proc() {
+    initialize_ui_automation_strategy();
+
     while (true) {
       std::this_thread::sleep_for(mousein_sleep);
       auto mouse_pos = get_mouse_pos();
@@ -82,15 +355,21 @@ namespace {
         continue;
       }
       auto window_rect = get_window_pos(mouse_window);
-      if (!window_rect)
+      if (!window_rect) {
         continue;
-      auto dpi = GetDpiForWindow(mouse_window);
-      int buttons_width = 185 * dpi / 120;
-      int buttons_height = 37 * dpi / 120;
-      buttons_rect.left = window_rect->right - buttons_width;
-      buttons_rect.top = window_rect->top;
-      buttons_rect.right = window_rect->right;
-      buttons_rect.bottom = window_rect->top + buttons_height;
+      }
+
+      buttons_rect = use_ui_automation_strategy(mouse_window);
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
+        buttons_rect = use_dwmwa_caption_strategy(mouse_window);
+      }
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
+        buttons_rect = use_top_right_zone_strategy(mouse_window);
+      }
+      if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.left) {
+        continue;
+      }
+
       if (mouse_in_rect(*mouse_pos, buttons_rect)) {
         if (mousein_reset) {
           mousein_reset = false;
