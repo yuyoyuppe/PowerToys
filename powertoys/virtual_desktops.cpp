@@ -344,7 +344,6 @@ void switch_to_window_desktop_after_delay(HWND hwnd, GUID new_desktop_id, int ms
     }
   }
 
-  ShowWindow(hwnd, SW_MAXIMIZE);
 };
 
 void move_window_to_new_desktop(HWND hwnd) {
@@ -362,6 +361,8 @@ void move_window_to_new_desktop(HWND hwnd) {
   if (GetWindowPlacement(hwnd, &original_placement)) {
     moved_window_original_positions[hwnd] = original_placement;
   }
+
+  ShowWindow(hwnd, SW_MAXIMIZE); // Maximize before moving.
   
   winrt::com_ptr <IApplicationView> view;
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
