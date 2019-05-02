@@ -270,6 +270,11 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
     }
     if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
       manager_internal->RemoveDesktop(old_desktop.get(), primary_desktop.get());
+    } else {
+      if(move_success) {
+        // Making sure we do switch desktops, in case the animation doesn't play.
+        winrt::check_hresult(manager_internal->SwitchDesktop(primary_desktop.get()));
+      }
     }
   }
 }
@@ -334,14 +339,14 @@ void switch_to_window_desktop_after_delay(HWND hwnd, GUID new_desktop_id, int ms
     move_success=SetForegroundWindow(hwnd);
   }
 
-  if(!move_success) {
-    // Couldn't set hwnd as the ForegroundWindow or it was the same window.
-    // Will have to switch desktop manually, without animation.
-    auto manager_internal = get_manager_internal();
-    winrt::com_ptr<IVirtualDesktop> new_desktop;
-    if (manager_internal->FindDesktop(&new_desktop_id, new_desktop.put()) == S_OK) {
-      winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
-    }
+  // In the case we couldn't set hwnd as the ForegroundWindow or it was the same window.
+  // Will have to switch desktop manually, without animation.
+  std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+  auto manager_internal = get_manager_internal();
+  winrt::com_ptr<IVirtualDesktop> new_desktop;
+  if (manager_internal->FindDesktop(&new_desktop_id, new_desktop.put()) == S_OK) {
+    winrt::check_hresult(manager_internal->SwitchDesktop(new_desktop.get()));
   }
 
 };
