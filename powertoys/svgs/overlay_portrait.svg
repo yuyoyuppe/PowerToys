@@ -125,11 +125,11 @@
                     <g id="Group-2-Copy-8" transform="translate(0.000000, 239.000000)">
                         <g id="Group" transform="translate(67.090465, 0.000000)">
                             <rect id="Rectangle" fill="#000000" x="0" y="0" width="38.3374083" height="39"></rect>
-                            <polygon id="KeyLeft_1" fill="#FFFFFF" transform="translate(17.731051, 19.987500) rotate(-90.000000) translate(-17.731051, -19.987500) " points="17.7310513 16.6329768 22.1185513 23.3420232 13.3435513 23.3420232"></polygon>
+                            <polygon id="KeyLeft_noactive" fill="#FFFFFF" transform="translate(17.731051, 19.987500) rotate(-90.000000) translate(-17.731051, -19.987500) " points="17.7310513 16.6329768 22.1185513 23.3420232 13.3435513 23.3420232"></polygon>
                         </g>
                         <g id="Group-Copy-2" transform="translate(134.180929, 0.000000)">
                             <rect id="Rectangle" fill="#000000" x="0" y="0" width="38.3374083" height="39"></rect>
-                            <polygon id="KeyRight_1" fill="#FFFFFF" transform="translate(20.606357, 19.987500) scale(-1, 1) rotate(-90.000000) translate(-20.606357, -19.987500) " points="20.606357 16.6329768 24.993857 23.3420232 16.218857 23.3420232"></polygon>
+                            <polygon id="KeyRight_noactive" fill="#FFFFFF" transform="translate(20.606357, 19.987500) scale(-1, 1) rotate(-90.000000) translate(-20.606357, -19.987500) " points="20.606357 16.6329768 24.993857 23.3420232 16.218857 23.3420232"></polygon>
                         </g>
                         <g id="Group-Copy">
                             <rect id="Rectangle" fill="#000000" x="0" y="0" width="38.3374083" height="39"></rect>
