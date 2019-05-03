@@ -560,10 +560,10 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     down = L"Minimize";
     break;
   default:
-    left = L"Snap left";
-    right = L"Snap right";
-    up = L"Maximize";
-    down = L"Minimize";
+    left = L"";
+    right = L"";
+    up = L"";
+    down = L"";
   }
   auto text_color = D2D1::ColorF(colors.light_mode ? 0x222222 : 0xDDDDDD, minature_shown || window_state == MINIMIZED ? 1.0 : 0.3);
   use_overlay->find_element(L"KeyUpGroup")->SetAttributeValue(L"fill-opacity", up.empty() ? 0.3f : 1.0f);
