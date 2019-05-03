@@ -246,6 +246,7 @@ void D2DWindowManagerPopup::render() {
 
 
 LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+  D2DWindowManagerPopup* _this;
   switch (message) {
   case WM_NCCREATE: {
     auto create_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
@@ -278,7 +279,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     return 0;
   case WM_MOUSEMOVE:
     // Enter the window
-    D2DWindowManagerPopup* _this = this_from_hwnd(window);
+    _this = this_from_hwnd(window);
     if(!_this->should_highlight) {
       InvalidateRect(window, NULL, TRUE);
     }
@@ -287,7 +288,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
 	  return DefWindowProc(window, message, wparam, lparam);
   case WM_MOUSELEAVE:
     // Leave the window
-    D2DWindowManagerPopup* _this = this_from_hwnd(window);
+    _this = this_from_hwnd(window);
     if(_this->should_highlight) {
       InvalidateRect(window, NULL, TRUE);
     }
