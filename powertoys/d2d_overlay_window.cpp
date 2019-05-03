@@ -80,7 +80,7 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.15), tumbnail_fadein(0.15, 0, 255), total_monitor({}) {
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.1), tumbnail_fadein(0.1, 0, 255), total_monitor({}) {
   tasklist_thread = std::thread([&] {
     while (running) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -375,24 +375,25 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     }
   }
   d2d_dc->Clear();
-  int x_offset = 0, y_offset = 0;
+  int x_offset = 0, y_offset = 0, dimention = 0;
   double anim_value = 1 - animation.value();
+  anim_value = min(anim_value, 0.8);
   if (!tasklist_buttons.empty()) {
     if (tasklist_buttons[0].x <= window_rect.left) { // taskbar on left
-      x_offset = (int)(-anim_value * window_width);
+      x_offset = (int)(-anim_value * use_overlay->width() * use_overlay->get_scale());
     }
     if (tasklist_buttons[0].x >= window_rect.right) { // taskbar on right
-      x_offset = (int)(anim_value * window_width);
+      x_offset = (int)(anim_value * use_overlay->width() * use_overlay->get_scale());
     }
     if (tasklist_buttons[0].y <= window_rect.top) { // taskbar on top
-      y_offset = (int)(-anim_value * window_height);
+      y_offset = (int)(-anim_value * use_overlay->height() * use_overlay->get_scale());
     }
     if (tasklist_buttons[0].y >= window_rect.bottom) { // taskbar on bottom
-      y_offset = (int)(anim_value * window_height);
+      y_offset = (int)(anim_value * use_overlay->height() * use_overlay->get_scale());
     }
   } else {
     x_offset = 0;
-    y_offset = (int)(anim_value * window_height);
+    y_offset = (int)(anim_value * use_overlay->height() * use_overlay->get_scale());
   }
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
