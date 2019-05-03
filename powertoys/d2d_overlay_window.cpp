@@ -467,7 +467,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     render_monitors = true;
   // render the monitors
   if (render_monitors) {
-    brushColor = D2D1::ColorF(colors.start_color_menu, minature_shown ? 1.0f : 0.3f);
+    brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? 1.0f : 0.3f);
     brush = nullptr;
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
     for (auto& monitor : monitors) {

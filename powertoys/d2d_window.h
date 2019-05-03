@@ -11,6 +11,7 @@
 #include <string>
 #include "tasklist_positions.h"
 #include "d2d_svg.h"
+#include <winrt/Windows.UI.ViewManagement.h>
 
 /*
   Usage:
@@ -64,6 +65,18 @@ struct WindowsColors {
   WindowsColors() {
     update();
   }
+  
+  static DWORD packed_color_from_ui_color(winrt::Windows::UI::Color color) {
+    return ((DWORD)color.R << 16) | ((DWORD)color.G << 8) | ((DWORD)color.B);
+  }
+  static winrt::Windows::UI::Color get_accent_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::Accent);
+  }
+  static winrt::Windows::UI::Color get_background_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::Background);
+  }
   static DWORD unpack_color(DWORD color) {
     // registry keeps the colors in ABGR format, we want RGB
     auto r = (color & 0xFF);
@@ -76,52 +89,27 @@ struct WindowsColors {
     DWORD data_size = sizeof(DWORD), stored_type;
     DWORD new_accent_color_menu = 0;
     DWORD new_start_color_menu = 0;
+    DWORD new_desktop_fill_color = 0;
     bool new_light_mode = true;
-    bool use_default = false;
-    if (RegGetValue(HKEY_CURRENT_USER,
-                    R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
-                    "AccentColorMenu",
-                    RRF_RT_REG_DWORD,
-                    &stored_type,
-                    &new_accent_color_menu,
-                    &data_size) != ERROR_SUCCESS)
-      use_default = true;
-    new_accent_color_menu = unpack_color(new_accent_color_menu);
-    data_size = sizeof(DWORD);
-    if (RegGetValue(HKEY_CURRENT_USER,
-                    R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
-                    "StartColorMenu",
-                    RRF_RT_REG_DWORD,
-                    &stored_type,
-                    &new_start_color_menu,
-                    &data_size) != ERROR_SUCCESS)
-      use_default = true;
-    new_start_color_menu = unpack_color(new_start_color_menu);
-    DWORD light_reg_val;
-    data_size = sizeof(DWORD);
-    if (RegGetValue(HKEY_CURRENT_USER,
-                    R"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
-                    "AppsUseLightTheme",
-                    RRF_RT_REG_DWORD,
-                    &stored_type,
-                    &light_reg_val,
-                    &data_size) != ERROR_SUCCESS)
-      use_default = true;
-    new_light_mode = light_reg_val != 0;
-    if (use_default) {
-      new_accent_color_menu = 0x00000000;
-      new_start_color_menu = 0x00333333;
-      new_light_mode = false;
-    }
+    new_accent_color_menu = packed_color_from_ui_color(get_accent_color());
+    new_start_color_menu = new_accent_color_menu;
+    DWORD light_reg_val = packed_color_from_ui_color(get_background_color());
+    new_desktop_fill_color = unpack_color(GetSysColor(COLOR_DESKTOP));
+
+    new_light_mode = light_reg_val != 0; //Dark mode will have black as the background color.
+
     bool changed = new_accent_color_menu != accent_color_menu  ||
                    new_start_color_menu != start_color_menu ||
-                   new_light_mode != light_mode;
+                   new_light_mode != light_mode ||
+                   new_desktop_fill_color != desktop_fill_color;
     accent_color_menu = new_accent_color_menu;
     start_color_menu = new_start_color_menu;
     light_mode = new_light_mode;
+    desktop_fill_color = new_desktop_fill_color;
+    
     return changed;
   }
-  DWORD accent_color_menu = 0, start_color_menu = 0;
+  DWORD accent_color_menu = 0, start_color_menu = 0, desktop_fill_color = 0;
   bool light_mode = true;
 };
 
