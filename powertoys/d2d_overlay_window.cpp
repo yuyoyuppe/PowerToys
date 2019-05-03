@@ -466,8 +466,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   if (window_state == MINIMIZED)
     render_monitors = true;
   // render the monitors
-  if (render_monitors) {
-    brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? 1.0f : 0.3f);
+  if (pos_anim_value == 0 && render_monitors) {
+    auto part = tumbnail_fadein.value() / 255;
+    brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? part : part * 0.3f);
     brush = nullptr;
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
     for (auto& monitor : monitors) {
