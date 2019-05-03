@@ -417,9 +417,9 @@ namespace {
         continue;
       }
 
-      buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
+      buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
-        buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
+        buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
       }
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         buttons_rect = use_top_right_zone_strategy(mouse_window, window_rect);
