@@ -466,9 +466,8 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   if (window_state == MINIMIZED)
     render_monitors = true;
   // render the monitors
-  if (pos_anim_value == 0 && render_monitors) {
-    auto part = tumbnail_fadein.value() / 255;
-    brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? part : part * 0.3f);
+  if (render_monitors) {
+    brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? current_anim_value : current_anim_value * 0.3f);
     brush = nullptr;
     winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
     for (auto& monitor : monitors) {
@@ -479,14 +478,13 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
       monitor_rect.bottom = (float)((monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top);
       d2d_dc->FillRectangle(monitor_rect, brush.get());
     }
-    // Finalize the overlay - dimm the buttons if no thumbnail is present and show "No active window"
-    use_overlay->toggle_window_group(minature_shown || window_state == MINIMIZED);
-    if (!minature_shown && window_state != MINIMIZED) {
-      no_active.render(d2d_dc);
-      window_state = UNKNONW;
-    }
   }
-
+  // Finalize the overlay - dimm the buttons if no thumbnail is present and show "No active window"
+  use_overlay->toggle_window_group(minature_shown || window_state == MINIMIZED);
+  if (!minature_shown && window_state != MINIMIZED) {
+    no_active.render(d2d_dc);
+    window_state = UNKNONW;
+  }
   // Animate keys
   for (unsigned id = 0; id < key_animations.size();) {
     auto& animation = key_animations[id];
