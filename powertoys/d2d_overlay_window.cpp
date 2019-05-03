@@ -479,13 +479,14 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
       monitor_rect.bottom = (float)((monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top);
       d2d_dc->FillRectangle(monitor_rect, brush.get());
     }
+    // Finalize the overlay - dimm the buttons if no thumbnail is present and show "No active window"
+    use_overlay->toggle_window_group(minature_shown || window_state == MINIMIZED);
+    if (!minature_shown && window_state != MINIMIZED) {
+      no_active.render(d2d_dc);
+      window_state = UNKNONW;
+    }
   }
-  // Finalize the overlay - dimm the buttons if no thumbnail is present and show "No active window"
-  use_overlay->toggle_window_group(minature_shown || window_state == MINIMIZED);
-  if (!minature_shown && window_state != MINIMIZED) {
-    no_active.render(d2d_dc);
-    window_state = UNKNONW;
-  }
+
   // Animate keys
   for (unsigned id = 0; id < key_animations.size();) {
     auto& animation = key_animations[id];
