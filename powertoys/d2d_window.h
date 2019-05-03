@@ -77,33 +77,42 @@ struct WindowsColors {
     DWORD new_accent_color_menu = 0;
     DWORD new_start_color_menu = 0;
     bool new_light_mode = true;
-    RegGetValue(HKEY_CURRENT_USER,
-                R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
-                "AccentColorMenu",
-                RRF_RT_REG_DWORD,
-                &stored_type,
-                &new_accent_color_menu,
-                &data_size);
+    bool use_default = false;
+    if (RegGetValue(HKEY_CURRENT_USER,
+                    R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
+                    "AccentColorMenu",
+                    RRF_RT_REG_DWORD,
+                    &stored_type,
+                    &new_accent_color_menu,
+                    &data_size) != ERROR_SUCCESS)
+      use_default = true;
     new_accent_color_menu = unpack_color(new_accent_color_menu);
     data_size = sizeof(DWORD);
-    RegGetValue(HKEY_CURRENT_USER,
-                R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
-                "StartColorMenu",
-                RRF_RT_REG_DWORD,
-                &stored_type,
-                &new_start_color_menu,
-                &data_size);
+    if (RegGetValue(HKEY_CURRENT_USER,
+                    R"(Software\Microsoft\Windows\CurrentVersion\Explorer\Accent)",
+                    "StartColorMenu",
+                    RRF_RT_REG_DWORD,
+                    &stored_type,
+                    &new_start_color_menu,
+                    &data_size) != ERROR_SUCCESS)
+      use_default = true;
     new_start_color_menu = unpack_color(new_start_color_menu);
     DWORD light_reg_val;
     data_size = sizeof(DWORD);
-    RegGetValue(HKEY_CURRENT_USER,
-                R"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
-                "AppsUseLightTheme",
-                RRF_RT_REG_DWORD,
-                &stored_type,
-                &light_reg_val,
-                &data_size);
+    if (RegGetValue(HKEY_CURRENT_USER,
+                    R"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
+                    "AppsUseLightTheme",
+                    RRF_RT_REG_DWORD,
+                    &stored_type,
+                    &light_reg_val,
+                    &data_size) != ERROR_SUCCESS)
+      use_default = true;
     new_light_mode = light_reg_val != 0;
+    if (use_default) {
+      new_accent_color_menu = 0x00000000;
+      new_start_color_menu = 0x00333333;
+      new_light_mode = false;
+    }
     bool changed = new_accent_color_menu != accent_color_menu  ||
                    new_start_color_menu != start_color_menu ||
                    new_light_mode != light_mode;
