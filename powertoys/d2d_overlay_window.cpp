@@ -505,23 +505,31 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   use_overlay->render(d2d_dc);
   // ... window arrows texts ...
   std::wstring left, right, up, down;
+  bool left_disabled = false;
+  bool right_disabled = false;
+  bool up_disabled = false;
+  bool down_disabled = false;
   switch (window_state) {
   case MINIMIZED:
-    left = L"";
-    right = L"";
+    left = L"No action";
+    left_disabled = true;
+    right = L"No action";
+    right_disabled = true;
     up = L"Restore";
-    down = L"";
+    down = L"No action";
+    down_disabled = true;
     break;
   case MAXIMIZED:
     left = L"Snap left";
     right = L"Snap right";
-    up = L"";
+    up = L"No action";
+    up_disabled = true;
     down = L"Restore";
     break;
   case SNAPED_TOP_LEFT:
     left = L"Snap upper right";
     right = L"Snap upper right";
-    up = L"Minimize";
+    up = L"Maximize";
     down = L"Snap left";
     break;
   case SNAPED_LEFT:
@@ -554,20 +562,30 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     up = L"Snap right";
     down = L"Minimize";
     break;
+  case RESTORED:
+    left = L"Snap left";
+    right = L"Snap right";
+    up = L"Maximize";
+    down = L"Minimize";
+    break;
   default:
-    left = L"";
-    right = L"";
-    up = L"";
-    down = L"";
+    left = L"No action";
+    left_disabled = true;
+    right = L"No action";
+    right_disabled = true;
+    up = L"No action";
+    up_disabled = true;
+    down = L"No action";
+    down_disabled = true;
   }
   auto text_color = D2D1::ColorF(colors.light_mode ? 0x222222 : 0xDDDDDD, minature_shown || window_state == MINIMIZED ? 1.0 : 0.3);
-  use_overlay->find_element(L"KeyUpGroup")->SetAttributeValue(L"fill-opacity", up.empty() ? 0.3f : 1.0f);
+  use_overlay->find_element(L"KeyUpGroup")->SetAttributeValue(L"fill-opacity", up_disabled ? 0.3f : 1.0f);
   text.set_aligment_center().write(d2d_dc, text_color, use_overlay->get_maximize_label(), up);
-  use_overlay->find_element(L"KeyDownGroup")->SetAttributeValue(L"fill-opacity", down.empty() ? 0.3f : 1.0f);
+  use_overlay->find_element(L"KeyDownGroup")->SetAttributeValue(L"fill-opacity", down_disabled ? 0.3f : 1.0f);
   text.write(d2d_dc, text_color, use_overlay->get_minimize_label(), down);
-  use_overlay->find_element(L"KeyLeftGroup")->SetAttributeValue(L"fill-opacity", left.empty() ? 0.3f : 1.0f);
+  use_overlay->find_element(L"KeyLeftGroup")->SetAttributeValue(L"fill-opacity", left_disabled ? 0.3f : 1.0f);
   text.set_aligment_right().write(d2d_dc, text_color, use_overlay->get_snap_left(), left);
-  use_overlay->find_element(L"KeyRightGroup")->SetAttributeValue(L"fill-opacity", right.empty() ? 0.3f : 1.0f);
+  use_overlay->find_element(L"KeyRightGroup")->SetAttributeValue(L"fill-opacity", right_disabled ? 0.3f : 1.0f);
   text.set_aligment_left().write(d2d_dc, text_color, use_overlay->get_snap_right(), right);
   // ... and the arrows with numbers
   for (auto&& button : tasklist_buttons) {
