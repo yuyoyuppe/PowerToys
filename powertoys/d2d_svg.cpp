@@ -85,6 +85,12 @@ D2DSVG& D2DSVG::toggle_element(const wchar_t* id, bool visible) {
   return *this;
 }
 
+winrt::com_ptr<ID2D1SvgElement> D2DSVG::find_element(const std::wstring& id) {
+  winrt::com_ptr< ID2D1SvgElement> element;
+  winrt::check_hresult(svg->FindElementById(id.c_str(), element.put()));
+  return element;
+}
+
 D2D1_RECT_F D2DSVG::rescale(D2D1_RECT_F rect) {
   D2D1_RECT_F result;
   auto src = reinterpret_cast<D2D1_POINT_2F*>(&rect);

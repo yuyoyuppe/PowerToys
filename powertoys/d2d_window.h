@@ -83,6 +83,34 @@ struct WindowsColors {
   static DWORD packed_color_from_ui_color(winrt::Windows::UI::Color color) {
     return ((DWORD)color.R << 16) | ((DWORD)color.G << 8) | ((DWORD)color.B);
   }
+  static winrt::Windows::UI::Color get_button_face_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.UIElementColor(winrt::Windows::UI::ViewManagement::UIElementType::ButtonFace);
+  }
+  static winrt::Windows::UI::Color get_button_text_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.UIElementColor(winrt::Windows::UI::ViewManagement::UIElementType::ButtonText);
+  }
+  static winrt::Windows::UI::Color get_highlight_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.UIElementColor(winrt::Windows::UI::ViewManagement::UIElementType::Highlight);
+  }
+  static winrt::Windows::UI::Color get_hotlight_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.UIElementColor(winrt::Windows::UI::ViewManagement::UIElementType::Hotlight);
+  }
+  static winrt::Windows::UI::Color get_highlight_text_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.UIElementColor(winrt::Windows::UI::ViewManagement::UIElementType::HighlightText);
+  }
+  static winrt::Windows::UI::Color get_accent_light_1_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight1);
+  }
+  static winrt::Windows::UI::Color get_accent_light_2_color() {
+    winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+    return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight2);
+  }
   static winrt::Windows::UI::Color get_accent_color() {
     winrt::Windows::UI::ViewManagement::UISettings uiSettings;
     return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::Accent);

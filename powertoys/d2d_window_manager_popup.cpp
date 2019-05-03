@@ -3,6 +3,7 @@
 #include "monitors.h"
 #include "virtual_desktops.h"
 #include "mouse_track_events.h"
+#include <winrt/Windows.UI.ViewManagement.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -220,12 +221,13 @@ void D2DWindowManagerPopup::render() {
   d2d_dc->Clear();
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
-  D2D1_COLOR_F brushColor;
+  DWORD back_color;
   if(should_highlight) {
-    brushColor = D2D1::ColorF(0.9f, 0.9f, 0.9f, 1.0f);
+    back_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_accent_light_1_color());
   } else {
-    brushColor = D2D1::ColorF(0.8f, 0.8f, 0.8f, 1.0f);
+    back_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_accent_color());
   }
+  D2D1_COLOR_F brushColor = D2D1::ColorF(back_color, 1.0f);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
@@ -238,6 +240,15 @@ void D2DWindowManagerPopup::render() {
     width*0.7f,
     height*0.7f,
     1.0f);
+  DWORD icon_color;
+  if (should_highlight) {
+    icon_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_highlight_text_color());
+  }
+  else {
+    icon_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_highlight_text_color());
+  }
+  D2D1_COLOR_F iconBrush = D2D1::ColorF(icon_color, 1.0f);
+  current_icon->find_element(L"icon-visual")->SetAttributeValue(L"fill", iconBrush);
   current_icon->render(d2d_dc.get());
   winrt::check_hresult(d2d_dc->EndDraw());
   winrt::check_hresult(dxgi_swap_chain->Present(1, 0));
@@ -285,7 +296,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     }
     _this->should_highlight = true;
     _this->mouse_track.OnMouseMove(window, TME_LEAVE); // Start tracking to see when we leave.
-	  return DefWindowProc(window, message, wparam, lparam);
+    return DefWindowProc(window, message, wparam, lparam);
   case WM_MOUSELEAVE:
     // Leave the window
     _this = this_from_hwnd(window);
@@ -294,7 +305,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     }
     _this->should_highlight = false;
     _this->mouse_track.Reset(window);
-	  return DefWindowProc(window, message, wparam, lparam);
+    return DefWindowProc(window, message, wparam, lparam);
   default:
     return DefWindowProc(window, message, wparam, lparam);
   }
