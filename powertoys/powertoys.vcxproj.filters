@@ -57,6 +57,9 @@
     <ClCompile Include="d2d_text.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="mouse_track_events.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -107,6 +110,9 @@
       <Filter>Functionality</Filter>
     </ClInclude>
     <ClInclude Include="d2d_text.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="mouse_track_events.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

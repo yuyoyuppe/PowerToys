@@ -145,6 +145,7 @@
     <ClCompile Include="d2d_text.cpp" />
     <ClCompile Include="d2d_window.cpp" />
     <ClCompile Include="d2d_window_manager_popup.cpp" />
+    <ClCompile Include="mouse_track_events.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -172,6 +173,7 @@
     <ClInclude Include="d2d_text.h" />
     <ClInclude Include="d2d_window.h" />
     <ClInclude Include="d2d_window_manager_popup.h" />
+    <ClInclude Include="mouse_track_events.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="start_visible.h" />

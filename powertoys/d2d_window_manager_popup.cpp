@@ -2,6 +2,7 @@
 #include "d2d_window_manager_popup.h"
 #include "monitors.h"
 #include "virtual_desktops.h"
+#include "mouse_track_events.h"
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -219,7 +220,12 @@ void D2DWindowManagerPopup::render() {
   d2d_dc->Clear();
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
-  D2D1_COLOR_F const brushColor = D2D1::ColorF(0.8f, 0.8f, 0.8f, 1.0f);
+  D2D1_COLOR_F brushColor;
+  if(should_highlight) {
+    brushColor = D2D1::ColorF(0.9f, 0.9f, 0.9f, 1.0f);
+  } else {
+    brushColor = D2D1::ColorF(0.8f, 0.8f, 0.8f, 1.0f);
+  }
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
@@ -255,7 +261,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     // don't activate
     return FALSE;
   case WM_MOUSEACTIVATE:
-    return MA_NOACTIVATE;
+    return MA_NOACTIVATEANDEAT;
 */
   case WM_SIZE:
     this_from_hwnd(window)->resize();
@@ -270,6 +276,24 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
       move_window_to_primary_desktop(this_from_hwnd(window)->target_window);
     }
     return 0;
+  case WM_MOUSEMOVE:
+    // Enter the window
+    D2DWindowManagerPopup* _this = this_from_hwnd(window);
+    if(!_this->should_highlight) {
+      InvalidateRect(window, NULL, TRUE);
+    }
+    _this->should_highlight = true;
+    _this->mouse_track.OnMouseMove(window, TME_LEAVE); // Start tracking to see when we leave.
+	  return DefWindowProc(window, message, wparam, lparam);
+  case WM_MOUSELEAVE:
+    // Leave the window
+    D2DWindowManagerPopup* _this = this_from_hwnd(window);
+    if(_this->should_highlight) {
+      InvalidateRect(window, NULL, TRUE);
+    }
+    _this->should_highlight = false;
+    _this->mouse_track.Reset(window);
+	  return DefWindowProc(window, message, wparam, lparam);
   default:
     return DefWindowProc(window, message, wparam, lparam);
   }

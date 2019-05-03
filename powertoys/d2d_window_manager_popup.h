@@ -10,6 +10,7 @@
 #include <dwmapi.h>
 #include <string>
 #include "d2d_window.h"
+#include "mouse_track_events.h"
 
 class D2DWindowManagerPopup
 {
@@ -38,6 +39,9 @@ private:
   D2DSVG maximize_to_new_desktop;
   D2DSVG restore_to_primary_desktop;
   D2DSVG* current_icon;
+
+  MouseTrackEvents mouse_track;
+  bool should_highlight = false;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;

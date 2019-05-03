@@ -71,6 +71,7 @@ void D2DWindow::show(int x, int y, int width, int height) {
   on_show();
   SetWindowPos(hwnd, HWND_TOPMOST, x, y, width, height, 0);
   ShowWindow(hwnd, SW_SHOWNORMAL);
+  UpdateWindow(hwnd);
 }
 
 void D2DWindow::hide() {
