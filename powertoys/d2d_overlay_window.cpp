@@ -80,7 +80,7 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), tumbnail_fadein(0.2, 0, 255), total_monitor({}) {
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_monitor({}) {
   tasklist_thread = std::thread([&] {
     while (running) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -149,7 +149,6 @@ void D2DOverlayWindow::show(HWND active_window) {
   animation.reset();
   auto primary_screen = get_primary_monitor();
   update_timestamp = std::chrono::system_clock::now();
-  thubnail_fadein_started = false;
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
 }
@@ -343,14 +342,14 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
   }
 }
 
-bool D2DOverlayWindow::show_thumbnail(const RECT& rect) {
+bool D2DOverlayWindow::show_thumbnail(const RECT& rect, double alpha) {
   if (!thumbnail)
     return false;
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION | DWM_TNP_OPACITY;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
-  thumb_properties.opacity = (int)tumbnail_fadein.value();
+  thumb_properties.opacity = (BYTE)(255*alpha);
   thumb_properties.rcDestination = rect;
   if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
     return false;
@@ -376,9 +375,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   }
   d2d_dc->Clear();
   int x_offset = 0, y_offset = 0, dimention = 0;
-  double current_anim_value = animation.value();
+  double current_anim_value = animation.value(Animation::AnimFunctions::LINEAR);
   SetLayeredWindowAttributes(hwnd, 0, (int)(255*current_anim_value), LWA_ALPHA);
-  double pos_anim_value = 1 - current_anim_value;
+  double pos_anim_value = 1 - animation.value(Animation::AnimFunctions::EASE_OUT_EXPO);
   if (!tasklist_buttons.empty()) {
     if (tasklist_buttons[0].x <= window_rect.left) { // taskbar on left
       x_offset = (int)(-pos_anim_value * use_overlay->width() * use_overlay->get_scale());
@@ -406,10 +405,6 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
   d2d_dc->FillRectangle(background_rect, brush.get());
  
-  // Set the animation - move the draw window according to annimation step
-  auto popin = D2D1::Matrix3x2F::Translation((float)x_offset, (float)y_offset);
-  d2d_dc->SetTransform(popin);
-
   // Thumbnail logic:
   auto window_state = get_window_state(active_window);
   auto thumb_window = get_window_pos(active_window);
@@ -453,13 +448,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     }
     // If the animation is done show the thumbnail
     //   we cannot animate the thumbnail, the animation lags behind
-    if (pos_anim_value == 0) {
-      if (!thubnail_fadein_started) {
-        tumbnail_fadein.reset();
-        thubnail_fadein_started = true;
-      }
-      minature_shown = show_thumbnail(thumbnail_pos);
-    }
+    minature_shown = show_thumbnail(thumbnail_pos, current_anim_value);
   } else {
     hide_thumbnail();
   }
@@ -476,6 +465,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
       monitor_rect.top = (float)((monitor.rect.top + monitor_dy) * rect_and_scale.scale + rect_and_scale.rect.top);
       monitor_rect.right = (float)((monitor.rect.right + monitor_dx) * rect_and_scale.scale + rect_and_scale.rect.left);
       monitor_rect.bottom = (float)((monitor.rect.bottom + monitor_dy)  * rect_and_scale.scale + rect_and_scale.rect.top);
+      d2d_dc->SetTransform(D2D1::Matrix3x2F::Identity());
       d2d_dc->FillRectangle(monitor_rect, brush.get());
     }
   }
@@ -485,11 +475,16 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     no_active.render(d2d_dc);
     window_state = UNKNONW;
   }
+
+  // Set the animation - move the draw window according to animation step
+  auto popin = D2D1::Matrix3x2F::Translation((float)x_offset, (float)y_offset);
+  d2d_dc->SetTransform(popin);
+
   // Animate keys
   for (unsigned id = 0; id < key_animations.size();) {
     auto& animation = key_animations[id];
     D2D1_COLOR_F color;
-    auto value = (float)animation.animation.value();
+    auto value = (float)animation.animation.value(Animation::AnimFunctions::EASE_OUT_EXPO);
     color.a = 1.0f;
     color.r = animation.original.r + (1.0f - animation.original.r) * value;
     color.g = animation.original.g + (1.0f - animation.original.g) * value;
@@ -498,7 +493,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     if (animation.animation.done()) {
       if (value == 1) {
         animation.animation.reset(0.05, 1, 0);
-        animation.animation.value();
+        animation.animation.value(Animation::AnimFunctions::EASE_OUT_EXPO);
       } else {
         key_animations.erase(key_animations.begin() + id);
         continue;

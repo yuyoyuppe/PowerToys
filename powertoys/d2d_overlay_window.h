@@ -110,7 +110,7 @@ public:
   }
 private:
   void animate(int vk_code, int offset);
-  bool show_thumbnail(const RECT& rect_and_scale);
+  bool show_thumbnail(const RECT& rect_and_scale, double alpha);
   void hide_thumbnail();
   void set_transparency(double alpha);
   virtual void init() override;
@@ -127,8 +127,7 @@ private:
   int monitor_dx = 0, monitor_dy = 0;
   D2DText text;
   WindowsColors colors;
-  bool thubnail_fadein_started = false;
-  Animation animation, tumbnail_fadein;
+  Animation animation;
   RECT window_rect = {};
   Tasklist tasklist;
   std::vector<TasklistButton> tasklist_buttons;

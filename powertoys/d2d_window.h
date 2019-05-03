@@ -25,6 +25,11 @@
 */
 class Animation {
 public:
+  enum AnimFunctions {
+    LINEAR = 0,
+    EASE_OUT_EXPO
+  };
+
   Animation(double duration = 1, double start = 0, double stop = 1) :
     start_value(start), end_value(stop), duration(duration),
     start(std::chrono::high_resolution_clock::now()) { }
@@ -41,17 +46,26 @@ public:
     reset(duration);
   }
 
-  double easeOutExpo (double t) const {
+  double ease_out_expo(double t) const {
     return 1 - pow( 2, -8 * t );
   }
 
-  double value() const {
+  double apply_animation_function(double t, AnimFunctions apply_function) const {
+    switch (apply_function) {
+      case EASE_OUT_EXPO:
+        return ease_out_expo(t);
+      case LINEAR:
+      default:
+        return t;
+    }
+  }
+
+  double value(AnimFunctions apply_function) const {
     auto anim_duration = std::chrono::high_resolution_clock::now() - start;
     double t = std::chrono::duration<double>(anim_duration).count() / duration;
     if (t >= 1)
       return end_value;
-    // ease out Expo.
-    return start_value + (end_value - start_value) * easeOutExpo(t);
+    return start_value + (end_value - start_value) * apply_animation_function(t, apply_function);
   }
   bool done() const {
     return std::chrono::high_resolution_clock::now() - start >= std::chrono::duration<double>(duration);
