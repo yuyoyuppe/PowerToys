@@ -39,13 +39,18 @@ public:
     end_value = stop;
     reset(duration);
   }
+
+  double easeOutExpo (double t) const {
+    return 1 - pow( 2, -8 * t );
+  }
+
   double value() const {
     auto anim_duration = std::chrono::high_resolution_clock::now() - start;
-    double seconds = std::chrono::duration<double>(anim_duration).count() / duration;
-    if (seconds > 1)
+    double t = std::chrono::duration<double>(anim_duration).count() / duration;
+    if (t >= 1)
       return end_value;
-    seconds -= 1;
-    return start_value + (end_value - start_value) * sqrt(1 - seconds * seconds);
+    // ease out Expo.
+    return start_value + (end_value - start_value) * easeOutExpo(t);
   }
   bool done() const {
     return std::chrono::high_resolution_clock::now() - start >= std::chrono::duration<double>(duration);

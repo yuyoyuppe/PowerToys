@@ -112,6 +112,7 @@ private:
   void animate(int vk_code, int offset);
   bool show_thumbnail(const RECT& rect_and_scale);
   void hide_thumbnail();
+  void set_transparency(double alpha);
   virtual void init() override;
   virtual void resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;

@@ -18,6 +18,8 @@ struct ACCENT_POLICY {
 
 typedef BOOL(WINAPI*pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
 
+pfnSetWindowCompositionAttribute SetWindowCompositionAttribute = NULL;
+
 pfnSetWindowCompositionAttribute getSetWindowCompositionAttributeFunPtr() {
   auto user32 = LoadLibrary("user32.dll");
   auto rval =  reinterpret_cast<pfnSetWindowCompositionAttribute>(GetProcAddress(user32, "SetWindowCompositionAttribute"));
@@ -26,11 +28,13 @@ pfnSetWindowCompositionAttribute getSetWindowCompositionAttributeFunPtr() {
 }
 
 void enable_acrylic_window(HWND hwnd) {
-  static auto SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
+  if(SetWindowCompositionAttribute ==NULL) {
+    SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
+  }
   ACCENT_POLICY accent = {};
   accent.AccentState = 3; // ACCENT_ENABLE_BLURBEHIND;
-  accent.GradientColor = 0xffffff;
-  accent.AccentFlags = 0;
+  accent.GradientColor = 0xFFFFFF;
+  accent.AccentFlags = 0; // 2 - Use GradientColor
   WINDOWCOMPOSITIONATTRIBDATA data;
   data.Attrib = 19; // WCA_ACCENT_POLICY
   data.pvData = &accent;
@@ -48,7 +52,7 @@ D2DWindow::D2DWindow() {
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
   RegisterClass(&wc);
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP,
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED,
                         wc.lpszClassName,
                         "PToyD2DPopup",
                         WS_POPUP| WS_VISIBLE,
