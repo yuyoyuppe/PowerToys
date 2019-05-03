@@ -568,9 +568,13 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     down = L"Minimize";
   }
   auto text_color = D2D1::ColorF(colors.light_mode ? 0x222222 : 0xDDDDDD, minature_shown || window_state == MINIMIZED ? 1.0 : 0.3);
+  use_overlay->find_element(L"KeyUpGroup")->SetAttributeValue(L"fill-opacity", up.empty() ? 0.3f : 1.0f);
   text.set_aligment_center().write(d2d_dc, text_color, use_overlay->get_maximize_label(), up);
+  use_overlay->find_element(L"KeyDownGroup")->SetAttributeValue(L"fill-opacity", down.empty() ? 0.3f : 1.0f);
   text.write(d2d_dc, text_color, use_overlay->get_minimize_label(), down);
+  use_overlay->find_element(L"KeyLeftGroup")->SetAttributeValue(L"fill-opacity", left.empty() ? 0.3f : 1.0f);
   text.set_aligment_right().write(d2d_dc, text_color, use_overlay->get_snap_left(), left);
+  use_overlay->find_element(L"KeyRightGroup")->SetAttributeValue(L"fill-opacity", right.empty() ? 0.3f : 1.0f);
   text.set_aligment_left().write(d2d_dc, text_color, use_overlay->get_snap_right(), right);
   // ... and the arrows with numbers
   for (auto&& button : tasklist_buttons) {
