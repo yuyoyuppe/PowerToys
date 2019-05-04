@@ -364,6 +364,9 @@ void D2DOverlayWindow::hide_thumbnail() {
 }
 
 void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
+  if (!visible) {
+    return;
+  }
   bool time_to_update = std::chrono::system_clock::now() - update_timestamp > std::chrono::milliseconds(250);
   if (time_to_update) {
     update_timestamp = std::chrono::system_clock::now();
