@@ -32,7 +32,8 @@ namespace {
   }
 
   void on_release() {
-    winkey_popup->hide();
+    //Calling hide here might cause a concurrency issue.
+    //winkey_popup->hide();
   }
 }
 
