@@ -78,6 +78,15 @@ namespace {
     result.left += width / 3;
     result.right -= width / 3;
 
+    // If the calculated maximize button area is outside the bounds, don't accept these results.
+    if (result.left > window_rect->right ||
+      result.top > window_rect->bottom ||
+      result.right < window_rect->left ||
+      result.bottom < window_rect->top
+    ) {
+      RECT zero = {0};
+      return zero;
+    }
     return result;
   }
 
