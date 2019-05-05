@@ -22,6 +22,7 @@ namespace {
   IUIAutomation* ui_automation = nullptr;
   IUIAutomationCondition* p_conditions_joined_top_idAutomation = NULL;
   IUIAutomationCondition* p_conditions_joined_top_nameAutomation = NULL;
+  IUIAutomationCondition* p_condition_true = NULL;
 
   HRESULT InitializeUIAutomation(IUIAutomation **ppAutomation)
   {
@@ -104,6 +105,12 @@ namespace {
     return result;
   }
 
+  struct UIAutomationCachedInfo {
+    IUIAutomationElement* window_ui_element;
+    double seconds_last_ui_automation_find_duration;
+  };
+  std::map<HWND, UIAutomationCachedInfo> custom_ui_automation_cache;
+
   void initialize_ui_automation_strategy() {
     //TODO: Definitely clean this up after experimentation.
     IUIAutomationCondition* p_condition_maximize_restore_id = NULL;
@@ -121,6 +128,11 @@ namespace {
     VARIANT var_prop_restore_string;
     var_prop_restore_string.vt = VT_BSTR;
     var_prop_restore_string.bstrVal = SysAllocString(L"Restore");
+    IUIAutomationCondition* p_condition_restore_down_id = NULL;
+    IUIAutomationCondition* p_condition_restore_down_name = NULL;
+    VARIANT var_prop_restore_down_string;
+    var_prop_restore_down_string.vt = VT_BSTR;
+    var_prop_restore_down_string.bstrVal = SysAllocString(L"Restore Down");
     IUIAutomationCondition* p_condition_maximizerestore_id = NULL;
     IUIAutomationCondition* p_condition_maximizerestore_name = NULL;
     VARIANT var_prop_maximizerestore_string;
@@ -142,10 +154,12 @@ namespace {
     IUIAutomationCondition* p_conditions_joined_name_1 = NULL;
     IUIAutomationCondition* p_conditions_joined_name_2 = NULL;
     IUIAutomationCondition* p_conditions_joined_name_3 = NULL;
+    IUIAutomationCondition* p_conditions_joined_name_4 = NULL;
     IUIAutomationCondition* p_conditions_joined_name_top = NULL;
     IUIAutomationCondition* p_conditions_joined_id_1 = NULL;
     IUIAutomationCondition* p_conditions_joined_id_2 = NULL;
     IUIAutomationCondition* p_conditions_joined_id_3 = NULL;
+    IUIAutomationCondition* p_conditions_joined_id_4 = NULL;
     IUIAutomationCondition* p_conditions_joined_id_top = NULL;
     IUIAutomationCondition* p_conditions_joined_visible_and_condition = NULL;
     HRESULT hr;
@@ -161,6 +175,10 @@ namespace {
       goto cleanup;
     }
 
+    hr = ui_automation->CreateTrueCondition(&p_condition_true);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
     hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_id);
     if (FAILED(hr)) {
       goto cleanup;
@@ -170,6 +188,10 @@ namespace {
       goto cleanup;
     }
     hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_restore_string, &p_condition_restore_id);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_restore_down_string, &p_condition_restore_down_id);
     if (FAILED(hr)) {
       goto cleanup;
     }
@@ -193,6 +215,10 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
+    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_restore_down_string, &p_condition_restore_down_name);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
     hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximizerestore_string, &p_condition_maximizerestore_name);
     if (FAILED(hr)) {
       goto cleanup;
@@ -205,7 +231,11 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_id, p_conditions_joined_id_3, &p_conditions_joined_id_2);
+    hr = ui_automation->CreateOrCondition(p_condition_restore_down_id, p_conditions_joined_id_3, &p_conditions_joined_id_4);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_restore_id, p_conditions_joined_id_4, &p_conditions_joined_id_2);
     if (FAILED(hr)) {
       goto cleanup;
     }
@@ -221,7 +251,11 @@ namespace {
     if (FAILED(hr)) {
       goto cleanup;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_name, p_conditions_joined_name_3, &p_conditions_joined_name_2);
+    hr = ui_automation->CreateOrCondition(p_condition_restore_down_name, p_conditions_joined_name_3, &p_conditions_joined_name_4);
+    if (FAILED(hr)) {
+      goto cleanup;
+    }
+    hr = ui_automation->CreateOrCondition(p_condition_restore_name, p_conditions_joined_name_4, &p_conditions_joined_name_2);
     if (FAILED(hr)) {
       goto cleanup;
     }
@@ -260,6 +294,8 @@ namespace {
       p_condition_maximize_id->Release();
     if (p_condition_restore_id != NULL)
       p_condition_restore_id->Release();
+    if (p_condition_restore_down_id != NULL)
+      p_condition_restore_down_id->Release();
     if (p_condition_maximizerestore_id != NULL)
       p_condition_maximizerestore_id->Release();
     if (p_condition_maximizerestorebutton_id != NULL)
@@ -268,12 +304,16 @@ namespace {
       p_condition_maximize_restore_name->Release();
     if (p_condition_maximize_name != NULL)
       p_condition_maximize_name->Release();
+    if (p_condition_restore_down_name != NULL)
+      p_condition_restore_down_name->Release();
     if (p_condition_restore_name != NULL)
       p_condition_restore_name->Release();
     if (p_condition_maximizerestore_name != NULL)
       p_condition_maximizerestore_name->Release();
     if (p_condition_maximizerestorebutton_name != NULL)
       p_condition_maximizerestorebutton_name->Release();
+    if (p_conditions_joined_id_4 != NULL)
+      p_conditions_joined_id_4->Release();
     if (p_conditions_joined_id_3 != NULL)
       p_conditions_joined_id_3->Release();
     if (p_conditions_joined_id_2 != NULL)
@@ -282,6 +322,8 @@ namespace {
       p_conditions_joined_id_1->Release();
     if (p_conditions_joined_id_top != NULL)
       p_conditions_joined_id_top->Release();
+    if (p_conditions_joined_name_4 != NULL)
+      p_conditions_joined_name_4->Release();
     if (p_conditions_joined_name_3 != NULL)
       p_conditions_joined_name_3->Release();
     if (p_conditions_joined_name_2 != NULL)
@@ -339,6 +381,50 @@ namespace {
     return result;
   }
 
+  IUIAutomationElement* find_element_ui_automation_max_depth_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* pcondition, int level, int maxlevel) {
+    RECT result = { 0 };
+    IUIAutomationElement* p_found = NULL;
+    IUIAutomationElement* p_child = NULL;
+    HRESULT hr;
+    int i = 0;
+    int children_len = 0;
+    IUIAutomationElementArray* p_children_array = NULL;
+
+    hwnd_UI_element->FindFirst(TreeScope_Children, pcondition, &p_found);
+
+    if (p_found == NULL && level < maxlevel) {
+      hr = hwnd_UI_element->FindAll(TreeScope_Children, p_condition_true, &p_children_array);
+      if (hr != S_OK || p_children_array == NULL) {
+        goto cleanup;
+      };
+      hr = p_children_array->get_Length(&children_len);
+      if (hr != S_OK) {
+        goto cleanup;
+      }
+      if (level > 1 && children_len > 10) {
+        // So many children. Most likely a section we won't care about.
+        goto cleanup;
+      }
+      for (i = 0; i < children_len; i++) {
+        hr = p_children_array->GetElement(i, &p_child);
+        if (hr != S_OK || p_child == NULL) {
+          continue;
+        }
+        p_found = find_element_ui_automation_max_depth_strategy(p_child, pcondition, level + 1, maxlevel);
+        p_child->Release();
+        if (p_found != NULL) {
+          break;
+        }
+      }
+    }
+
+  cleanup:
+    if (p_children_array != NULL) {
+      p_children_array->Release();
+    }
+    return p_found;
+  }
+
   IUIAutomationElement* find_element_ui_automation_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* pcondition) {
     RECT result = { 0 };
     IUIAutomationElement* p_found = NULL;
@@ -353,6 +439,8 @@ namespace {
     RECT result = { 0 };
     IUIAutomationElement* hwnd_UI_element = NULL;
     HRESULT hr;
+    UIAutomationCachedInfo cache_elem = { 0 };
+    BOOL cache_valid;
 
     if (ui_automation_strategy_last_hwnd != hwnd) {
       ui_automation_strategy_last_hwnd = hwnd;
@@ -366,9 +454,46 @@ namespace {
       if (hr != S_OK || hwnd_UI_element == NULL) {
         goto cleanup;
       }
-      ui_automation_strategy_element_found = find_element_ui_automation_strategy(hwnd_UI_element, p_conditions_joined_top_idAutomation);
+
+      if (custom_ui_automation_cache.find(hwnd) != custom_ui_automation_cache.end()) {
+        // Check if the cached element for hwnd is still valid.
+        cache_elem = custom_ui_automation_cache[hwnd];
+        hr = ui_automation->CompareElements(cache_elem.window_ui_element, hwnd_UI_element, &cache_valid);
+        if (hr != S_OK) {
+          goto cleanup;
+        }
+        if (cache_valid) {
+          // Release older window element pointer and use the new instead.
+          cache_elem.window_ui_element->Release();
+          cache_elem.window_ui_element = hwnd_UI_element;
+          custom_ui_automation_cache[hwnd] = cache_elem;
+        }
+        else {
+          cache_elem.window_ui_element->Release();
+          custom_ui_automation_cache.erase(hwnd);
+          cache_elem = { 0 };
+        }
+      }
+      if (cache_elem.window_ui_element != NULL && cache_elem.seconds_last_ui_automation_find_duration > 0.5) {
+        // Unfortunately, it takes too long to search this window. Just use another strategy.
+        goto cleanup;
+      }
+      auto start_time = std::chrono::high_resolution_clock::now();
+      ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element, p_conditions_joined_top_idAutomation,1,7);
       if (ui_automation_strategy_element_found == NULL) {
-        ui_automation_strategy_element_found = find_element_ui_automation_strategy(hwnd_UI_element, p_conditions_joined_top_nameAutomation);
+        ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element, p_conditions_joined_top_nameAutomation,1,7);
+      }
+      auto chrono_duration = std::chrono::high_resolution_clock::now() - start_time;
+      double seconds_duration = std::chrono::duration<double>(chrono_duration).count();
+      if( ui_automation_strategy_element_found == NULL) {
+        //Nothing useful found. Can't keep doing this for this Window.
+        cache_elem.window_ui_element = hwnd_UI_element;
+        cache_elem.seconds_last_ui_automation_find_duration=seconds_duration;
+        custom_ui_automation_cache[hwnd] = cache_elem;
+      } else {
+        cache_elem.window_ui_element = hwnd_UI_element;
+        cache_elem.seconds_last_ui_automation_find_duration=0;
+        custom_ui_automation_cache[hwnd] = cache_elem;
       }
     }
     if (ui_automation_strategy_element_found != NULL) {
@@ -379,8 +504,6 @@ namespace {
       }
     }
   cleanup:
-    if (hwnd_UI_element != NULL)
-      hwnd_UI_element->Release();
     return result;
   }
 
@@ -426,9 +549,9 @@ namespace {
         continue;
       }
 
-      buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
+      buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
-        buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
+        buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
       }
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         buttons_rect = use_top_right_zone_strategy(mouse_window, window_rect);
