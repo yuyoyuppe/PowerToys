@@ -12,7 +12,8 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   #if _DEBUG && _WIN64
   //Global error handlers to diagnose errors.
-    InitGlobalErrorHandlers();
+    //We prefer this not not show any longer until there's a bug to diagnose.
+    //InitGlobalErrorHandlers();
   #endif
   winrt::init_apartment();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
