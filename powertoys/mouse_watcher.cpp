@@ -97,7 +97,7 @@ namespace {
     auto dpi = GetDpiForWindow(hwnd);
     int buttons_width = 170 * dpi / 120;
     int horizontal_padding = 20 * dpi / 120;
-    int buttons_height = 37 * dpi / 120;
+    int buttons_height = 50 * dpi / 120;
     result.left = window_rect->right - buttons_width + horizontal_padding;
     result.top = window_rect->top;
     result.right = window_rect->right - horizontal_padding;
