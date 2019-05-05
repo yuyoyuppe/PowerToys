@@ -27,6 +27,8 @@ D2DWindowManagerPopup::D2DWindowManagerPopup() {
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         nullptr, nullptr, wc.hInstance, this);
   WINRT_VERIFY(hwnd);
+  SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);
+  ShowWindow(hwnd,SW_HIDE);
   init();
   //enable_acrylic_window(hwnd);
 }
@@ -129,7 +131,6 @@ void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   //SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width()/2, primary_screen.height()/2, 0);
   current_icon = (currentDesktopIndex==0?&maximize_to_new_desktop:&restore_to_primary_desktop);
   target_window_on_primary_desktop = (currentDesktopIndex==0?TRUE:FALSE);
-  SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);
 
   TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE;
