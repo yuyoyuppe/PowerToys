@@ -24,35 +24,35 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="d2d_window.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="virtual_desktops.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="tasklist_positions.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="d2d_window_manager_popup.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="unhandled_exception_handler.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="d2d_svg.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="tray_icon.cpp">
       <Filter>Functionality</Filter>
     </ClCompile>
-    <ClCompile Include="d2d_overlay_window.cpp">
-      <Filter>Functionality</Filter>
-    </ClCompile>
-    <ClCompile Include="d2d_text.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="mouse_track_events.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_svg.cpp">
+      <Filter>D2DWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_text.cpp">
+      <Filter>D2DWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_window.cpp">
+      <Filter>D2DWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_window_manager_popup.cpp">
+      <Filter>D2DWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="d2d_overlay_window.cpp">
+      <Filter>D2DWindows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,33 +75,33 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="d2d_window.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="virtual_desktops.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="tasklist_positions.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="d2d_window_manager_popup.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="unhandled_exception_handler.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="d2d_svg.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="d2d_overlay_window.h">
-      <Filter>Functionality</Filter>
-    </ClInclude>
-    <ClInclude Include="d2d_text.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="mouse_track_events.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_svg.h">
+      <Filter>D2DWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_text.h">
+      <Filter>D2DWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_window.h">
+      <Filter>D2DWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_window_manager_popup.h">
+      <Filter>D2DWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="d2d_overlay_window.h">
+      <Filter>D2DWindows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +110,9 @@
     </Filter>
     <Filter Include="Functionality">
       <UniqueIdentifier>{ba8e1409-9389-41e1-a864-2df96b242c1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D2DWindows">
+      <UniqueIdentifier>{4af3a1fd-df23-49bf-bb88-3f26fb178938}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
