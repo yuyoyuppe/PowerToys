@@ -32,6 +32,14 @@ std::optional<POINT> get_mouse_pos() {
   }
 }
 
+int width(const RECT& rect) {
+  return rect.right - rect.left;
+}
+
+int height(const RECT& rect) {
+  return rect.bottom - rect.top;
+}
+
 bool operator<(const RECT& lhs, const RECT& rhs) {
   auto lhs_tuple = std::make_tuple(lhs.left, lhs.right, lhs.top, lhs.bottom);
   auto rhs_tuple = std::make_tuple(rhs.left, rhs.right, rhs.top, rhs.bottom); 

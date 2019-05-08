@@ -9,9 +9,10 @@ std::optional<RECT> get_button_pos(HWND hwnd);
 std::optional<RECT> get_window_pos(HWND hwnd);
 // Gets mouse postion.
 std::optional<POINT> get_mouse_pos();
+// Calculate sizes
+int width(const RECT& rect);
+int height(const RECT& rect);
 // Compare rects
-bool operator==(const RECT& lhs, const RECT& rhs);
-bool operator!=(const RECT& lhs, const RECT& rhs);
 bool operator<(const RECT& lhs, const RECT& rhs);
 // Moves and/or resizes small_rect to fit inside big_rect.
 RECT keep_rect_inside_rect(const RECT& small_rect, const RECT& big_rect);

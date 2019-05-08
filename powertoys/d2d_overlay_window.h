@@ -18,74 +18,10 @@ public:
   ScaleResult get_thumbnail_rect_and_scale(int x_offset, int y_offset, int window_cx, int window_cy, float fill);
   D2DOverlaySVG& toggle_window_group(bool active);
   winrt::com_ptr<ID2D1SvgElement> find_element(const std::wstring& id);
-  D2D1_RECT_F get_maximize_label() {
-    D2D1_RECT_F result;
-    float height = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-    float width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-    if (width >= height) {
-      result.top = thumbnail_scaled_rect.bottom + height * 0.210;
-      result.bottom = thumbnail_scaled_rect.bottom + height * 0.310;
-      result.left = thumbnail_scaled_rect.left + width * 0.009;
-      result.right = thumbnail_scaled_rect.right + width * 0.009;
-    } else {
-      result.top = thumbnail_scaled_rect.top + height * 0.323;
-      result.bottom = thumbnail_scaled_rect.top + height * 0.398;
-      result.left = thumbnail_scaled_rect.right;
-      result.right = thumbnail_scaled_rect.right + width * 1.45;
-    }
-    return result;
-  }
-  D2D1_RECT_F get_minimize_label() {
-    D2D1_RECT_F result;
-    float height = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-    float width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-    if (width >= height) {
-      result.top = thumbnail_scaled_rect.bottom + height * 0.8;
-      result.bottom = thumbnail_scaled_rect.bottom + height * 0.9;
-      result.left = thumbnail_scaled_rect.left + width * 0.009;
-      result.right = thumbnail_scaled_rect.right + width * 0.009;
-    } else {
-      result.top = thumbnail_scaled_rect.top + height * 0.725;
-      result.bottom = thumbnail_scaled_rect.top + height * 0.800;
-      result.left = thumbnail_scaled_rect.right;
-      result.right = thumbnail_scaled_rect.right + width * 1.45;
-    }
-    return result;
-  }
-  D2D1_RECT_F get_snap_left() {
-    D2D1_RECT_F result;
-    float height = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-    float width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-    if (width >= height) {
-      result.top = thumbnail_scaled_rect.bottom + height * 0.5;
-      result.bottom = thumbnail_scaled_rect.bottom + height * 0.6;
-      result.left = thumbnail_scaled_rect.left + width * 0.009;
-      result.right = thumbnail_scaled_rect.left + width * 0.339;
-    } else {
-      result.top = thumbnail_scaled_rect.top + height * 0.523;
-      result.bottom = thumbnail_scaled_rect.top + height * 0.598;
-      result.left = thumbnail_scaled_rect.right;
-      result.right = thumbnail_scaled_rect.right + width * 0.450;
-    }
-    return result;
-  }
-  D2D1_RECT_F get_snap_right() {
-    D2D1_RECT_F result;
-    float height = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
-    float width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
-    if (width >= height) {
-      result.top = thumbnail_scaled_rect.bottom + height * 0.5;
-      result.bottom = thumbnail_scaled_rect.bottom + height * 0.6;
-      result.left = thumbnail_scaled_rect.left + width * 0.679;
-      result.right = thumbnail_scaled_rect.right + width * 1.009;
-    } else {
-      result.top = thumbnail_scaled_rect.top + height * 0.523;
-      result.bottom = thumbnail_scaled_rect.top + height * 0.598;
-      result.left = thumbnail_scaled_rect.right + width;
-      result.right = thumbnail_scaled_rect.right + width * 1.45;
-    }
-    return result;
-  }
+  D2D1_RECT_F get_maximize_label() const;
+  D2D1_RECT_F get_minimize_label() const;
+  D2D1_RECT_F get_snap_left() const;
+  D2D1_RECT_F get_snap_right() const;
 private:
   D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
   RECT thumbnail_scaled_rect;
@@ -104,15 +40,11 @@ public:
   D2DOverlayWindow();
   void show(HWND active_window);
   void animate(int vk_code);
-  ~D2DOverlayWindow() {
-    running = false;
-    tasklist_thread.join();
-  }
+  ~D2DOverlayWindow();
 private:
   void animate(int vk_code, int offset);
   bool show_thumbnail(const RECT& rect_and_scale, double alpha);
   void hide_thumbnail();
-  void set_transparency(double alpha);
   virtual void init() override;
   virtual void resize() override;
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;

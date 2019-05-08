@@ -80,6 +80,76 @@ D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
   return *this;
 }
 
+D2D1_RECT_F D2DOverlaySVG::get_maximize_label() const {
+  D2D1_RECT_F result;
+  auto height = (float)(thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top);
+  auto width = (float)(thumbnail_scaled_rect.right - thumbnail_scaled_rect.left);
+  if (width >= height) {
+    result.top = thumbnail_scaled_rect.bottom + height * 0.210f;
+    result.bottom = thumbnail_scaled_rect.bottom + height * 0.310f;
+    result.left = thumbnail_scaled_rect.left + width * 0.009f;
+    result.right = thumbnail_scaled_rect.right + width * 0.009f;
+  } else {
+    result.top = thumbnail_scaled_rect.top + height * 0.323f;
+    result.bottom = thumbnail_scaled_rect.top + height * 0.398f;
+    result.left = (float)thumbnail_scaled_rect.right;
+    result.right = thumbnail_scaled_rect.right + width * 1.45f;
+  }
+  return result;
+}
+D2D1_RECT_F D2DOverlaySVG::get_minimize_label() const {
+  D2D1_RECT_F result;
+  auto height = (float)(thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top);
+  auto width = (float)(thumbnail_scaled_rect.right - thumbnail_scaled_rect.left);
+  if (width >= height) {
+    result.top = thumbnail_scaled_rect.bottom + height * 0.8f;
+    result.bottom = thumbnail_scaled_rect.bottom + height * 0.9f;
+    result.left = thumbnail_scaled_rect.left + width * 0.009f;
+    result.right = thumbnail_scaled_rect.right + width * 0.009f;
+  } else {
+    result.top = thumbnail_scaled_rect.top + height * 0.725f;
+    result.bottom = thumbnail_scaled_rect.top + height * 0.800f;
+    result.left = (float)thumbnail_scaled_rect.right;
+    result.right = thumbnail_scaled_rect.right + width * 1.45f;
+  }
+  return result;
+}
+D2D1_RECT_F D2DOverlaySVG::get_snap_left() const {
+  D2D1_RECT_F result;
+  auto height = (float)(thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top);
+  auto width = (float)(thumbnail_scaled_rect.right - thumbnail_scaled_rect.left);
+  if (width >= height) {
+    result.top = thumbnail_scaled_rect.bottom + height * 0.5f;
+    result.bottom = thumbnail_scaled_rect.bottom + height * 0.6f;
+    result.left = thumbnail_scaled_rect.left + width * 0.009f;
+    result.right = thumbnail_scaled_rect.left + width * 0.339f;
+  } else {
+    result.top = thumbnail_scaled_rect.top + height * 0.523f;
+    result.bottom = thumbnail_scaled_rect.top + height * 0.598f;
+    result.left = (float)thumbnail_scaled_rect.right;
+    result.right = thumbnail_scaled_rect.right + width * 0.450f;
+  }
+  return result;
+}
+D2D1_RECT_F D2DOverlaySVG::get_snap_right() const {
+  D2D1_RECT_F result;
+  auto height = (float)(thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top);
+  auto width = (float)(thumbnail_scaled_rect.right - thumbnail_scaled_rect.left);
+  if (width >= height) {
+    result.top = thumbnail_scaled_rect.bottom + height * 0.5f;
+    result.bottom = thumbnail_scaled_rect.bottom + height * 0.6f;
+    result.left = thumbnail_scaled_rect.left + width * 0.679f;
+    result.right = thumbnail_scaled_rect.right + width * 1.009f;
+  } else {
+    result.top = thumbnail_scaled_rect.top + height * 0.523f;
+    result.bottom = thumbnail_scaled_rect.top + height * 0.598f;
+    result.left = (float)thumbnail_scaled_rect.right + width;
+    result.right = thumbnail_scaled_rect.right + width * 1.45f;
+  }
+  return result;
+}
+
+
 D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_monitor({}) {
   tasklist_thread = std::thread([&] {
     while (running) {
@@ -250,6 +320,11 @@ void D2DOverlayWindow::on_hide() {
   }
 }
 
+D2DOverlayWindow::~D2DOverlayWindow() {
+  running = false;
+  tasklist_thread.join();
+}
+
 void D2DOverlayWindow::init() {
   colors.update();
   landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
@@ -371,7 +446,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   }
   d2d_dc->Clear();
   int x_offset = 0, y_offset = 0, dimention = 0;
-  double current_anim_value = animation.value(Animation::AnimFunctions::LINEAR);
+  auto current_anim_value = (float)animation.value(Animation::AnimFunctions::LINEAR);
   SetLayeredWindowAttributes(hwnd, 0, (int)(255*current_anim_value), LWA_ALPHA);
   double pos_anim_value = 1 - animation.value(Animation::AnimFunctions::EASE_OUT_EXPO);
   if (!tasklist_buttons.empty()) {
@@ -574,7 +649,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     down = L"No action";
     down_disabled = true;
   }
-  auto text_color = D2D1::ColorF(colors.light_mode ? 0x222222 : 0xDDDDDD, minature_shown || window_state == MINIMIZED ? 1.0 : 0.3);
+  auto text_color = D2D1::ColorF(colors.light_mode ? 0x222222 : 0xDDDDDD, minature_shown || window_state == MINIMIZED ? 1.0f : 0.3f);
   use_overlay->find_element(L"KeyUpGroup")->SetAttributeValue(L"fill-opacity", up_disabled ? 0.3f : 1.0f);
   text.set_aligment_center().write(d2d_dc, text_color, use_overlay->get_maximize_label(), up);
   use_overlay->find_element(L"KeyDownGroup")->SetAttributeValue(L"fill-opacity", down_disabled ? 0.3f : 1.0f);

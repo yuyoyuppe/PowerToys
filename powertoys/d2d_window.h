@@ -128,7 +128,7 @@ struct WindowsColors {
   }
   // Update colors - returns true if the values where changed
   bool update() {
-    DWORD data_size = sizeof(DWORD), stored_type;
+    DWORD data_size = sizeof(DWORD);
     DWORD new_accent_color_menu = 0;
     DWORD new_start_color_menu = 0;
     DWORD new_desktop_fill_color = 0;

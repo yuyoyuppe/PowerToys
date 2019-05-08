@@ -39,7 +39,7 @@ public:
     winrt::com_ptr<ID2D1SolidColorBrush> brush;
     d2d_dc->CreateSolidColorBrush(color, brush.put());
     d2d_dc->DrawText(text.c_str(),
-                     text.length(),
+                     (UINT32) text.length(),
                      format.get(),
                      rect,
                      brush.get());
