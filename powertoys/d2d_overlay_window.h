@@ -4,6 +4,8 @@
 #include "d2d_text.h"
 #include "monitors.h"
 #include "animation.h"
+#include "windows_colors.h"
+
 struct ScaleResult {
   double scale;
   RECT rect;

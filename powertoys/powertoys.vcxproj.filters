@@ -57,6 +57,9 @@
     <ClCompile Include="animation.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="windows_colors.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_watcher.h">
@@ -107,6 +110,9 @@
       <Filter>D2DWindows</Filter>
     </ClInclude>
     <ClInclude Include="animation.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="windows_colors.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

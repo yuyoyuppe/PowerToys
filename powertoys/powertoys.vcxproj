@@ -164,6 +164,7 @@
     <ClCompile Include="unhandled_exception_handler.cpp" />
     <ClCompile Include="virtual_desktops.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="windows_colors.cpp" />
     <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@
     <ClInclude Include="unhandled_exception_handler.h" />
     <ClInclude Include="virtual_desktops.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="windows_colors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="powertoys.rc" />

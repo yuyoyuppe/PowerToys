@@ -3,6 +3,7 @@
 #include "monitors.h"
 #include "virtual_desktops.h"
 #include "mouse_track_events.h"
+#include "windows_colors.h"
 #include <winrt/Windows.UI.ViewManagement.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
@@ -224,9 +225,9 @@ void D2DWindowManagerPopup::render() {
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
   DWORD back_color;
   if(should_highlight) {
-    back_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_accent_light_1_color());
+    back_color = WindowsColors::rgb_color(WindowsColors::get_accent_light_1_color());
   } else {
-    back_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_accent_color());
+    back_color = WindowsColors::rgb_color(WindowsColors::get_accent_color());
   }
   D2D1_COLOR_F brushColor = D2D1::ColorF(back_color, 1.0f);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
@@ -236,17 +237,17 @@ void D2DWindowManagerPopup::render() {
   float height = hwnd_rect.bottom - hwnd_rect.top;
   //Apply 15% padding
   current_icon->resize(
-    width*0.15f,
-    height*0.15f,
-    width*0.7f,
-    height*0.7f,
+    (int)(width*0.15f),
+    (int)(height*0.15f),
+    (int)(width*0.7f),
+    (int)(height*0.7f),
     1.0f);
   DWORD icon_color;
   if (should_highlight) {
-    icon_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_highlight_text_color());
+    icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
   }
   else {
-    icon_color = WindowsColors::packed_color_from_ui_color(WindowsColors::get_highlight_text_color());
+    icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
   }
   D2D1_COLOR_F iconBrush = D2D1::ColorF(icon_color, 1.0f);
   current_icon->find_element(L"icon-visual")->SetAttributeValue(L"fill", iconBrush);
