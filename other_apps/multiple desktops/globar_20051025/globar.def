@@ -1,9 +1,0 @@
-LIBRARY GLOBAR
-DESCRIPTION "Globar Titlebar Library"
-EXPORTS
-	EnableGlobalButtons
-	AddGlobalButton
-	RemoveGlobalButton
-	SetNotifyWindow
-	DisableByNameW
-	DisableByNameA
