@@ -297,7 +297,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
       InvalidateRect(window, NULL, TRUE);
     }
     _this->should_highlight = true;
-    _this->mouse_track.OnMouseMove(window, TME_LEAVE); // Start tracking to see when we leave.
+    _this->mouse_track.on_moude_move(window, TME_LEAVE); // Start tracking to see when we leave.
     return DefWindowProc(window, message, wparam, lparam);
   case WM_MOUSELEAVE:
     // Leave the window
@@ -306,7 +306,7 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
       InvalidateRect(window, NULL, TRUE);
     }
     _this->should_highlight = false;
-    _this->mouse_track.Reset(window);
+    _this->mouse_track.reset(window);
     return DefWindowProc(window, message, wparam, lparam);
   default:
     return DefWindowProc(window, message, wparam, lparam);

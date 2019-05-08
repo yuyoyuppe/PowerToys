@@ -3,8 +3,8 @@ class MouseTrackEvents
 {
 public:
   MouseTrackEvents();
-  void OnMouseMove(HWND hwnd, DWORD dwFlags);
-  void Reset(HWND hwnd);
+  void on_moude_move(HWND hwnd, DWORD dwFlags);
+  void reset(HWND hwnd);
 private:
-  bool m_bMouseTracking;
+  bool mouse_tracking;
 };

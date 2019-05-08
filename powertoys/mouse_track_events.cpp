@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "mouse_track_events.h"
 
-MouseTrackEvents::MouseTrackEvents() : m_bMouseTracking(false) {
+MouseTrackEvents::MouseTrackEvents() : mouse_tracking(false) {
 }
 
-void MouseTrackEvents::OnMouseMove(HWND hwnd, DWORD dwFlags) {
-  if (!m_bMouseTracking)
+void MouseTrackEvents::on_moude_move(HWND hwnd, DWORD dwFlags) {
+  if (!mouse_tracking)
   {
     // Enable mouse tracking.
     TRACKMOUSEEVENT tme;
@@ -16,11 +16,11 @@ void MouseTrackEvents::OnMouseMove(HWND hwnd, DWORD dwFlags) {
     if(!TrackMouseEvent(&tme)) {
       int a = 2;
     }
-    m_bMouseTracking = true;
+    mouse_tracking = true;
   }
 }
 
-void MouseTrackEvents::Reset(HWND hwnd)
+void MouseTrackEvents::reset(HWND hwnd)
 {
-  m_bMouseTracking = false;
+  mouse_tracking = false;
 }
