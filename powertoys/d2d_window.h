@@ -30,55 +30,20 @@ public:
     EASE_OUT_EXPO
   };
 
-  Animation(double duration = 1, double start = 0, double stop = 1) :
-    start_value(start), end_value(stop), duration(duration),
-    start(std::chrono::high_resolution_clock::now()) { }
-  void reset() {
-    start = std::chrono::high_resolution_clock::now();
-  }
-  void reset(double duration) {
-    this->duration = duration;
-    reset();
-  }
-  void reset(double duration, double start, double stop) {
-    start_value = start;
-    end_value = stop;
-    reset(duration);
-  }
-
-  double ease_out_expo(double t) const {
-    return 1 - pow( 2, -8 * t );
-  }
-
-  double apply_animation_function(double t, AnimFunctions apply_function) const {
-    switch (apply_function) {
-      case EASE_OUT_EXPO:
-        return ease_out_expo(t);
-      case LINEAR:
-      default:
-        return t;
-    }
-  }
-
-  double value(AnimFunctions apply_function) const {
-    auto anim_duration = std::chrono::high_resolution_clock::now() - start;
-    double t = std::chrono::duration<double>(anim_duration).count() / duration;
-    if (t >= 1)
-      return end_value;
-    return start_value + (end_value - start_value) * apply_animation_function(t, apply_function);
-  }
-  bool done() const {
-    return std::chrono::high_resolution_clock::now() - start >= std::chrono::duration<double>(duration);
-  }
+  Animation(double duration = 1, double start = 0, double stop = 1);
+  void reset();
+  void reset(double duration);
+  void reset(double duration, double start, double stop);
+  double value(AnimFunctions apply_function) const;
+  bool done() const;
 private:
+  double apply_animation_function(double t, AnimFunctions apply_function) const;
   std::chrono::high_resolution_clock::time_point start;
   double start_value, end_value, duration;
 };
 
 struct WindowsColors {
-  WindowsColors() {
-    update();
-  }
+  using Color = winrt::Windows::UI::Color;
   
   static DWORD packed_color_from_ui_color(winrt::Windows::UI::Color color) {
     return ((DWORD)color.R << 16) | ((DWORD)color.G << 8) | ((DWORD)color.B);
