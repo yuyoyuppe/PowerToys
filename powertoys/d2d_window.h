@@ -13,35 +13,6 @@
 #include "d2d_svg.h"
 #include <winrt/Windows.UI.ViewManagement.h>
 
-/*
-  Usage:
-    When creating animation contstructor takes one parameter - how long
-    should the animation take in seconds.
-
-    Call reset() when starting animation.
-
-    When redering, call value() to get value from 0 to 1 - depending on animation
-    progress.
-*/
-class Animation {
-public:
-  enum AnimFunctions {
-    LINEAR = 0,
-    EASE_OUT_EXPO
-  };
-
-  Animation(double duration = 1, double start = 0, double stop = 1);
-  void reset();
-  void reset(double duration);
-  void reset(double duration, double start, double stop);
-  double value(AnimFunctions apply_function) const;
-  bool done() const;
-private:
-  double apply_animation_function(double t, AnimFunctions apply_function) const;
-  std::chrono::high_resolution_clock::time_point start;
-  double start_value, end_value, duration;
-};
-
 struct WindowsColors {
   using Color = winrt::Windows::UI::Color;
   

@@ -3,7 +3,7 @@
 #include "d2d_window.h"
 #include "d2d_text.h"
 #include "monitors.h"
-
+#include "animation.h"
 struct ScaleResult {
   double scale;
   RECT rect;
