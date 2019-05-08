@@ -17,16 +17,10 @@
     <ClCompile Include="mouse_handler.cpp">
       <Filter>Functionality</Filter>
     </ClCompile>
-    <ClCompile Include="move_window.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="monitors.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="start_visible.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="window.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
@@ -74,16 +68,10 @@
     <ClInclude Include="mouse_watcher.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="move_window.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="monitors.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="start_visible.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="window.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />

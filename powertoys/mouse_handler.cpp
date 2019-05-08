@@ -2,7 +2,6 @@
 #include "functionalities.h"
 #include "d2d_window_manager_popup.h"
 #include "mouse_watcher.h"
-#include "move_window.h"
 #include "virtual_desktops.h"
 
 namespace {
