@@ -365,16 +365,16 @@ namespace {
 
     pos = 0;
     SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
-    result.left = coord_value;
+    result.left = (LONG)coord_value;
     pos = 1;
     SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
-    result.top = coord_value;
+    result.top = (LONG)coord_value;
     pos = 2;
     SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
-    result.right = result.left + coord_value;
+    result.right = (LONG)(result.left + coord_value);
     pos = 3;
     SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
-    result.bottom = result.top + coord_value;
+    result.bottom = (LONG)(result.top + coord_value);
 
   cleanup:
     VariantClear(&varBoundedRectProp);
