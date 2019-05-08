@@ -1,8 +1,8 @@
 #pragma once
 
-// Start WinKey Overlay
+// Start the WinKey Overlay
 void start_winkey_handler();
-// Start Maximize Popup
+// Start the Maximize Popup
 void start_mouse_handler();
-// Start Tray Icon
+// Start the Tray Icon
 void start_tray_icon();

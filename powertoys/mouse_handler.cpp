@@ -27,8 +27,6 @@ namespace {
   }
 }
 
-
-
 void start_mouse_handler() {
   if (maximize_popup == NULL) {
     maximize_popup = new D2DWindowManagerPopup();

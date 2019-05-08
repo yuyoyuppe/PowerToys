@@ -33,9 +33,8 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         case WM_RBUTTONUP:
         case WM_CONTEXTMENU:
         {
-          HMENU h_menu, h_sub_menu;
-          h_menu = LoadMenu(reinterpret_cast<HINSTANCE>(&__ImageBase), MAKEINTRESOURCE(ID_TRAY_MENU));
-          h_sub_menu = GetSubMenu(h_menu, 0);
+          auto h_menu = LoadMenu(reinterpret_cast<HINSTANCE>(&__ImageBase), MAKEINTRESOURCE(ID_TRAY_MENU));
+          auto h_sub_menu = GetSubMenu(h_menu, 0);
           POINT mouse_pointer;
           GetCursorPos(&mouse_pointer);
           SetForegroundWindow(window); // Needed for the context menu to disappear.
@@ -54,8 +53,8 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
 void start_tray_icon() {
   id_tray_icon = wm_icon_notify = RegisterWindowMessage("WM_PowerToysIconNotify");
 
-  HINSTANCE h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
-  HICON icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
+  auto h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+  auto icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
 
   static const char* class_name = "PToyTrayIconWindow";
   WNDCLASS wc = {};
@@ -66,12 +65,17 @@ void start_tray_icon() {
   wc.lpfnWndProc = tray_icon_window_proc;
   wc.hIcon = icon;
   RegisterClass(&wc);
-  HWND hwnd = CreateWindow( wc.lpszClassName,
-                        "PToyTrayIconWindow",
-                        WS_OVERLAPPEDWINDOW | WS_POPUP,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        nullptr, nullptr, wc.hInstance, nullptr);
+  auto hwnd = CreateWindow(wc.lpszClassName,
+                           "PToyTrayIconWindow",
+                           WS_OVERLAPPEDWINDOW | WS_POPUP,
+                           CW_USEDEFAULT,
+                           CW_USEDEFAULT,
+                           CW_USEDEFAULT,
+                           CW_USEDEFAULT,
+                           nullptr,
+                           nullptr,
+                           wc.hInstance,
+                           nullptr);
   WINRT_VERIFY(hwnd);
 
   memset(&tray_icon_data, 0, sizeof(tray_icon_data));
