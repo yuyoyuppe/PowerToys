@@ -42,6 +42,7 @@ private:
 
   MouseTrackEvents mouse_track;
   bool should_highlight = false;
+  bool is_pressed = false;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;

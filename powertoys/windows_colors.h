@@ -13,6 +13,7 @@ struct WindowsColors {
   static Color get_highlight_text_color();
   static Color get_accent_light_1_color();
   static Color get_accent_light_2_color();
+  static Color get_accent_dark_1_color();
   static Color get_accent_color();
   static Color get_background_color();
   

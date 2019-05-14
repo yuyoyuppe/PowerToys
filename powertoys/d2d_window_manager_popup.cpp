@@ -208,7 +208,9 @@ void D2DWindowManagerPopup::render() {
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
   DWORD back_color;
-  if(should_highlight) {
+  if(is_pressed) {
+    back_color = WindowsColors::rgb_color(WindowsColors::get_accent_dark_1_color());
+  } else if(should_highlight) {
     back_color = WindowsColors::rgb_color(WindowsColors::get_accent_light_1_color());
   } else {
     back_color = WindowsColors::rgb_color(WindowsColors::get_accent_color());
@@ -226,11 +228,7 @@ void D2DWindowManagerPopup::render() {
                        (int)(height*0.7f),
                        1.0f);
   DWORD icon_color;
-  if (should_highlight) {
-    icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
-  } else {
-    icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
-  }
+  icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
   D2D1_COLOR_F iconBrush = D2D1::ColorF(icon_color, 1.0f);
   current_icon->find_element(L"icon-visual")->SetAttributeValue(L"fill", iconBrush);
   current_icon->render(d2d_dc.get());
@@ -258,6 +256,11 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     this_from_hwnd(window)->render();
     return DefWindowProc(window, message, wparam, lparam);
   case WM_LBUTTONDOWN:
+    _this = this_from_hwnd(window);
+    _this->is_pressed = true;
+    InvalidateRect(window, NULL, TRUE);
+    return DefWindowProc(window, message, wparam, lparam);
+  case WM_LBUTTONUP:
     this_from_hwnd(window)->hide();
     if (this_from_hwnd(window)->target_window_on_primary_desktop) {
       move_window_to_new_desktop(this_from_hwnd(window)->target_window);
@@ -268,20 +271,18 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
   case WM_MOUSEMOVE:
     // Enter the window
     _this = this_from_hwnd(window);
-    if(!_this->should_highlight) {
-      InvalidateRect(window, NULL, TRUE);
-    }
+    _this->is_pressed = wparam & MK_LBUTTON;
     _this->should_highlight = true;
     _this->mouse_track.on_moude_move(window, TME_LEAVE); // Start tracking to see when we leave.
+    InvalidateRect(window, NULL, TRUE);
     return DefWindowProc(window, message, wparam, lparam);
   case WM_MOUSELEAVE:
     // Leave the window
     _this = this_from_hwnd(window);
-    if(_this->should_highlight) {
-      InvalidateRect(window, NULL, TRUE);
-    }
     _this->should_highlight = false;
+    _this->is_pressed = false;
     _this->mouse_track.reset(window);
+    InvalidateRect(window, NULL, TRUE);
     return DefWindowProc(window, message, wparam, lparam);
   default:
     return DefWindowProc(window, message, wparam, lparam);

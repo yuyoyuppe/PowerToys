@@ -39,6 +39,10 @@ WindowsColors::Color WindowsColors::get_accent_light_2_color() {
   winrt::Windows::UI::ViewManagement::UISettings uiSettings;
   return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight2);
 }
+WindowsColors::Color WindowsColors::get_accent_dark_1_color() {
+  winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+  return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::AccentDark1);
+}
 WindowsColors::Color WindowsColors::get_accent_color() {
   winrt::Windows::UI::ViewManagement::UISettings uiSettings;
   return uiSettings.GetColorValue(winrt::Windows::UI::ViewManagement::UIColorType::Accent);
