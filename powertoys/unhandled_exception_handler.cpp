@@ -7,14 +7,13 @@
 #include <sstream>
 #include <signal.h>
 
-static IMAGEHLP_SYMBOL64* pSymbol = (IMAGEHLP_SYMBOL64*)malloc(sizeof(IMAGEHLP_SYMBOL64) + MAX_PATH * sizeof(TCHAR));
+static IMAGEHLP_SYMBOL64* p_symbol = (IMAGEHLP_SYMBOL64*)malloc(sizeof(IMAGEHLP_SYMBOL64) + MAX_PATH * sizeof(TCHAR));
 static IMAGEHLP_LINE64 line;
-static BOOLEAN processingException = FALSE;
-static CHAR modulePath[MAX_PATH];
-static LPTOP_LEVEL_EXCEPTION_FILTER defaultTopLevelExceptionHandler = NULL;
+static bool processing_exception = false;
+static CHAR module_path[MAX_PATH];
+static LPTOP_LEVEL_EXCEPTION_FILTER default_top_level_exception_handler = NULL;
 
-static const char* exceptionDescription(const DWORD& code)
-{
+static const char* exception_description(const DWORD& code) {
   switch (code) {
   case EXCEPTION_ACCESS_VIOLATION:         return "EXCEPTION_ACCESS_VIOLATION";
   case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:    return "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
@@ -36,36 +35,28 @@ static const char* exceptionDescription(const DWORD& code)
   case EXCEPTION_PRIV_INSTRUCTION:         return "EXCEPTION_PRIV_INSTRUCTION";
   case EXCEPTION_SINGLE_STEP:              return "EXCEPTION_SINGLE_STEP";
   case EXCEPTION_STACK_OVERFLOW:           return "EXCEPTION_STACK_OVERFLOW";
-  default: return "UNKNOWN EXCEPTION";
+  default:                                 return "UNKNOWN EXCEPTION";
   }
 }
 
-void InitSymbols() {
+void init_symbols() {
   SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
   line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-  HANDLE process = GetCurrentProcess();
+  auto process = GetCurrentProcess();
   SymInitialize(process, NULL, TRUE);
 }
 
-void LogStackTrace(std::string& generalErrorDescription) {
-  BOOL            result;
-  HANDLE          thread;
-  HANDLE          process;
-  CONTEXT         context;
-  STACKFRAME64    stack;
-  ULONG           frame;
-  DWORD64         dw64Displacement;
-  DWORD           dwDisplacement;
-
-  memset(&stack, 0, sizeof(STACKFRAME64));
-  memset(pSymbol, '\0', sizeof(*pSymbol) + MAX_PATH);
-  memset(&modulePath[0], '\0', sizeof(modulePath));
+void log_stack_trace(std::string& generalErrorDescription) {
+  memset(p_symbol, '\0', sizeof(*p_symbol) + MAX_PATH);
+  memset(&module_path[0], '\0', sizeof(module_path));
   line.LineNumber = 0;
 
+  CONTEXT context;
   RtlCaptureContext(&context);
-  process = GetCurrentProcess();
-  thread = GetCurrentThread();
-  dw64Displacement = 0;
+  auto process = GetCurrentProcess();
+  auto thread = GetCurrentThread();
+  STACKFRAME64 stack;
+  memset(&stack, 0, sizeof(STACKFRAME64));
   stack.AddrPC.Offset = context.Rip;
   stack.AddrPC.Mode = AddrModeFlat;
   stack.AddrStack.Offset = context.Rsp;
@@ -75,32 +66,32 @@ void LogStackTrace(std::string& generalErrorDescription) {
 
   std::stringstream ss;
   ss << generalErrorDescription << std::endl;
-  for (frame = 0;; frame++) {
-    result = StackWalk64(
-      IMAGE_FILE_MACHINE_AMD64,
-      process,
-      thread,
-      &stack,
-      &context,
-      NULL,
-      SymFunctionTableAccess64,
-      SymGetModuleBase64,
-      NULL
-    );
+  for (ULONG frame = 0;; frame++) {
+    auto result = StackWalk64(IMAGE_FILE_MACHINE_AMD64,
+                              process,
+                              thread,
+                              &stack,
+                              &context,
+                              NULL,
+                              SymFunctionTableAccess64,
+                              SymGetModuleBase64,
+                              NULL);
 
-    pSymbol->MaxNameLength = MAX_PATH;
-    pSymbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
+    p_symbol->MaxNameLength = MAX_PATH;
+    p_symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
 
-    SymGetSymFromAddr64(process, stack.AddrPC.Offset, &dw64Displacement, pSymbol);
+    DWORD64 dw64Displacement;
+    SymGetSymFromAddr64(process, stack.AddrPC.Offset, &dw64Displacement, p_symbol);
+    DWORD dwDisplacement;
     SymGetLineFromAddr64(process, stack.AddrPC.Offset, &dwDisplacement, &line);
 
-    DWORD64 moduleBase = SymGetModuleBase64(process, stack.AddrPC.Offset);
-    if (moduleBase)
-    {
-      GetModuleFileNameA((HINSTANCE)moduleBase, modulePath, MAX_PATH);
+    auto module_base = SymGetModuleBase64(process, stack.AddrPC.Offset);
+    if (module_base) {
+      GetModuleFileNameA((HINSTANCE)module_base, module_path, MAX_PATH);
     }
-    ss << modulePath << "!" << pSymbol->Name <<
-      "(" << line.FileName << ":" << line.LineNumber << std::endl;
+    ss << module_path << "!"
+       << p_symbol->Name
+       << "(" << line.FileName << ":" << line.LineNumber << ")\n";
     if (!result) {
       break;
     }
@@ -111,33 +102,33 @@ void LogStackTrace(std::string& generalErrorDescription) {
 }
 
 LONG WINAPI UnhandledExceptiontHandler(PEXCEPTION_POINTERS info) {
-  if (!processingException) {
-    processingException = true;
+  if (!processing_exception) {
+    processing_exception = true;
     try {
-      InitSymbols();
-      std::string exDescription = "Exception code not available";
+      init_symbols();
+      std::string ex_description = "Exception code not available";
       if (info != NULL && info->ExceptionRecord != NULL && info->ExceptionRecord->ExceptionCode != NULL) {
-        exDescription = exceptionDescription(info->ExceptionRecord->ExceptionCode);
+        ex_description = exception_description(info->ExceptionRecord->ExceptionCode);
       }
-      LogStackTrace(exDescription);
+      log_stack_trace(ex_description);
     }
     catch (...) {}
-    if (defaultTopLevelExceptionHandler != NULL && info != NULL) {
-      defaultTopLevelExceptionHandler(info);
+    if (default_top_level_exception_handler != NULL && info != NULL) {
+      default_top_level_exception_handler(info);
     }
-    processingException = false;
+    processing_exception = false;
   }
   return EXCEPTION_CONTINUE_SEARCH;
 }
 
 extern "C" void AbortHandler(int signal_number) {
-  InitSymbols();
-  std::string exDescription = "SIGABRT was raised.";
-  LogStackTrace(exDescription);
+  init_symbols();
+  std::string ex_description = "SIGABRT was raised.";
+  log_stack_trace(ex_description);
 }
 
-void InitGlobalErrorHandlers() {
-  defaultTopLevelExceptionHandler = SetUnhandledExceptionFilter(UnhandledExceptiontHandler);
+void init_global_error_handlers() {
+  default_top_level_exception_handler = SetUnhandledExceptionFilter(UnhandledExceptiontHandler);
   signal(SIGABRT, &AbortHandler);
 }
 #endif
