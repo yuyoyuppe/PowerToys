@@ -31,7 +31,6 @@ D2DWindowManagerPopup::D2DWindowManagerPopup() {
   SetLayeredWindowAttributes(hwnd, 0, (int)(255), LWA_ALPHA);
   ShowWindow(hwnd,SW_HIDE);
   init();
-  //enable_acrylic_window(hwnd);
 }
 
 D2DWindowManagerPopup::~D2DWindowManagerPopup() {
@@ -47,41 +46,33 @@ void D2DWindowManagerPopup::init()
   // we need to recreate the device.
   if (!d2d_factory) {
     D2D1_FACTORY_OPTIONS options = { D2D1_DEBUG_LEVEL_INFORMATION };
-    winrt::check_hresult(D2D1CreateFactory(
-      D2D1_FACTORY_TYPE_MULTI_THREADED,
-      __uuidof(d2d_factory),
-      &options,
-      d2d_factory.put_void()));
+    winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED,
+                                           __uuidof(d2d_factory),
+                                           &options,
+                                           d2d_factory.put_void()));
   }
   // For all other stuff - assing nullptr first to release the object, to reset
   // the com_ptr.
   d3d_device = nullptr;
-  winrt::check_hresult(D3D11CreateDevice(
-    nullptr,
-    D3D_DRIVER_TYPE_HARDWARE,
-    nullptr,
-    D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-    nullptr,
-    0,
-    D3D11_SDK_VERSION,
-    d3d_device.put(),
-    nullptr,
-    nullptr));
+  winrt::check_hresult(D3D11CreateDevice(nullptr,
+                                         D3D_DRIVER_TYPE_HARDWARE,
+                                         nullptr,
+                                         D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+                                         nullptr,
+                                         0,
+                                         D3D11_SDK_VERSION,
+                                         d3d_device.put(),
+                                         nullptr,
+                                         nullptr));
   dxgi_device = nullptr;
-  winrt::check_hresult(d3d_device->QueryInterface(
-    __uuidof(dxgi_device),
-    dxgi_device.put_void()));
+  winrt::check_hresult(d3d_device->QueryInterface(__uuidof(dxgi_device), dxgi_device.put_void()));
   dxgi_factory = nullptr;
-  winrt::check_hresult(CreateDXGIFactory2(
-    0, // DXGI_CREATE_FACTORY_DEBUG for extra output, but might crash in releases
-    __uuidof(dxgi_factory),
-    dxgi_factory.put_void()));
+  winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
   d2d_device = nullptr;
   winrt::check_hresult(d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
   d2d_dc = nullptr;
-  winrt::check_hresult(d2d_device->CreateDeviceContext(
-    D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-    d2d_dc.put()));
+  winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d_dc.put()));
+
   maximize_to_new_desktop.load(L"svgs\\maximize_to_new_desktop.svg", d2d_dc.get());
   restore_to_primary_desktop.load(L"svgs\\restore_to_primary_desktop.svg", d2d_dc.get());
   current_icon = &maximize_to_new_desktop;
@@ -94,15 +85,13 @@ D2DWindowManagerPopup* D2DWindowManagerPopup::this_from_hwnd(HWND window) {
 void D2DWindowManagerPopup::create_tooltip(HWND window) {
   //Create a tooltip.
   hwnd_tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
-    WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX ,
-    CW_USEDEFAULT, CW_USEDEFAULT,
-    CW_USEDEFAULT, CW_USEDEFAULT,
-    window, NULL,
-    reinterpret_cast<HINSTANCE>(&__ImageBase), NULL);
+                                WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX ,
+                                CW_USEDEFAULT, CW_USEDEFAULT,
+                                CW_USEDEFAULT, CW_USEDEFAULT,
+                                window, NULL,
+                                reinterpret_cast<HINSTANCE>(&__ImageBase), NULL);
 
-  SetWindowPos(hwnd_tooltip, HWND_TOPMOST,0, 0, 0, 0,
-    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-
+  SetWindowPos(hwnd_tooltip, HWND_TOPMOST,0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
   // Associate the tooltip with the tool.
   TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE; // sizeof(TOOLINFO) doesn't work...
@@ -114,7 +103,6 @@ void D2DWindowManagerPopup::create_tooltip(HWND window) {
   if(!SendMessage(hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM)&tool_info)) {
     MessageBox(NULL, "Couldn't create the ToolTip control.", "Error", MB_OK);
   }
-
 }
 
 HWND D2DWindowManagerPopup::get_hwnd() {
@@ -161,7 +149,7 @@ void D2DWindowManagerPopup::resize() {
   hwnd_rect.top = (float)0;
   hwnd_rect.bottom = (float)height;
   hwnd_rect.right = (float)width;
-if (width == 0 || height == 0)
+  if (width == 0 || height == 0)
     return;
   DXGI_SWAP_CHAIN_DESC1 sc_description = {};
   sc_description.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -173,17 +161,14 @@ if (width == 0 || height == 0)
   sc_description.Width = width;
   sc_description.Height = height;
   dxgi_swap_chain = nullptr;
-  winrt::check_hresult(dxgi_factory->CreateSwapChainForComposition(
-    dxgi_device.get(),
-    &sc_description,
-    nullptr,
-    dxgi_swap_chain.put()));
+  winrt::check_hresult(dxgi_factory->CreateSwapChainForComposition(dxgi_device.get(),
+                                                                   &sc_description,
+                                                                   nullptr,
+                                                                   dxgi_swap_chain.put()));
   composition_device = nullptr;
-  winrt::check_hresult(DCompositionCreateDevice(
-    dxgi_device.get(),
-    __uuidof(composition_device),
-    composition_device.put_void()));
-
+  winrt::check_hresult(DCompositionCreateDevice(dxgi_device.get(),
+                                                __uuidof(composition_device),
+                                                composition_device.put_void()));
   composition_target = nullptr;
   winrt::check_hresult(composition_device->CreateTargetForHwnd(hwnd, true, composition_target.put()));
   composition_visual = nullptr;
@@ -199,16 +184,15 @@ if (width == 0 || height == 0)
   properties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
   d2d_bitmap = nullptr;
   winrt::check_hresult(d2d_dc->CreateBitmapFromDxgiSurface(dxgi_surface.get(),
-    properties,
-    d2d_bitmap.put()));
+                                                           properties,
+                                                           d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
 
   TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE;
   tool_info.hwnd = hwnd;
   // Get the current tooltip definition.
-  if( SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info) )
-  {
+  if(SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info)) {
     // Resize the tooltip rect.
     GetClientRect(hwnd, &tool_info.rect);
     SendMessage(hwnd_tooltip, TTM_NEWTOOLRECT, 0, (LPARAM)&tool_info);
@@ -236,17 +220,15 @@ void D2DWindowManagerPopup::render() {
   float width = hwnd_rect.right - hwnd_rect.left;
   float height = hwnd_rect.bottom - hwnd_rect.top;
   //Apply 15% padding
-  current_icon->resize(
-    (int)(width*0.15f),
-    (int)(height*0.15f),
-    (int)(width*0.7f),
-    (int)(height*0.7f),
-    1.0f);
+  current_icon->resize((int)(width*0.15f),
+                       (int)(height*0.15f),
+                       (int)(width*0.7f),
+                       (int)(height*0.7f),
+                       1.0f);
   DWORD icon_color;
   if (should_highlight) {
     icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
-  }
-  else {
+  } else {
     icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());
   }
   D2D1_COLOR_F iconBrush = D2D1::ColorF(icon_color, 1.0f);
@@ -270,13 +252,6 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     this_from_hwnd(window)->create_tooltip(window);
     return DefWindowProc(window, message, wparam, lparam);
   }
-/*
-  case WM_NCACTIVATE:
-    // don't activate
-    return FALSE;
-  case WM_MOUSEACTIVATE:
-    return MA_NOACTIVATEANDEAT;
-*/
   case WM_SIZE:
     this_from_hwnd(window)->resize();
   case WM_PAINT:
@@ -312,4 +287,3 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     return DefWindowProc(window, message, wparam, lparam);
   }
 }
-

@@ -92,11 +92,10 @@ void D2DWindow::base_init() {
 #else
     D2D1_FACTORY_OPTIONS options = {};
 #endif
-    winrt::check_hresult(D2D1CreateFactory(
-                         D2D1_FACTORY_TYPE_MULTI_THREADED,
-                         __uuidof(d2d_factory),
-                         &options,
-                         d2d_factory.put_void()));
+    winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED,
+                                           __uuidof(d2d_factory),
+                                           &options,
+                                           d2d_factory.put_void()));
   }
   // For all other stuff - assing nullptr first to release the object, to reset the com_ptr.
   d2d_dc = nullptr;
@@ -115,12 +114,7 @@ void D2DWindow::base_init() {
                                          nullptr,
                                          nullptr));
   winrt::check_hresult(d3d_device->QueryInterface(__uuidof(dxgi_device), dxgi_device.put_void()));
-#ifdef _DEBUG
-  // TODO: Change 0 to DXGI_CREATE_FACTORY_DEBUG before releaseing the code.
   winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
-#else
-  winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
-#endif
   winrt::check_hresult(d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
   winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d_dc.put()));
   enable_acrylic_window(hwnd);
@@ -146,19 +140,18 @@ void D2DWindow::base_resize(int width, int height) {
   sc_description.Width = window_width;
   sc_description.Height = window_height;
   dxgi_swap_chain = nullptr;
-  winrt::check_hresult(dxgi_factory->CreateSwapChainForComposition(
-    dxgi_device.get(),
-    &sc_description,
-    nullptr,
-    dxgi_swap_chain.put()));
+  winrt::check_hresult(dxgi_factory->CreateSwapChainForComposition(dxgi_device.get(),
+                                                                   &sc_description,
+                                                                   nullptr,
+                                                                   dxgi_swap_chain.put()));
   composition_device = nullptr;
-  winrt::check_hresult(DCompositionCreateDevice(
-    dxgi_device.get(),
-    __uuidof(composition_device),
-    composition_device.put_void()));
+  winrt::check_hresult(DCompositionCreateDevice(dxgi_device.get(),
+                                                __uuidof(composition_device),
+                                                composition_device.put_void()));
 
   composition_target = nullptr;
   winrt::check_hresult(composition_device->CreateTargetForHwnd(hwnd, true, composition_target.put()));
+  
   composition_visual = nullptr;
   winrt::check_hresult(composition_device->CreateVisual(composition_visual.put()));
   winrt::check_hresult(composition_visual->SetContent(dxgi_swap_chain.get()));
@@ -170,10 +163,11 @@ void D2DWindow::base_resize(int width, int height) {
   properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
   properties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
   properties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+  
   d2d_bitmap = nullptr;
   winrt::check_hresult(d2d_dc->CreateBitmapFromDxgiSurface(dxgi_surface.get(),
-    properties,
-    d2d_bitmap.put()));
+                                                           properties,
+                                                           d2d_bitmap.put()));
   d2d_dc->SetTarget(d2d_bitmap.get());
   resize();
 }
