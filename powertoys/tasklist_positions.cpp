@@ -60,9 +60,9 @@ bool Tasklist::update_buttons(std::vector<TasklistButton>& buttons) {
     } else {
       return false;
     }
-    if (BSTR automationId; child->get_CurrentAutomationId(&automationId) >= 0) {
-      button.name = automationId;
-      SysFreeString(automationId);
+    if (BSTR automation_id; child->get_CurrentAutomationId(&automation_id) >= 0) {
+      button.name = automation_id;
+      SysFreeString(automation_id);
     }
     found_butttons.push_back(button);
   }
