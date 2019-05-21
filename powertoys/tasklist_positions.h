@@ -3,7 +3,7 @@
 #include <unordered_set>
 #include <string>
 #include <Windows.h>
-#include <oleacc.h>
+#include <UIAutomationClient.h>
 
 struct TasklistButton {
   std::wstring name;
@@ -13,13 +13,10 @@ struct TasklistButton {
 class Tasklist {
 public:
   void update();
-  std::vector<TasklistButton> get_buttons() const;
-  bool update_buttons(std::vector<TasklistButton>& buttons) const;
+  std::vector<TasklistButton> get_buttons();
+  bool update_buttons(std::vector<TasklistButton>& buttons);
 private:
-  bool is_pinned(const std::wstring& name) const;
-  std::vector<TasklistButton> assign_keynums(std::vector<TasklistButton> buttons) const;
-  winrt::com_ptr<IAccessible> tasklist;
-  bool labels_hidden;
-  std::unordered_set<std::wstring> pinned_shortcuts;
-  std::vector<char> pinned_registry;
+  winrt::com_ptr<IUIAutomation> automation;
+  winrt::com_ptr<IUIAutomationElement> element;
+  winrt::com_ptr<IUIAutomationCondition> true_condition;
 };
