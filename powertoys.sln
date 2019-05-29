@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "powertoys", "powertoys\powertoys.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,12 @@ Global
 		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}.Release|x64.Build.0 = Release|x64
 		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}.Release|x86.ActiveCfg = Release|Win32
 		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}.Release|x86.Build.0 = Release|Win32
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Debug|x64.ActiveCfg = Debug|x86
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Debug|x86.ActiveCfg = Debug|x86
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Debug|x86.Build.0 = Debug|x86
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Release|x64.ActiveCfg = Release|x86
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Release|x86.ActiveCfg = Release|x86
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

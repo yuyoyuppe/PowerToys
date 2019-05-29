@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="32cc65f8-d79e-43db-853d-16de0ac5ca51" Name="PowerToys" Language="1033" Version="0.0.1" Manufacturer="Microsoft" UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" />
+
+		<MajorUpgrade AllowDowngrades="yes" />
+    <MediaTemplate EmbedCab="yes" />
+    
+    <!-- 
+      Reinstall everything, files, registry keys and shortcuts.
+    -->
+    <Property Id="REINSTALLMODE" Value="amus" />
+    
+    <Icon Id="powertoys.ico" SourceFile="$(var.powertoys.ProjectDir)\svgs\icon.ico"/>
+		<Feature Id="ProductFeature" Title="PowerToys" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+    <UI>
+      <UIRef Id="WixUI_Minimal"/>
+    </UI>
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Bitmaps\banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.powertoys.ProjectDir)\License.rtf" />
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="PowerToys">
+          <Directory Id="SvgsInstallFolder" Name="svgs"/>
+        </Directory>
+			</Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id ="ApplicationProgramsFolder" Name ="PowerToys"/>
+      </Directory>
+    </Directory>
+	</Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER" FileSource="$(var.powertoys.TargetDir)">
+      <Component Id="powertoys.exe" Guid="a2c66d91-3485-4d00-b04d-91844e6b345b">
+        <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="SvgsInstallFolder" FileSource="$(var.powertoys.ProjectDir)\svgs\">
+      <Component Id="PowerToysSvgs" Guid="7c4d4eed-9338-423d-992c-dce02f3e2d35">
+        <File Source="$(var.powertoys.ProjectDir)\svgs\0.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\1.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\2.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\3.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\4.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\5.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\6.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\7.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\8.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\9.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\maximize_to_new_desktop.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\no_active_window.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\overlay.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\overlay_portrait.svg" />
+        <File Source="$(var.powertoys.ProjectDir)\svgs\restore_to_primary_desktop.svg" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="43184672-485d-4632-a16c-12d5e33b1f11">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="PowerToys"
+                  Description="PowerToys - Windows system utilities to maximize productivity"
+                  Target="[#powertoys.exe]"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="powertoys.ico"
+                  IconIndex="0"/>
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" 
+                       Key="Software\[Manufacturer]\[ProductName]" 
+                       Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes"/>
+      </Component>
+      <!-- XXX: This doesn't seem to work for making the app start at log in.
+      <Component Id="RunOnLoginRegistryKey" Guid="e31d7e25-f641-4302-8524-cc6999a136a9">
+        <RegistryKey Root="HKCU"
+                     Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                     Action="createAndRemoveOnUninstall"
+                     >
+          <RegistryValue Type="string"
+                         Name="[ProductName]"
+                         Value="[#powertoys.exe]"
+                         KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+      -->
+
+    </DirectoryRef>
+  </Fragment>
+  
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <ComponentRef Id="powertoys.exe" />
+      <ComponentRef Id="PowerToysSvgs" />
+      <ComponentRef Id="ApplicationShortcut" />
+		</ComponentGroup>
+	</Fragment>
+</Wix>
