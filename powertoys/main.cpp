@@ -9,6 +9,16 @@
 #include "unhandled_exception_handler.h"
 #endif
 
+void chdir_current_executable() {
+  // Change current directory to the path of the executable.
+  CCHAR executable_path[MAX_PATH];
+  GetModuleFileName(NULL, executable_path, MAX_PATH);
+  PathRemoveFileSpec(executable_path);
+  if(!SetCurrentDirectory(executable_path)) {
+    show_last_error_message((LPTSTR)"Change Directory to Executable Path", GetLastError());
+  }
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   #if _DEBUG && _WIN64
   //Global error handlers to diagnose errors.
@@ -20,6 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   // We will handle scaling ourselfs.
   HHOOK handle = NULL;
   try {
+    chdir_current_executable();
     start_tray_icon();
     start_winkey_handler();
     start_mouse_handler();
