@@ -9,10 +9,16 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 UINT wm_icon_notify = 0;
 UINT id_tray_icon = 0;
 
+// Contais the Windows Message for taskbar creation.
+UINT wm_taskbar_restart = 0;
+
 NOTIFYICONDATA tray_icon_data;
 
 LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
+  case WM_CREATE:
+    wm_taskbar_restart = RegisterWindowMessage(TEXT("TaskbarCreated"));
+    break;
   case WM_DESTROY:
     Shell_NotifyIcon(NIM_DELETE, &tray_icon_data);
     PostQuitMessage(0);
@@ -43,11 +49,12 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         }
         break;
       }
-    } else {
-      return DefWindowProc(window, message, wparam, lparam);
+    } else if(message == wm_taskbar_restart) {
+      // To show tray icon when the taskbar is created/restarted.
+      Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
     }
   }
-  return 0;
+  return DefWindowProc(window, message, wparam, lparam);
 }
 
 void start_tray_icon() {
