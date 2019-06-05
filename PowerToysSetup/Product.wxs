@@ -41,6 +41,9 @@
       <Component Id="powertoys.exe" Guid="a2c66d91-3485-4d00-b04d-91844e6b345b">
         <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
       </Component>
+      <Component Id="License.rtf" Guid="3e5ae43b-cfb4-449b-a346-94caaff3312e">
+        <File Source="$(var.powertoys.ProjectDir)\License.rtf" Id="License.rtf" KeyPath="yes" Checksum="yes" />
+      </Component>
     </DirectoryRef>
     <DirectoryRef Id="SvgsInstallFolder" FileSource="$(var.powertoys.ProjectDir)\svgs\">
       <Component Id="PowerToysSvgs" Guid="7c4d4eed-9338-423d-992c-dce02f3e2d35">
@@ -101,6 +104,7 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <ComponentRef Id="powertoys.exe" />
+      <ComponentRef Id="License.rtf" />
       <ComponentRef Id="PowerToysSvgs" />
       <ComponentRef Id="ApplicationShortcut" />
 		</ComponentGroup>
