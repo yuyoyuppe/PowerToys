@@ -14,12 +14,13 @@ The hook also allows using 0-9 to change the active ZoneSet during a drag operat
 During initial standup, FancyZones creates a ZoneWindow for each connected monitor. When it receives a WM_DISPLAYCHANGE, it updates the available ZoneWindows to reflect the state of the system (eg add a new ZoneWindow for newly connected monitor, delete ZoneWindow for disconnected monitor, etc)
 
 ### Interface
+```
 interface IFancyZones : public IUnknown
 {
     // Returns the main application window
     IFACEMETHOD_(HWND, GetWindow)() = 0;
 
-    // Returns the global HINSTANCE for the processj
+    // Returns the global HINSTANCE for the process
     IFACEMETHOD_(HINSTANCE, GetHInstance)() = 0;
 
     // Returns the global Settings object used to look up individual settings throughout the product
@@ -76,11 +77,13 @@ interface IFancyZones : public IUnknown
     // Keep windows positioned inside their zones when the active ZoneSet changes
     IFACEMETHOD_(void, MoveWindowsOnActiveZoneSetChange)() = 0;
 };
+```
 
 ## ZoneWindow
 ZoneWindow is used to display the Zones a user can drop a window in during a drag operation, flash the Zones when the ZoneSet changes, and draw the Zone Editor UI when in edit mode. Basically, when a ZoneSet needs to be visualized, ZoneWindow does it.
 
 ### Interface
+```
 interface IZoneWindow : public IUnknown
 {
     // Shows the ZoneWindow
@@ -119,11 +122,13 @@ interface IZoneWindow : public IUnknown
     // Allows changing the active ZoneSet via key press either during a drag or while the ZoneWindow is in foreground
     IFACEMETHOD_(void, CycleActiveZoneSet)(DWORD vkCode) = 0;
 };
+```
 
 ## ZoneSet
 Collection of one or more Zones. Only one ZoneSet is active at a time per monitor.
 
 ### Interface
+```
 interface IZoneSet : public IUnknown
 {
     // Gets the unique ID used to identify this ZoneSet
@@ -178,11 +183,13 @@ interface IZoneSet : public IUnknown
     // to a different Zone based on the current cursor position
     IFACEMETHOD_(void, MoveSizeExit)(_In_ HWND window, _In_ HWND zoneWindow, _In_ POINT ptClient) = 0;
 };
+```
 
 ## Zone
 Basically a RECT and a map of HWND->RECT to keep track of where windows can be placed and which windows are currently in the Zone.
 
 ### Interface
+```
 interface IZone : public IUnknown
 {
     // Returns the RECT that this Zone represents
@@ -204,4 +211,5 @@ interface IZone : public IUnknown
     // Returns the id given to this Zone
     IFACEMETHOD_(size_t, GetId)() = 0;
 };
+```
 
