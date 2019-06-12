@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Id="32cc65f8-d79e-43db-853d-16de0ac5ca51" Name="PowerToys" Language="1033" Version="0.0.1" Manufacturer="Microsoft" UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
-		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" />
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
 		<MajorUpgrade AllowDowngrades="yes" />
     <MediaTemplate EmbedCab="yes" />
-    
-    <!-- 
+
+    <!--
       Reinstall everything, files, registry keys and shortcuts.
     -->
     <Property Id="REINSTALLMODE" Value="amus" />
-    
+
     <Icon Id="powertoys.ico" SourceFile="$(var.powertoys.ProjectDir)\svgs\icon.ico"/>
 		<Feature Id="ProductFeature" Title="PowerToys" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
 		</Feature>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     <UI>
-      <UIRef Id="WixUI_Minimal"/>
+      <UIRef Id="WixUI_PTInstallDir"/>
+      <Publish Dialog="ExitDialog"
+            Control="Finish"
+            Event="DoAction"
+            Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
     </UI>
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Bitmaps\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.powertoys.ProjectDir)\License.rtf" />
+    <Property Id="INSTALLSTARTMENUSHORTCUT" Value="1"/>
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch PowerToys" />
+    <Property Id="WixShellExecTarget" Value="[#powertoys.exe]" />
+    <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
 	</Product>
 
 	<Fragment>
@@ -33,6 +43,7 @@
       <Directory Id="ProgramMenuFolder">
         <Directory Id ="ApplicationProgramsFolder" Name ="PowerToys"/>
       </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop"/>
     </Directory>
 	</Fragment>
 
@@ -69,6 +80,7 @@
   <Fragment>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="43184672-485d-4632-a16c-12d5e33b1f11">
+        <Condition>INSTALLSTARTMENUSHORTCUT</Condition>
         <Shortcut Id="ApplicationStartMenuShortcut"
                   Name="PowerToys"
                   Description="PowerToys - Windows system utilities to maximize productivity"
@@ -77,36 +89,56 @@
                   Icon="powertoys.ico"
                   IconIndex="0"/>
         <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU" 
-                       Key="Software\[Manufacturer]\[ProductName]" 
-                       Name="installed" 
-                       Type="integer" 
-                       Value="1" 
+        <RegistryValue Root="HKCU"
+                       Key="Software\[Manufacturer]\[ProductName]"
+                       Name="startshorcutinstalled"
+                       Type="integer"
+                       Value="1"
                        KeyPath="yes"/>
       </Component>
-      <!-- XXX: This doesn't seem to work for making the app start at log in.
-      <Component Id="RunOnLoginRegistryKey" Guid="e31d7e25-f641-4302-8524-cc6999a136a9">
-        <RegistryKey Root="HKCU"
-                     Key="Software\Microsoft\Windows\CurrentVersion\Run"
-                     Action="createAndRemoveOnUninstall"
-                     >
-          <RegistryValue Type="string"
-                         Name="[ProductName]"
-                         Value="[#powertoys.exe]"
-                         KeyPath="yes" />
-        </RegistryKey>
+    </DirectoryRef>
+    <!-- XXX: This doesn't seem to work for making the app start at log in.
+    <Component Id="RunOnLoginRegistryKey" Guid="e31d7e25-f641-4302-8524-cc6999a136a9">
+      <RegistryKey Root="HKCU"
+                    Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                    Action="createAndRemoveOnUninstall"
+                    >
+        <RegistryValue Type="string"
+                        Name="[ProductName]"
+                        Value="[#powertoys.exe]"
+                        KeyPath="yes" />
+      </RegistryKey>
+    </Component>
+    -->
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="87321f2b-cc48-4326-881e-9c62cc260dc8">
+      <Condition>INSTALLDESKTOPSHORTCUT</Condition>
+      <RegistryValue Root="HKCU"
+                      Key="Software\[Manufacturer]\[ProductName]"
+                      Name="desktopshorcutinstalled"
+                      Type="integer"
+                      Value="1"
+                      KeyPath="yes"/>
+      <Shortcut Id="DesktopShortcut"
+                Name="PowerToys"
+                Description="PowerToys - Windows system utilities to maximize productivity"
+                Target="[#powertoys.exe]"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="powertoys.ico"
+                Directory="DesktopFolder"/>
       </Component>
-      -->
-
     </DirectoryRef>
   </Fragment>
-  
+
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <ComponentRef Id="powertoys.exe" />
       <ComponentRef Id="License.rtf" />
       <ComponentRef Id="PowerToysSvgs" />
       <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
 		</ComponentGroup>
 	</Fragment>
 </Wix>
