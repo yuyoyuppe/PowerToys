@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="32cc65f8-d79e-43db-853d-16de0ac5ca51" Name="PowerToys" Language="1033" Version="0.0.1" Manufacturer="Microsoft" UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
+	<Product Id="32cc65f8-d79e-43db-853d-16de0ac5ca51" Name="PowerToys" Language="1033" Version="0.6.9" Manufacturer="Microsoft" UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
 		<MajorUpgrade AllowDowngrades="yes" />
