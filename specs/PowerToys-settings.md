@@ -19,7 +19,9 @@ The settings JSON object for each PowerToy should provide:
 * Logo Image
 * Credits string
 * Credits link
-* Settings property bag
+* Settings property bag.  Each item in the property bag has two items:
+   * String: display name
+   * String: property / editor type
 
 Property Bag of settings in priority order (type->editor)
 * Bool->slide switch
