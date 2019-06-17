@@ -101,7 +101,7 @@ void log_stack_trace(std::string& generalErrorDescription) {
 
 }
 
-LONG WINAPI UnhandledExceptiontHandler(PEXCEPTION_POINTERS info) {
+LONG WINAPI unhandled_exceptiont_handler(PEXCEPTION_POINTERS info) {
   if (!processing_exception) {
     processing_exception = true;
     try {
@@ -128,7 +128,7 @@ extern "C" void AbortHandler(int signal_number) {
 }
 
 void init_global_error_handlers() {
-  default_top_level_exception_handler = SetUnhandledExceptionFilter(UnhandledExceptiontHandler);
+  default_top_level_exception_handler = SetUnhandledExceptionFilter(unhandled_exceptiont_handler);
   signal(SIGABRT, &AbortHandler);
 }
 #endif

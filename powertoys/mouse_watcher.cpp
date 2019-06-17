@@ -19,18 +19,22 @@ namespace {
   RECT mouse_window_rect;
   HWND mouse_window_hwnd;
 
-  IUIAutomation* ui_automation = nullptr;
-  IUIAutomationCondition* p_conditions_joined_top_idAutomation = NULL;
-  IUIAutomationCondition* p_conditions_joined_top_nameAutomation = NULL;
-  IUIAutomationCondition* p_condition_true = NULL;
-
-  HRESULT InitializeUIAutomation(IUIAutomation **ppAutomation)
-  {
-    return CoCreateInstance(CLSID_CUIAutomation, NULL,
-      CLSCTX_INPROC_SERVER, IID_IUIAutomation,
-      reinterpret_cast<void**>(ppAutomation));
+  winrt::com_ptr<IUIAutomation> ui_automation;
+  winrt::com_ptr<IUIAutomationCondition> conditions_joined_top_id;
+  winrt::com_ptr<IUIAutomationCondition> conditions_joined_top_name;
+  winrt::com_ptr<IUIAutomationCondition> condition_true;
+  
+  void initialize_ui_automation() {
+    conditions_joined_top_id = nullptr;
+    conditions_joined_top_name = nullptr;
+    condition_true = nullptr;
+    ui_automation = nullptr;
+    winrt::check_hresult(CoCreateInstance(CLSID_CUIAutomation,
+                                          nullptr,
+                                          CLSCTX_INPROC_SERVER,
+                                          IID_IUIAutomation,
+                                          ui_automation.put_void()));
   };
-
 
   bool mouse_in_rect(POINT mouse_pos, RECT rect) {
     return mouse_pos.x >= rect.left && mouse_pos.x <= rect.right &&
@@ -43,7 +47,7 @@ namespace {
     // Test if mouse is in one of the rects
     if (mouse_in_rect(mouse_pos, buttons_rect) || mouse_in_rect(mouse_pos, popup_rect))
       return true;
-   // Test if mouse is in the trapezoid
+    // Test if mouse is in the trapezoid
     int top = buttons_rect.top;
     int bottom = popup_rect.top;
     int heigh = bottom - top;
@@ -61,7 +65,7 @@ namespace {
     return mouse_pos.x >= px_left && mouse_pos.x <= px_right;
   }
 
-  RECT use_dwmwa_caption_strategy (HWND hwnd, std::optional<RECT>& window_rect) {
+  RECT use_dwmwa_caption_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
     // Try to get caption buttons by using DWMWA_CAPTION_BUTTON_BOUNDS.
     RECT result = { 0 };
     DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &result, sizeof(RECT));
@@ -83,8 +87,7 @@ namespace {
     if (result.left > window_rect->right ||
       result.top > window_rect->bottom ||
       result.right < window_rect->left ||
-      result.bottom < window_rect->top
-    ) {
+      result.bottom < window_rect->top) {
       RECT zero = {0};
       return zero;
     }
@@ -106,404 +109,345 @@ namespace {
   }
 
   struct UIAutomationCachedInfo {
-    IUIAutomationElement* window_ui_element;
+    winrt::com_ptr<IUIAutomationElement> window_ui_element;
     double seconds_last_ui_automation_find_duration;
   };
-  std::map<HWND, UIAutomationCachedInfo> custom_ui_automation_cache;
+
+  std::unordered_map<HWND, UIAutomationCachedInfo> custom_ui_automation_cache;
 
   void initialize_ui_automation_strategy() {
-    //TODO: Definitely clean this up after experimentation.
-    IUIAutomationCondition* p_condition_maximize_restore_id = NULL;
-    IUIAutomationCondition* p_condition_maximize_restore_name = NULL;
-    VARIANT var_prop_maximize_restore_string;
-    var_prop_maximize_restore_string.vt = VT_BSTR;
-    var_prop_maximize_restore_string.bstrVal = SysAllocString(L"Maximize-Restore");
-    IUIAutomationCondition* p_condition_maximize_id = NULL;
-    IUIAutomationCondition* p_condition_maximize_name = NULL;
-    VARIANT var_prop_maximize_string;
-    var_prop_maximize_string.vt = VT_BSTR;
-    var_prop_maximize_string.bstrVal = SysAllocString(L"Maximize");
-    IUIAutomationCondition* p_condition_restore_id = NULL;
-    IUIAutomationCondition* p_condition_restore_name = NULL;
-    VARIANT var_prop_restore_string;
-    var_prop_restore_string.vt = VT_BSTR;
-    var_prop_restore_string.bstrVal = SysAllocString(L"Restore");
-    IUIAutomationCondition* p_condition_restore_down_id = NULL;
-    IUIAutomationCondition* p_condition_restore_down_name = NULL;
-    VARIANT var_prop_restore_down_string;
-    var_prop_restore_down_string.vt = VT_BSTR;
-    var_prop_restore_down_string.bstrVal = SysAllocString(L"Restore Down");
-    IUIAutomationCondition* p_condition_maximizerestore_id = NULL;
-    IUIAutomationCondition* p_condition_maximizerestore_name = NULL;
-    VARIANT var_prop_maximizerestore_string;
-    var_prop_maximizerestore_string.vt = VT_BSTR;
-    var_prop_maximizerestore_string.bstrVal = SysAllocString(L"MaximizeRestore");
-    IUIAutomationCondition* p_condition_maximizerestorebutton_id = NULL;
-    IUIAutomationCondition* p_condition_maximizerestorebutton_name = NULL;
-    VARIANT var_prop_maximizerestorebutton_string;
-    var_prop_maximizerestorebutton_string.vt = VT_BSTR;
-    var_prop_maximizerestorebutton_string.bstrVal = SysAllocString(L"MaximizeRestoreButton");
-    IUIAutomationCondition* p_conditions_is_offscreen = NULL;
-    VARIANT var_prop_false_bool;
-    var_prop_false_bool.vt = VT_BOOL;
-    var_prop_false_bool.boolVal = VARIANT_FALSE;
-    IUIAutomationCondition* p_conditions_is_enabled = NULL;
-    VARIANT var_prop_true_bool;
-    var_prop_true_bool.vt = VT_BOOL;
-    var_prop_true_bool.boolVal = VARIANT_TRUE;
-    IUIAutomationCondition* p_conditions_joined_name_1 = NULL;
-    IUIAutomationCondition* p_conditions_joined_name_2 = NULL;
-    IUIAutomationCondition* p_conditions_joined_name_3 = NULL;
-    IUIAutomationCondition* p_conditions_joined_name_4 = NULL;
-    IUIAutomationCondition* p_conditions_joined_name_top = NULL;
-    IUIAutomationCondition* p_conditions_joined_id_1 = NULL;
-    IUIAutomationCondition* p_conditions_joined_id_2 = NULL;
-    IUIAutomationCondition* p_conditions_joined_id_3 = NULL;
-    IUIAutomationCondition* p_conditions_joined_id_4 = NULL;
-    IUIAutomationCondition* p_conditions_joined_id_top = NULL;
-    IUIAutomationCondition* p_conditions_joined_visible_and_condition = NULL;
-    HRESULT hr;
-    /*
-    if (var_prop_maximize_restore_string.bstrVal == NULL) {
-      goto cleanup;
-    }
-    */
+    initialize_ui_automation();
 
-    CoInitialize(nullptr);
-    hr = InitializeUIAutomation(&ui_automation);
-    if (FAILED(hr)) {
-      goto cleanup;
+    if (ui_automation->CreateTrueCondition(condition_true.put()) < 0) {
+      return;
     }
-
-    hr = ui_automation->CreateTrueCondition(&p_condition_true);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximize_restore_id;
+    VARIANT prop_maximize_restore_string;
+    prop_maximize_restore_string.vt = VT_BSTR;
+    prop_maximize_restore_string.bstrVal = SysAllocString(L"Maximize-Restore");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_maximize_restore_string,
+                                               condition_maximize_restore_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximize_restore_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_maximize_restore_string,
+                                               condition_maximize_restore_name.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximize_string, &p_condition_maximize_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximize_id;
+    VARIANT prop_maximize_string;
+    prop_maximize_string.vt = VT_BSTR;
+    prop_maximize_string.bstrVal = SysAllocString(L"Maximize");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_maximize_string,
+                                               condition_maximize_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_restore_string, &p_condition_restore_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximize_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_maximize_string,
+                                               condition_maximize_name.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_restore_down_string, &p_condition_restore_down_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_restore_id;
+    VARIANT prop_restore_string;
+    prop_restore_string.vt = VT_BSTR;
+    prop_restore_string.bstrVal = SysAllocString(L"Restore");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_restore_string,
+                                               condition_restore_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximizerestore_string, &p_condition_maximizerestore_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_restore_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_restore_string,
+                                               condition_restore_name.put()) < 0 ) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId, var_prop_maximizerestorebutton_string, &p_condition_maximizerestorebutton_id);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_restore_down_id;
+    VARIANT prop_restore_down_string;
+    prop_restore_down_string.vt = VT_BSTR;
+    prop_restore_down_string.bstrVal = SysAllocString(L"Restore Down");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_restore_down_string,
+                                               condition_restore_down_id.put()) < 0 ) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximize_restore_string, &p_condition_maximize_restore_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_restore_down_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_restore_down_string,
+                                               condition_restore_down_name.put()) < 0 ) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximize_string, &p_condition_maximize_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximizerestore_id;
+    VARIANT prop_maximizerestore_string;
+    prop_maximizerestore_string.vt = VT_BSTR;
+    prop_maximizerestore_string.bstrVal = SysAllocString(L"MaximizeRestore");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_maximizerestore_string,
+                                               condition_maximizerestore_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_restore_string, &p_condition_restore_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximizerestore_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_maximizerestore_string,
+                                               condition_maximizerestore_name.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_restore_down_string, &p_condition_restore_down_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximizerestorebutton_id;
+    VARIANT prop_maximizerestorebutton_string;
+    prop_maximizerestorebutton_string.vt = VT_BSTR;
+    prop_maximizerestorebutton_string.bstrVal = SysAllocString(L"MaximizeRestoreButton");
+    if (ui_automation->CreatePropertyCondition(UIA_AutomationIdPropertyId,
+                                               prop_maximizerestorebutton_string,
+                                               condition_maximizerestorebutton_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximizerestore_string, &p_condition_maximizerestore_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> condition_maximizerestorebutton_name;
+    if (ui_automation->CreatePropertyCondition(UIA_NamePropertyId,
+                                               prop_maximizerestorebutton_string,
+                                               condition_maximizerestorebutton_name.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_NamePropertyId, var_prop_maximizerestorebutton_string, &p_condition_maximizerestorebutton_name);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_id_3;
+    if (ui_automation->CreateOrCondition(condition_maximizerestore_id.get(),
+                                         condition_maximizerestorebutton_id.get(),
+                                         conditions_joined_id_3.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximizerestore_id, p_condition_maximizerestorebutton_id, &p_conditions_joined_id_3);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_id_4;
+    if (ui_automation->CreateOrCondition(condition_restore_down_id.get(),
+                                         conditions_joined_id_3.get(),
+                                         conditions_joined_id_4.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_down_id, p_conditions_joined_id_3, &p_conditions_joined_id_4);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_id_2;
+    if (ui_automation->CreateOrCondition(condition_restore_id.get(),
+                                         conditions_joined_id_4.get(),
+                                         conditions_joined_id_2.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_id, p_conditions_joined_id_4, &p_conditions_joined_id_2);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_id_1;
+    if (ui_automation->CreateOrCondition(condition_maximize_id.get(),
+                                         conditions_joined_id_2.get(),
+                                         conditions_joined_id_1.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_id, p_conditions_joined_id_2, &p_conditions_joined_id_1);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_id_top;
+    if (ui_automation->CreateOrCondition(condition_maximize_restore_id.get(),
+                                         conditions_joined_id_1.get(),
+                                         conditions_joined_id_top.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_restore_id, p_conditions_joined_id_1, &p_conditions_joined_id_top);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_name_3;
+    if (ui_automation->CreateOrCondition(condition_maximizerestore_name.get(),
+                                         condition_maximizerestorebutton_name.get(),
+                                         conditions_joined_name_3.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximizerestore_name, p_condition_maximizerestorebutton_name, &p_conditions_joined_name_3);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_name_4;
+    if (ui_automation->CreateOrCondition(condition_restore_down_name.get(),
+                                         conditions_joined_name_3.get(),
+                                         conditions_joined_name_4.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_down_name, p_conditions_joined_name_3, &p_conditions_joined_name_4);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_name_2;
+    if (ui_automation->CreateOrCondition(condition_restore_name.get(),
+                                         conditions_joined_name_4.get(),
+                                         conditions_joined_name_2.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_restore_name, p_conditions_joined_name_4, &p_conditions_joined_name_2);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_name_1;
+    if (ui_automation->CreateOrCondition(condition_maximize_name.get(),
+                                         conditions_joined_name_2.get(),
+                                         conditions_joined_name_1.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_name, p_conditions_joined_name_2, &p_conditions_joined_name_1);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_name_top;
+    if (ui_automation->CreateOrCondition(condition_maximize_restore_name.get(),
+                                         conditions_joined_name_1.get(),
+                                         conditions_joined_name_top.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateOrCondition(p_condition_maximize_restore_name, p_conditions_joined_name_1, &p_conditions_joined_name_top);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_is_offscreen;
+    VARIANT prop_false_bool;
+    prop_false_bool.vt = VT_BOOL;
+    prop_false_bool.boolVal = VARIANT_FALSE;
+    if (ui_automation->CreatePropertyCondition(UIA_IsOffscreenPropertyId,
+                                               prop_false_bool,
+                                               conditions_is_offscreen.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_IsOffscreenPropertyId, var_prop_false_bool, &p_conditions_is_offscreen);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_is_enabled;
+    VARIANT prop_true_bool;
+    prop_true_bool.vt = VT_BOOL;
+    prop_true_bool.boolVal = VARIANT_TRUE;
+    if (ui_automation->CreatePropertyCondition(UIA_IsEnabledPropertyId,
+                                               prop_true_bool,
+                                               conditions_is_enabled.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreatePropertyCondition(UIA_IsEnabledPropertyId, var_prop_true_bool, &p_conditions_is_enabled);
-    if (FAILED(hr)) {
-      goto cleanup;
+    winrt::com_ptr<IUIAutomationCondition> conditions_joined_visible_and_condition;
+    if (ui_automation->CreateAndCondition(conditions_is_enabled.get(),
+                                          conditions_is_offscreen.get(),
+                                          conditions_joined_visible_and_condition.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateAndCondition(p_conditions_is_enabled, p_conditions_is_offscreen, &p_conditions_joined_visible_and_condition);
-    if (FAILED(hr)) {
-      goto cleanup;
+    if (ui_automation->CreateAndCondition(conditions_joined_id_top.get(),
+                                          conditions_joined_visible_and_condition.get(),
+                                          conditions_joined_top_id.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateAndCondition(p_conditions_joined_id_top, p_conditions_joined_visible_and_condition, &p_conditions_joined_top_idAutomation);
-    if (FAILED(hr)) {
-      goto cleanup;
+    if (ui_automation->CreateAndCondition(conditions_joined_name_top.get(),
+                                          conditions_joined_visible_and_condition.get(),
+                                          conditions_joined_top_name.put()) < 0) {
+      return;
     }
-    hr = ui_automation->CreateAndCondition(p_conditions_joined_name_top, p_conditions_joined_visible_and_condition, &p_conditions_joined_top_nameAutomation);
-    if (FAILED(hr)) {
-      goto cleanup;
-    }
-  cleanup:
-    if (p_condition_maximize_restore_id != NULL)
-      p_condition_maximize_restore_id->Release();
-    if (p_condition_maximize_id != NULL)
-      p_condition_maximize_id->Release();
-    if (p_condition_restore_id != NULL)
-      p_condition_restore_id->Release();
-    if (p_condition_restore_down_id != NULL)
-      p_condition_restore_down_id->Release();
-    if (p_condition_maximizerestore_id != NULL)
-      p_condition_maximizerestore_id->Release();
-    if (p_condition_maximizerestorebutton_id != NULL)
-      p_condition_maximizerestorebutton_id->Release();
-    if (p_condition_maximize_restore_name != NULL)
-      p_condition_maximize_restore_name->Release();
-    if (p_condition_maximize_name != NULL)
-      p_condition_maximize_name->Release();
-    if (p_condition_restore_down_name != NULL)
-      p_condition_restore_down_name->Release();
-    if (p_condition_restore_name != NULL)
-      p_condition_restore_name->Release();
-    if (p_condition_maximizerestore_name != NULL)
-      p_condition_maximizerestore_name->Release();
-    if (p_condition_maximizerestorebutton_name != NULL)
-      p_condition_maximizerestorebutton_name->Release();
-    if (p_conditions_joined_id_4 != NULL)
-      p_conditions_joined_id_4->Release();
-    if (p_conditions_joined_id_3 != NULL)
-      p_conditions_joined_id_3->Release();
-    if (p_conditions_joined_id_2 != NULL)
-      p_conditions_joined_id_2->Release();
-    if (p_conditions_joined_id_1 != NULL)
-      p_conditions_joined_id_1->Release();
-    if (p_conditions_joined_id_top != NULL)
-      p_conditions_joined_id_top->Release();
-    if (p_conditions_joined_name_4 != NULL)
-      p_conditions_joined_name_4->Release();
-    if (p_conditions_joined_name_3 != NULL)
-      p_conditions_joined_name_3->Release();
-    if (p_conditions_joined_name_2 != NULL)
-      p_conditions_joined_name_2->Release();
-    if (p_conditions_joined_name_1 != NULL)
-      p_conditions_joined_name_1->Release();
-    if (p_conditions_joined_name_top != NULL)
-      p_conditions_joined_name_top->Release();
-    if (p_conditions_is_offscreen != NULL)
-      p_conditions_is_offscreen->Release();
-    if (p_conditions_is_enabled != NULL)
-      p_conditions_is_enabled->Release();
-    if (p_conditions_joined_visible_and_condition != NULL)
-      p_conditions_joined_visible_and_condition->Release();
-    //VariantClear(&var_prop_maximize_restore_string);
-    //VariantClear(&var_prop_maximize_string);
-    //VariantClear(&var_prop_restore_string);
   }
 
-  HWND ui_automation_strategy_last_hwnd = NULL;
-  IUIAutomationElement* ui_automation_strategy_element_found = NULL;
-
+  
   RECT get_bounding_rectangle_from_hwnd_UI_element(IUIAutomationElement* query_ui_element) {
-    RECT result = { 0 };
-    VARIANT varBoundedRectProp;
-    varBoundedRectProp.vt = VT_NULL;
+    if (!query_ui_element == NULL) {
+      return {};
+    }
+    VARIANT bounded_rect_prop;
+    bounded_rect_prop.vt = VT_NULL;
+    auto hr = query_ui_element->GetCurrentPropertyValue(UIA_BoundingRectanglePropertyId, &bounded_rect_prop);
+    if (FAILED(hr) || bounded_rect_prop.vt != (VT_R8 | VT_ARRAY)) {
+      return {};
+    }
+    RECT result = { 0 };    
     DOUBLE coord_value;
     LONG pos;
-    HRESULT hr;
-
-    if (query_ui_element == NULL) {
-      goto cleanup;
-    }
-
-    hr = query_ui_element->GetCurrentPropertyValue(UIA_BoundingRectanglePropertyId, &varBoundedRectProp);
-    if (FAILED(hr) || varBoundedRectProp.vt != (VT_R8 | VT_ARRAY)) {
-      goto cleanup;
-    }
-
     pos = 0;
-    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    SafeArrayGetElement(bounded_rect_prop.parray, &pos, &coord_value);
     result.left = (LONG)coord_value;
     pos = 1;
-    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    SafeArrayGetElement(bounded_rect_prop.parray, &pos, &coord_value);
     result.top = (LONG)coord_value;
     pos = 2;
-    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    SafeArrayGetElement(bounded_rect_prop.parray, &pos, &coord_value);
     result.right = (LONG)(result.left + coord_value);
     pos = 3;
-    SafeArrayGetElement(varBoundedRectProp.parray, &pos, &coord_value);
+    SafeArrayGetElement(bounded_rect_prop.parray, &pos, &coord_value);
     result.bottom = (LONG)(result.top + coord_value);
-
-  cleanup:
-    VariantClear(&varBoundedRectProp);
+    VariantClear(&bounded_rect_prop);
     return result;
   }
 
-  IUIAutomationElement* find_element_ui_automation_max_depth_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* pcondition, int level, int maxlevel) {
+  winrt::com_ptr<IUIAutomationElement> find_element_ui_automation_max_depth_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* condition, int level, int maxlevel) {
     RECT result = { 0 };
-    IUIAutomationElement* p_found = NULL;
-    IUIAutomationElement* p_child = NULL;
-    HRESULT hr;
-    int i = 0;
-    int children_len = 0;
-    IUIAutomationElementArray* p_children_array = NULL;
-
-    hwnd_UI_element->FindFirst(TreeScope_Children, pcondition, &p_found);
-
-    if (p_found == NULL && level < maxlevel) {
-      hr = hwnd_UI_element->FindAll(TreeScope_Children, p_condition_true, &p_children_array);
-      if (hr != S_OK || p_children_array == NULL) {
-        goto cleanup;
+    winrt::com_ptr<IUIAutomationElement> found;
+    hwnd_UI_element->FindFirst(TreeScope_Children, condition, found.put());
+    if (found && level < maxlevel) {
+      winrt::com_ptr<IUIAutomationElementArray> children_array;
+      auto hr = hwnd_UI_element->FindAll(TreeScope_Children, condition_true.get(), children_array.put());
+      if (hr != S_OK || !children_array) {
+        return found;
       };
-      hr = p_children_array->get_Length(&children_len);
-      if (hr != S_OK) {
-        goto cleanup;
+      int children_len = 0;
+      if (children_array->get_Length(&children_len) != S_OK) {
+        return found;
       }
       if (level > 1 && children_len > 10) {
         // So many children. Most likely a section we won't care about.
-        goto cleanup;
+        return found;
       }
-      for (i = 0; i < children_len; i++) {
-        hr = p_children_array->GetElement(i, &p_child);
-        if (hr != S_OK || p_child == NULL) {
+      for (int i = 0; i < children_len; i++) {
+        winrt::com_ptr<IUIAutomationElement> child;
+        hr = children_array->GetElement(i, child.put());
+        if (hr != S_OK || !child) {
           continue;
         }
-        p_found = find_element_ui_automation_max_depth_strategy(p_child, pcondition, level + 1, maxlevel);
-        p_child->Release();
-        if (p_found != NULL) {
+        found = nullptr;
+        found = find_element_ui_automation_max_depth_strategy(child.get(), condition, level + 1, maxlevel);
+        if (!found) {
           break;
         }
       }
     }
-
-  cleanup:
-    if (p_children_array != NULL) {
-      p_children_array->Release();
-    }
-    return p_found;
+    return found;
   }
 
-  IUIAutomationElement* find_element_ui_automation_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* pcondition) {
-    RECT result = { 0 };
-    IUIAutomationElement* p_found = NULL;
-
-    hwnd_UI_element->FindFirst(TreeScope_Descendants, pcondition, &p_found);
-
-    return p_found;
+  winrt::com_ptr<IUIAutomationElement>  find_element_ui_automation_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* condition) {
+    winrt::com_ptr<IUIAutomationElement> found;
+    hwnd_UI_element->FindFirst(TreeScope_Descendants, condition, found.put());
+    return found;
   }
 
+  HWND ui_automation_strategy_last_hwnd = nullptr;
+  winrt::com_ptr<IUIAutomationElement> ui_automation_strategy_element_found;
   RECT use_ui_automation_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
     // A strategy to find the maximize button using UIAutomation.
-    RECT result = { 0 };
-    IUIAutomationElement* hwnd_UI_element = NULL;
+    /*RECT result = { 0 };
+    
     HRESULT hr;
-    UIAutomationCachedInfo cache_elem = { 0 };
-    BOOL cache_valid;
+    
+    */
 
+    winrt::com_ptr<IUIAutomationElement> hwnd_UI_element;
     if (ui_automation_strategy_last_hwnd != hwnd) {
       ui_automation_strategy_last_hwnd = hwnd;
       // We haven't searched this window for the maximize button recently. Query it.
       // This is an expensive operation for some Windows and may block them.
-      if (ui_automation_strategy_element_found != NULL) {
-        ui_automation_strategy_element_found->Release();
-        ui_automation_strategy_element_found = NULL;
+      if (ui_automation_strategy_element_found) {
+        ui_automation_strategy_element_found = nullptr;
       }
-      hr = ui_automation->ElementFromHandle(hwnd, &hwnd_UI_element);
+      auto hr = ui_automation->ElementFromHandle(hwnd, hwnd_UI_element.put());
       if (hr != S_OK || hwnd_UI_element == NULL) {
-        goto cleanup;
+        return {};
       }
-
-      if (custom_ui_automation_cache.find(hwnd) != custom_ui_automation_cache.end()) {
+      UIAutomationCachedInfo cache_elem = { 0 };
+      if (auto iter = custom_ui_automation_cache.find(hwnd); iter != custom_ui_automation_cache.end()) {
         // Check if the cached element for hwnd is still valid.
-        cache_elem = custom_ui_automation_cache[hwnd];
-        hr = ui_automation->CompareElements(cache_elem.window_ui_element, hwnd_UI_element, &cache_valid);
-        if (hr != S_OK) {
-          goto cleanup;
+        auto& cached_elem = iter->second;
+        BOOL cache_valid;
+        if (ui_automation->CompareElements(cache_elem.window_ui_element.get(), hwnd_UI_element.get(), &cache_valid) != S_OK) {
+          return {};
         }
         if (cache_valid) {
           // Release older window element pointer and use the new instead.
-          cache_elem.window_ui_element->Release();
-          cache_elem.window_ui_element = hwnd_UI_element;
-          custom_ui_automation_cache[hwnd] = cache_elem;
-        }
-        else {
-          cache_elem.window_ui_element->Release();
-          custom_ui_automation_cache.erase(hwnd);
-          cache_elem = { 0 };
+          cached_elem.window_ui_element = nullptr;
+          cached_elem.window_ui_element = hwnd_UI_element;
+          cache_elem = cached_elem;
+        } else {
+          cached_elem.window_ui_element = nullptr;
+          custom_ui_automation_cache.erase(iter);
         }
       }
-      if (cache_elem.window_ui_element != NULL && cache_elem.seconds_last_ui_automation_find_duration > 0.5) {
+      if (cache_elem.window_ui_element && cache_elem.seconds_last_ui_automation_find_duration > 0.5) {
         // Unfortunately, it takes too long to search this window. Just use another strategy.
-        goto cleanup;
+        return {};
       }
       auto start_time = std::chrono::high_resolution_clock::now();
-      ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element, p_conditions_joined_top_idAutomation,1,7);
-      if (ui_automation_strategy_element_found == NULL) {
-        ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element, p_conditions_joined_top_nameAutomation,1,7);
+      ui_automation_strategy_element_found = nullptr;
+      ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element.get(), conditions_joined_top_id.get(), 1, 7);
+      if (!ui_automation_strategy_element_found) {
+        ui_automation_strategy_element_found = find_element_ui_automation_max_depth_strategy(hwnd_UI_element.get(), conditions_joined_top_name.get(), 1, 7);
       }
       auto chrono_duration = std::chrono::high_resolution_clock::now() - start_time;
       double seconds_duration = std::chrono::duration<double>(chrono_duration).count();
-      if( ui_automation_strategy_element_found == NULL) {
+      if(!ui_automation_strategy_element_found) {
         //Nothing useful found. Can't keep doing this for this Window.
         cache_elem.window_ui_element = hwnd_UI_element;
         cache_elem.seconds_last_ui_automation_find_duration=seconds_duration;
-        custom_ui_automation_cache[hwnd] = cache_elem;
+        custom_ui_automation_cache.emplace(hwnd, cache_elem);
       } else {
         cache_elem.window_ui_element = hwnd_UI_element;
         cache_elem.seconds_last_ui_automation_find_duration=0;
-        custom_ui_automation_cache[hwnd] = cache_elem;
+        custom_ui_automation_cache.emplace(hwnd, cache_elem);
       }
     }
-    if (ui_automation_strategy_element_found != NULL) {
-      result = get_bounding_rectangle_from_hwnd_UI_element(ui_automation_strategy_element_found);
+    RECT result = { 0 };
+    if (ui_automation_strategy_element_found) {
+      result = get_bounding_rectangle_from_hwnd_UI_element(ui_automation_strategy_element_found.get());
       if (result.left != result.right && result.bottom != result.top) {
         // Adjust top to the top of the Window. UIAutomation seems to detect the lower half of the button sometimes.
         result.top = window_rect->top;
       }
     }
-  cleanup:
     return result;
   }
 
@@ -523,11 +467,10 @@ namespace {
       }
       if (mousein_signalled) {
         auto current_mouse_window_rect = get_window_pos(mouse_window_hwnd);
-        if (
-          !IsWindowVisible(popup_hwnd)
-          || !current_mouse_window_rect
-          || *current_mouse_window_rect != mouse_window_rect
-          || !mouse_in_bounds(*mouse_pos, buttons_rect, popup_rect)) {
+        if (!IsWindowVisible(popup_hwnd) ||
+            !current_mouse_window_rect ||
+            *current_mouse_window_rect != mouse_window_rect ||
+            !mouse_in_bounds(*mouse_pos, buttons_rect, popup_rect)) {
           mousein_signalled = false;
           mouse_out_cb();
         }
@@ -577,7 +520,6 @@ namespace {
       }
     }
   }
-
 }
 
 void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out, HWND popup) {
