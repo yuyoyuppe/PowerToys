@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="32cc65f8-d79e-43db-853d-16de0ac5ca51" Name="PowerToys" Language="1033" Version="0.6.9" Manufacturer="Microsoft" UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
-		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
+  
+  <Product Id="*"
+       Name="PowerToys"
+       Language="1033"
+       Version="0.6.9"
+       Manufacturer="Microsoft"
+       UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
+    
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" />
 
-		<MajorUpgrade AllowDowngrades="yes" />
+		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed." />
     <MediaTemplate EmbedCab="yes" />
-
-    <!--
-      Reinstall everything, files, registry keys and shortcuts.
-    -->
-    <Property Id="REINSTALLMODE" Value="amus" />
 
     <Property Id="WINDOWSBUILDNUMBER" Secure="yes">
       <RegistrySearch Id="BuildNumberSearch" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" />
