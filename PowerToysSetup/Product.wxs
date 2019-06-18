@@ -36,12 +36,49 @@
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.powertoys.ProjectDir)\License.rtf" />
     <Property Id="INSTALLSTARTMENUSHORTCUT" Value="1"/>
+    <Property Id="CREATESCHEDULEDTASK" Value="1"/>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch PowerToys" />
     <Property Id="WixShellExecTarget" Value="[#powertoys.exe]" />
     <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
-	</Product>
 
+    <InstallExecuteSequence>
+      <Custom Action="SetRegisterPowerToysSchTaskParam" Before="RegisterPowerToysSchTask" />
+      <Custom Action="RegisterPowerToysSchTask" After="InstallFiles">
+        NOT Installed and CREATESCHEDULEDTASK = 1
+      </Custom>
+      <Custom Action="RemovePowerToysSchTasks" After="RemoveFiles">
+        Installed and (NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")
+      </Custom>
+    </InstallExecuteSequence>
+
+    <CustomAction Id="SetRegisterPowerToysSchTaskParam"
+                  Property="RegisterPowerToysSchTask"
+                  Value="[#powertoys.exe]" />
+
+    <!-- Needs to Impersonate="no" and Execute="deferred" in order to run elevated. -->
+    <CustomAction Id="RegisterPowerToysSchTask"
+                  Return="ignore"
+                  Impersonate="no"
+                  Execute="deferred"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="CreateScheduledTaskCA"
+                   />
+
+    <!-- Needs to Impersonate="no" and Execute="deferred" in order to run elevated. -->
+    <CustomAction Id="RemovePowerToysSchTasks"
+                  Return="ignore"
+                  Impersonate="no"
+                  Execute="deferred"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="RemoveScheduledTasksCA"
+                   />
+  </Product>
+
+  <Fragment>
+    <Binary Id="PTCustomActions" SourceFile="$(var.PowerToysSetupCustomActions.TargetPath)" />
+  </Fragment>
+  
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramFilesFolder">
@@ -106,19 +143,6 @@
                        KeyPath="yes"/>
       </Component>
     </DirectoryRef>
-    <!-- XXX: This doesn't seem to work for making the app start at log in.
-    <Component Id="RunOnLoginRegistryKey" Guid="e31d7e25-f641-4302-8524-cc6999a136a9">
-      <RegistryKey Root="HKCU"
-                    Key="Software\Microsoft\Windows\CurrentVersion\Run"
-                    Action="createAndRemoveOnUninstall"
-                    >
-        <RegistryValue Type="string"
-                        Name="[ProductName]"
-                        Value="[#powertoys.exe]"
-                        KeyPath="yes" />
-      </RegistryKey>
-    </Component>
-    -->
   </Fragment>
   <Fragment>
     <DirectoryRef Id="DesktopFolder">

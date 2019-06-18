@@ -23,7 +23,7 @@
                 <Control Id="ChangeFolder" Type="PushButton" X="20" Y="120" Width="56" Height="17" Text="!(loc.InstallDirDlgChange)" />
                 <Control Id="StartMenuShortcutCheckBox" Type="CheckBox" X="20" Y="160" Width="290" Height="17" Property="INSTALLSTARTMENUSHORTCUT" CheckBoxValue="1" Text="Create a shortcut for [ProductName] in the start menu." />
                 <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="180" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="Create a shortcut for [ProductName] in the desktop." />
-                <Control Id="ScheduledTaskCheckBox" Type="CheckBox" X="20" Y="200" Width="330" Height="17" Property="CREATESCHEDULEDTASK" CheckBoxValue="0" Text="Automatically start [ProductName] when this user logins. (Not implemented yet)" />
+                <Control Id="ScheduledTaskCheckBox" Type="CheckBox" X="20" Y="200" Width="330" Height="17" Property="CREATESCHEDULEDTASK" CheckBoxValue="1" Text="Automatically start [ProductName] when this user logs in." />
             </Dialog>
         </UI>
     </Fragment>

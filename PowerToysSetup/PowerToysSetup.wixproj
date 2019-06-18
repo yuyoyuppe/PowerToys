@@ -24,6 +24,14 @@
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj">
+      <Name>PowerToysSetupCustomActions</Name>
+      <Project>{32f3882b-f2d6-4586-b5ed-11e39e522bd3}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\powertoys\powertoys.vcxproj">
       <Name>powertoys</Name>
       <Project>{9412d5c6-2cf2-4fc2-a601-b55508ea9b27}</Project>
