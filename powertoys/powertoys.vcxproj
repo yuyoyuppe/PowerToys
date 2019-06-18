@@ -81,6 +81,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\utils</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -96,7 +97,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;telemetry;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -114,6 +115,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\utils</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -133,7 +135,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;telemetry;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -142,12 +144,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="animation.cpp" />
-    <ClCompile Include="d2d_overlay_window.cpp" />
-    <ClCompile Include="d2d_svg.cpp" />
-    <ClCompile Include="d2d_text.cpp" />
-    <ClCompile Include="d2d_window.cpp" />
     <ClCompile Include="d2d_window_manager_popup.cpp" />
+    <ClCompile Include="lowlevel_keyboard_event.cpp" />
     <ClCompile Include="mouse_track_events.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -155,42 +153,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="start_visible.cpp" />
-    <ClCompile Include="keyboard_watcher.cpp" />
+    <ClCompile Include="powertoy_module.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="monitors.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="mouse_watcher.cpp" />
-    <ClCompile Include="tasklist_positions.cpp" />
     <ClCompile Include="tray_icon.cpp" />
     <ClCompile Include="unhandled_exception_handler.cpp" />
     <ClCompile Include="virtual_desktops.cpp" />
-    <ClCompile Include="utils.cpp" />
-    <ClCompile Include="windows_colors.cpp" />
-    <ClCompile Include="winkey_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="animation.h" />
-    <ClInclude Include="d2d_overlay_window.h" />
-    <ClInclude Include="d2d_svg.h" />
-    <ClInclude Include="d2d_text.h" />
-    <ClInclude Include="d2d_window.h" />
     <ClInclude Include="d2d_window_manager_popup.h" />
+    <ClInclude Include="lowlevel_keyboard_event.h" />
+    <ClInclude Include="powertoy_module_interface.h" />
     <ClInclude Include="mouse_track_events.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="powertoy_module.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="start_visible.h" />
     <ClInclude Include="functionalities.h" />
-    <ClInclude Include="keyboard_watcher.h" />
-    <ClInclude Include="monitors.h" />
     <ClInclude Include="mouse_watcher.h" />
-    <ClInclude Include="tasklist_positions.h" />
     <ClInclude Include="Telemetry\ProjectTelemetry.h" />
     <ClInclude Include="Telemetry\TraceLoggingDefines.h" />
     <ClInclude Include="unhandled_exception_handler.h" />
     <ClInclude Include="virtual_desktops.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="windows_colors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="powertoys.rc" />
@@ -324,6 +308,11 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)\svgs</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)\svgs</DestinationFolders>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\utils\utils.vcxproj">
+      <Project>{74485049-c722-400f-abe5-86ac52d929b3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,32 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="keyboard_watcher.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="winkey_handler.cpp">
-      <Filter>Functionality</Filter>
-    </ClCompile>
     <ClCompile Include="mouse_watcher.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="mouse_handler.cpp">
       <Filter>Functionality</Filter>
     </ClCompile>
-    <ClCompile Include="monitors.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="start_visible.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="virtual_desktops.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="tasklist_positions.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="unhandled_exception_handler.cpp">
@@ -39,52 +21,23 @@
     <ClCompile Include="mouse_track_events.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="d2d_svg.cpp">
-      <Filter>D2DWindows</Filter>
-    </ClCompile>
-    <ClCompile Include="d2d_text.cpp">
-      <Filter>D2DWindows</Filter>
-    </ClCompile>
-    <ClCompile Include="d2d_window.cpp">
-      <Filter>D2DWindows</Filter>
-    </ClCompile>
     <ClCompile Include="d2d_window_manager_popup.cpp">
       <Filter>D2DWindows</Filter>
     </ClCompile>
-    <ClCompile Include="d2d_overlay_window.cpp">
-      <Filter>D2DWindows</Filter>
-    </ClCompile>
-    <ClCompile Include="animation.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="windows_colors.cpp">
-      <Filter>Utils</Filter>
+    <ClCompile Include="powertoy_module.cpp" />
+    <ClCompile Include="lowlevel_keyboard_event.cpp">
+      <Filter>Events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="keyboard_watcher.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="functionalities.h">
       <Filter>Functionality</Filter>
     </ClInclude>
     <ClInclude Include="mouse_watcher.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="monitors.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="start_visible.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="virtual_desktops.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="tasklist_positions.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="unhandled_exception_handler.h">
@@ -94,26 +47,13 @@
     <ClInclude Include="mouse_track_events.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="d2d_svg.h">
-      <Filter>D2DWindows</Filter>
-    </ClInclude>
-    <ClInclude Include="d2d_text.h">
-      <Filter>D2DWindows</Filter>
-    </ClInclude>
-    <ClInclude Include="d2d_window.h">
-      <Filter>D2DWindows</Filter>
-    </ClInclude>
     <ClInclude Include="d2d_window_manager_popup.h">
       <Filter>D2DWindows</Filter>
     </ClInclude>
-    <ClInclude Include="d2d_overlay_window.h">
-      <Filter>D2DWindows</Filter>
-    </ClInclude>
-    <ClInclude Include="animation.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="windows_colors.h">
-      <Filter>Utils</Filter>
+    <ClInclude Include="powertoy_module.h" />
+    <ClInclude Include="powertoy_module_interface.h" />
+    <ClInclude Include="lowlevel_keyboard_event.h">
+      <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="Telemetry\ProjectTelemetry.h">
       <Filter>Telemetry</Filter>
@@ -138,60 +78,59 @@
     <Filter Include="Telemetry">
       <UniqueIdentifier>{40ffda03-ee4c-4ccb-86a3-17d7c92ea64f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{d409b25e-c0f1-4913-bb32-da4a21339c76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="powertoys.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="svgs\0.svg">
+    <CopyFileToFolders Include="svgs\icon.ico" />
+    <CopyFileToFolders Include="svgs\0.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\1.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\1.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\2.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\2.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\3.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\3.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\4.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\4.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\5.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\5.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\6.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\6.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\7.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\7.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\8.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\8.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\9.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\9.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\restore_to_primary_desktop.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\no_active_window.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\maximize_to_new_desktop.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\overlay.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\no_active_window.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\overlay_portrait.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\overlay.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\maximize_to_new_desktop.svg">
       <Filter>svgs</Filter>
-    </None>
-    <None Include="svgs\overlay_portrait.svg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="svgs\restore_to_primary_desktop.svg">
       <Filter>svgs</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="svgs\icon.ico">
-      <Filter>svgs</Filter>
-    </Image>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

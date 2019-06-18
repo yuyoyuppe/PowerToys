@@ -3,13 +3,13 @@
 
 void Tasklist::update() {
   // Get HWND of the tasklist
-  auto tasklist_hwnd = FindWindow("Shell_TrayWnd", nullptr);
+  auto tasklist_hwnd = FindWindowA("Shell_TrayWnd", nullptr);
   if (!tasklist_hwnd) return;
-  tasklist_hwnd = FindWindowEx(tasklist_hwnd, 0, "ReBarWindow32", nullptr);
+  tasklist_hwnd = FindWindowExA(tasklist_hwnd, 0, "ReBarWindow32", nullptr);
   if (!tasklist_hwnd) return;
-  tasklist_hwnd = FindWindowEx(tasklist_hwnd, 0, "MSTaskSwWClass", nullptr);
+  tasklist_hwnd = FindWindowExA(tasklist_hwnd, 0, "MSTaskSwWClass", nullptr);
   if (!tasklist_hwnd) return;
-  tasklist_hwnd = FindWindowEx(tasklist_hwnd, 0, "MSTaskListWClass", nullptr);
+  tasklist_hwnd = FindWindowExA(tasklist_hwnd, 0, "MSTaskListWClass", nullptr);
   if (!tasklist_hwnd) return;
   if (!automation) {
     winrt::check_hresult(CoCreateInstance(CLSID_CUIAutomation,

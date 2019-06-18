@@ -2,6 +2,10 @@
 #include "functionalities.h"
 #include <ShellScalingApi.h>
 
+#include "powertoy_module.h"
+#include "lowlevel_keyboard_event.h"
+#include <filesystem>
+
 TRACELOGGING_DEFINE_PROVIDER(
     g_hProvider,
     "Microsoft.PowerToys",
@@ -19,9 +23,11 @@ void chdir_current_executable() {
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
   if(!SetCurrentDirectory(executable_path)) {
-    show_last_error_message((LPTSTR)"Change Directory to Executable Path", GetLastError());
+    show_last_error_message((LPSTR)"Change Directory to Executable Path", GetLastError());
   }
 }
+
+std::unordered_map<std::wstring, PowertoyModule> modules;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   #if _DEBUG && _WIN64
@@ -31,12 +37,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   #endif
   TraceLoggingRegister(g_hProvider);
   winrt::init_apartment();
+  start_tray_icon();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
   int result;
   try {
     chdir_current_executable();
-    start_tray_icon();
-    start_winkey_handler();
+    // Load Powertyos DLLS
+    for (auto& file : std::filesystem::directory_iterator(".")) {
+      if (file.path().extension() != L".dll")
+        continue;
+      try {
+        auto module = load_powertoy(file.path().wstring());
+        modules.emplace(module.get_name(), std::move(module));
+      } catch (...) { }
+    } 
+    // Start our events providers
+    start_lowlevel_keyboard_hook();
     start_mouse_handler();
 
     TraceLoggingWrite(

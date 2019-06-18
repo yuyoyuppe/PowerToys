@@ -21,7 +21,7 @@ typedef BOOL(WINAPI*pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONATT
 pfnSetWindowCompositionAttribute SetWindowCompositionAttribute = NULL;
 
 pfnSetWindowCompositionAttribute getSetWindowCompositionAttributeFunPtr() {
-  auto user32 = LoadLibrary("user32.dll");
+  auto user32 = LoadLibraryA("user32.dll");
   auto rval =  reinterpret_cast<pfnSetWindowCompositionAttribute>(GetProcAddress(user32, "SetWindowCompositionAttribute"));
   FreeLibrary(user32);
   return rval;
@@ -45,14 +45,14 @@ void enable_acrylic_window(HWND hwnd) {
 
 D2DWindow::D2DWindow() {
   static const char* class_name = "PToyD2DPopup";
-  WNDCLASS wc = {};
+  WNDCLASSA wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   wc.lpszClassName = class_name;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
-  RegisterClass(&wc);
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED,
+  RegisterClassA(&wc);
+  hwnd = CreateWindowExA(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED,
                         wc.lpszClassName,
                         "PToyD2DPopup",
                         WS_POPUP| WS_VISIBLE,

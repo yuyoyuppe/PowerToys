@@ -4,10 +4,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "powertoys", "powertoys\powertoys.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
+	ProjectSection(ProjectDependencies) = postProject
+		{74485049-C722-400F-ABE5-86AC52D929B3} = {74485049-C722-400F-ABE5-86AC52D929B3}
+	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerToysSetupCustomActions", "PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj", "{32F3882B-F2D6-4586-B5ED-11E39E522BD3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "utils\utils.vcxproj", "{74485049-C722-400F-ABE5-86AC52D929B3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "overlay_window", "modules\overlay_window\overlay_window.vcxproj", "{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27} = {9412D5C6-2CF2-4FC2-A601-B55508EA9B27}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +51,22 @@ Global
 		{32F3882B-F2D6-4586-B5ED-11E39E522BD3}.Release|x64.Build.0 = Release|Win32
 		{32F3882B-F2D6-4586-B5ED-11E39E522BD3}.Release|x86.ActiveCfg = Release|Win32
 		{32F3882B-F2D6-4586-B5ED-11E39E522BD3}.Release|x86.Build.0 = Release|Win32
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Debug|x64.ActiveCfg = Debug|x64
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Debug|x64.Build.0 = Debug|x64
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Debug|x86.ActiveCfg = Debug|Win32
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Debug|x86.Build.0 = Debug|Win32
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Release|x64.ActiveCfg = Release|x64
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Release|x64.Build.0 = Release|x64
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Release|x86.ActiveCfg = Release|Win32
+		{74485049-C722-400F-ABE5-86AC52D929B3}.Release|x86.Build.0 = Release|Win32
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Debug|x64.ActiveCfg = Debug|x64
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Debug|x64.Build.0 = Debug|x64
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Debug|x86.ActiveCfg = Debug|Win32
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Debug|x86.Build.0 = Debug|Win32
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Release|x64.ActiveCfg = Release|x64
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Release|x64.Build.0 = Release|x64
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Release|x86.ActiveCfg = Release|Win32
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,7 +9,6 @@
 #include <dcomp.h>
 #include <dwmapi.h>
 #include <string>
-#include "tasklist_positions.h"
 #include "d2d_svg.h"
 
 class D2DWindow

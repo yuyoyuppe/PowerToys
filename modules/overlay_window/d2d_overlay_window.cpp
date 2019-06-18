@@ -1,9 +1,10 @@
 ﻿#include "pch.h"
 #include "d2d_overlay_window.h"
-#include "monitors.h"
-#include "tasklist_positions.h"
-#include "keyboard_watcher.h"
-#include "start_visible.h"
+#include "utils/monitors.h"
+#include "utils/tasklist_positions.h"
+#include "utils/start_visible.h"
+#include "keyboard_state.h"
+#include "overlay_window.h"
 
 D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
   D2DSVG::load(filename, d2d_dc);
@@ -441,7 +442,7 @@ void D2DOverlayWindow::hide_thumbnail() {
 void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   if (!winkey_held() || is_start_visible()) {
     hide();
-    signal_hide();
+    instance->was_hidden();
     return;
   }
   d2d_dc->Clear();
