@@ -309,7 +309,7 @@ namespace {
 
   
   RECT get_bounding_rectangle_from_hwnd_UI_element(IUIAutomationElement* query_ui_element) {
-    if (!query_ui_element == NULL) {
+    if (!query_ui_element) {
       return {};
     }
     VARIANT bounded_rect_prop;
@@ -341,7 +341,7 @@ namespace {
     RECT result = { 0 };
     winrt::com_ptr<IUIAutomationElement> found;
     hwnd_UI_element->FindFirst(TreeScope_Children, condition, found.put());
-    if (found && level < maxlevel) {
+    if (!found && level < maxlevel) {
       winrt::com_ptr<IUIAutomationElementArray> children_array;
       auto hr = hwnd_UI_element->FindAll(TreeScope_Children, condition_true.get(), children_array.put());
       if (hr != S_OK || !children_array) {
@@ -363,7 +363,7 @@ namespace {
         }
         found = nullptr;
         found = find_element_ui_automation_max_depth_strategy(child.get(), condition, level + 1, maxlevel);
-        if (!found) {
+        if (found) {
           break;
         }
       }
@@ -402,18 +402,18 @@ namespace {
       UIAutomationCachedInfo cache_elem = { 0 };
       if (auto iter = custom_ui_automation_cache.find(hwnd); iter != custom_ui_automation_cache.end()) {
         // Check if the cached element for hwnd is still valid.
-        auto& cached_elem = iter->second;
+        cache_elem = iter->second;
         BOOL cache_valid;
         if (ui_automation->CompareElements(cache_elem.window_ui_element.get(), hwnd_UI_element.get(), &cache_valid) != S_OK) {
           return {};
         }
         if (cache_valid) {
           // Release older window element pointer and use the new instead.
-          cached_elem.window_ui_element = nullptr;
-          cached_elem.window_ui_element = hwnd_UI_element;
-          cache_elem = cached_elem;
+          cache_elem.window_ui_element = nullptr;
+          cache_elem.window_ui_element = hwnd_UI_element;
+          custom_ui_automation_cache.emplace(hwnd, cache_elem);
         } else {
-          cached_elem.window_ui_element = nullptr;
+          cache_elem.window_ui_element = nullptr;
           custom_ui_automation_cache.erase(iter);
         }
       }
