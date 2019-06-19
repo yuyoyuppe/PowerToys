@@ -411,10 +411,11 @@ namespace {
           // Release older window element pointer and use the new instead.
           cache_elem.window_ui_element = nullptr;
           cache_elem.window_ui_element = hwnd_UI_element;
-          custom_ui_automation_cache.emplace(hwnd, cache_elem);
+          custom_ui_automation_cache.insert_or_assign(hwnd, cache_elem);
         } else {
           cache_elem.window_ui_element = nullptr;
           custom_ui_automation_cache.erase(iter);
+          cache_elem = {0};
         }
       }
       if (cache_elem.window_ui_element && cache_elem.seconds_last_ui_automation_find_duration > 0.5) {
@@ -433,11 +434,11 @@ namespace {
         //Nothing useful found. Can't keep doing this for this Window.
         cache_elem.window_ui_element = hwnd_UI_element;
         cache_elem.seconds_last_ui_automation_find_duration=seconds_duration;
-        custom_ui_automation_cache.emplace(hwnd, cache_elem);
+        custom_ui_automation_cache.insert_or_assign(hwnd, cache_elem);
       } else {
         cache_elem.window_ui_element = hwnd_UI_element;
         cache_elem.seconds_last_ui_automation_find_duration=0;
-        custom_ui_automation_cache.emplace(hwnd, cache_elem);
+        custom_ui_automation_cache.insert_or_assign(hwnd, cache_elem);
       }
     }
     RECT result = { 0 };
