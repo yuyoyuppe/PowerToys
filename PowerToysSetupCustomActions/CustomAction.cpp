@@ -88,13 +88,13 @@ UINT __stdcall CreateScheduledTaskCA(MSIHANDLE hInstall) {
 
   // ------------------------------------------------------
   // Get the PowerToys task folder. Creates it if it doesn't exist.
-  hr = pService->GetFolder(_bstr_t(L"\\PowerToys"), &pTaskFolder);
+  hr = pService->GetFolder(_bstr_t(L"\\Microsoft\\PowerToys"), &pTaskFolder);
   if (FAILED(hr)) {
     // Folder doesn't exist. Get the Root folder and create the PowerToys subfolder.
     ITaskFolder *pRootFolder = NULL;
     hr = pService->GetFolder(_bstr_t(L"\\"), &pRootFolder);
     ExitOnFailure(hr, "Cannot get Root Folder pointer: %x", hr);
-    hr = pRootFolder->CreateFolder(_bstr_t(L"\\PowerToys"), _variant_t(L""), &pTaskFolder);
+    hr = pRootFolder->CreateFolder(_bstr_t(L"\\Microsoft\\PowerToys"), _variant_t(L""), &pTaskFolder);
     if (FAILED(hr)) {
       pRootFolder->Release();
       ExitOnFailure(hr, "Cannot create PowerToys task folder: %x", hr);
@@ -286,7 +286,7 @@ UINT __stdcall RemoveScheduledTasksCA(MSIHANDLE hInstall) {
 
   // ------------------------------------------------------
   // Get the PowerToys task folder.
-  hr = pService->GetFolder(_bstr_t(L"\\PowerToys"), &pTaskFolder);
+  hr = pService->GetFolder(_bstr_t(L"\\Microsoft\\PowerToys"), &pTaskFolder);
   if (FAILED(hr)) {
     // Folder doesn't exist. No need to delete anything.
     WcaLog(LOGMSG_STANDARD, "The PowerToys scheduled task folder wasn't found. Nothing to delete.");
@@ -327,9 +327,9 @@ UINT __stdcall RemoveScheduledTasksCA(MSIHANDLE hInstall) {
   // ------------------------------------------------------
   // Get the pointer to the root task folder and delete the PowerToys subfolder.
   ITaskFolder *pRootFolder = NULL;
-  hr = pService->GetFolder(_bstr_t(L"\\"), &pRootFolder);
+  hr = pService->GetFolder(_bstr_t(L"\\Microsoft"), &pRootFolder);
   ExitOnFailure(hr, "Cannot get Root Folder pointer: %x", hr);
-  hr = pRootFolder->DeleteFolder(_bstr_t(L"\\PowerToys"), NULL);
+  hr = pRootFolder->DeleteFolder(_bstr_t(L"PowerToys"), NULL);
   pRootFolder->Release();
   ExitOnFailure(hr, "Cannot delete the PowerToys folder: %x", hr);
 
