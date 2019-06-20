@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
   
   <Product Id="*"
        Name="PowerToys"
@@ -73,6 +74,12 @@
                   BinaryKey="PTCustomActions"
                   DllEntry="RemoveScheduledTasksCA"
                    />
+    <!-- Close 'powertoys.exe' before uninstall-->
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
+    <InstallExecuteSequence>
+      <Custom Action="WixCloseApplications" Before="RemoveFiles" />
+    </InstallExecuteSequence>
+    <util:CloseApplication CloseMessage="yes" Target="powertoys.exe" ElevatedCloseMessage="yes" RebootPrompt="no" TerminateProcess="0" />
   </Product>
 
   <Fragment>
