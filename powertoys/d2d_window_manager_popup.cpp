@@ -110,29 +110,26 @@ HWND D2DWindowManagerPopup::get_hwnd() {
 }
 
 void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
-  int currentDesktopIndex = GetCurrentDesktopGUIDIndexForWindow(targetWindow);
-  if (currentDesktopIndex < 0) {
-    // Couldn't find the Desktop.
+  int current_desktop_index = get_desktop_index_for_window(targetWindow);
+  if (current_desktop_index < 0) {
+    // Couldn't find the desktop.
     return;
   }
   target_window = targetWindow;
-  //auto primary_screen = get_primary_monitor();
-  //SetWindowPos(hwnd, HWND_TOPMOST, primary_screen.left(), primary_screen.top(), primary_screen.width()/2, primary_screen.height()/2, 0);
-  current_icon = (currentDesktopIndex==0?&maximize_to_new_desktop:&restore_to_primary_desktop);
-  target_window_on_primary_desktop = (currentDesktopIndex==0?TRUE:FALSE);
+  current_icon = (current_desktop_index == 0 ? &maximize_to_new_desktop : &restore_to_primary_desktop);
+  target_window_on_primary_desktop = (current_desktop_index == 0 ? TRUE : FALSE);
 
   TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE;
   tool_info.hwnd = hwnd;
   // Get the current tooltip definition.
-  if( SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info) )
-  {
+  if (SendMessage(hwnd_tooltip, TTM_GETTOOLINFO, 0, (LPARAM)&tool_info)) {
     // Change the tooltip text.
     tool_info.lpszText = target_window_on_primary_desktop ? maximize_tooltip_message : restore_tooltip_message;
     SendMessage(hwnd_tooltip, TTM_UPDATETIPTEXT, 0, (LPARAM)&tool_info);
   }
 
-  SetWindowPos(hwnd, HWND_TOPMOST, area.left, area.top, area.right-area.left, area.bottom-area.top, 0);
+  SetWindowPos(hwnd, HWND_TOPMOST, area.left, area.top, area.right - area.left, area.bottom - area.top, 0);
   ShowWindow(hwnd, SW_SHOWNOACTIVATE);
 }
 
