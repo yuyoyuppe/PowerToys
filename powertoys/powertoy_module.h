@@ -44,8 +44,10 @@ public:
     name = module->get_name();
     config = module->get_config();
     auto want_signals = module->get_events();
-    for (; *want_signals; ++want_signals) {
-      powertoys_events().register_receiver(*want_signals, module);
+    if (want_signals) {
+      for (; *want_signals; ++want_signals) {
+        powertoys_events().register_receiver(*want_signals, module);
+      }
     }
   }
   const std::wstring& get_name() const {
