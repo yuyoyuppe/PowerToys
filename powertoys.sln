@@ -3,27 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runner", "src\powertoys\runner\runner.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runner", "src\runner\runner.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
 	ProjectSection(ProjectDependencies) = postProject
 		{74485049-C722-400F-ABE5-86AC52D929B3} = {74485049-C722-400F-ABE5-86AC52D929B3}
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {44CC9375-3E6E-4D99-8913-7FB748807EBD}
 		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA} = {A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "src\installer\PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "installer\PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{74485049-C722-400F-ABE5-86AC52D929B3} = {74485049-C722-400F-ABE5-86AC52D929B3}
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {44CC9375-3E6E-4D99-8913-7FB748807EBD}
 		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA} = {A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerToysSetupCustomActions", "src\installer\PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj", "{32F3882B-F2D6-4586-B5ED-11E39E522BD3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerToysSetupCustomActions", "installer\PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj", "{32F3882B-F2D6-4586-B5ED-11E39E522BD3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "src\powertoys\utils\utils.vcxproj", "{74485049-C722-400F-ABE5-86AC52D929B3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "src\utils\utils.vcxproj", "{74485049-C722-400F-ABE5-86AC52D929B3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shortcut_guide", "src\powertoys\modules\shortcut_guide\shortcut_guide.vcxproj", "{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shortcut_guide", "src\modules\shortcut_guide\shortcut_guide.vcxproj", "{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_powertoy", "src\powertoys\modules\example_powertoy\example_powertoy.vcxproj", "{44CC9375-3E6E-4D99-8913-7FB748807EBD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_powertoy", "src\modules\example_powertoy\example_powertoy.vcxproj", "{44CC9375-3E6E-4D99-8913-7FB748807EBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{4574FDD0-F61D-4376-98BF-E5A1262C11EC}"
 EndProject

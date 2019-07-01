@@ -37,7 +37,7 @@
     <Folder Include="CustomDialogs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\powertoys\runner\runner.vcxproj">
+    <ProjectReference Include="..\..\src\runner\runner.vcxproj">
       <Name>runner</Name>
       <Project>{9412d5c6-2cf2-4fc2-a601-b55508ea9b27}</Project>
       <Private>True</Private>
