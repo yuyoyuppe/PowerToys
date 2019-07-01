@@ -2,6 +2,12 @@
 #include "functionalities.h"
 #include <ShellScalingApi.h>
 
+TRACELOGGING_DEFINE_PROVIDER(
+    g_hProvider,
+    "Microsoft.PowerToys",
+    // {38e8889b-9731-53f5-e901-e8a7c1753074}
+    (0x38e8889b, 0x9731, 0x53f5, 0xe9, 0x01, 0xe8, 0xa7, 0xc1, 0x75, 0x30, 0x74),
+    TraceLoggingOptionProjectTelemetry());
 
 #if _DEBUG && _WIN64
 #include "unhandled_exception_handler.h"
@@ -23,17 +29,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   //We prefer this not not show any longer until there's a bug to diagnose.
   //init_global_error_handlers();
   #endif
+  TraceLoggingRegister(g_hProvider);
   winrt::init_apartment();
   winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
+  int result;
   try {
     chdir_current_executable();
     start_tray_icon();
     start_winkey_handler();
     start_mouse_handler();
-    int result = run_message_loop();
-  return result;
+
+    TraceLoggingWrite(
+        g_hProvider,
+        "PowerToysLaunch",
+        TraceLoggingDescription("Successful launch of PowerToys"),
+        ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+        TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+        TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+    result = run_message_loop();
   } catch (std::runtime_error err) {
     MessageBox(NULL, err.what(), "Error", MB_OK | MB_ICONERROR);
-    return -1;
+    result = -1;
   }
+  TraceLoggingUnregister(g_hProvider);
+  return result;
 }

@@ -115,6 +115,12 @@
     <ClInclude Include="windows_colors.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Telemetry\ProjectTelemetry.h">
+      <Filter>Telemetry</Filter>
+    </ClInclude>
+    <ClInclude Include="Telemetry\TraceLoggingDefines.h">
+      <Filter>Telemetry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">
@@ -128,6 +134,9 @@
     </Filter>
     <Filter Include="svgs">
       <UniqueIdentifier>{1123565f-43ba-4eb8-a6f5-2d5f8f3ae6af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Telemetry">
+      <UniqueIdentifier>{40ffda03-ee4c-4ccb-86a3-17d7c92ea64f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -96,6 +96,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -132,6 +133,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -183,6 +185,8 @@
     <ClInclude Include="monitors.h" />
     <ClInclude Include="mouse_watcher.h" />
     <ClInclude Include="tasklist_positions.h" />
+    <ClInclude Include="Telemetry\ProjectTelemetry.h" />
+    <ClInclude Include="Telemetry\TraceLoggingDefines.h" />
     <ClInclude Include="unhandled_exception_handler.h" />
     <ClInclude Include="virtual_desktops.h" />
     <ClInclude Include="utils.h" />
