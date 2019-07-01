@@ -3,25 +3,39 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "powertoys", "powertoys\powertoys.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runner", "src\powertoys\runner\runner.vcxproj", "{9412D5C6-2CF2-4FC2-A601-B55508EA9B27}"
 	ProjectSection(ProjectDependencies) = postProject
 		{74485049-C722-400F-ABE5-86AC52D929B3} = {74485049-C722-400F-ABE5-86AC52D929B3}
+		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {44CC9375-3E6E-4D99-8913-7FB748807EBD}
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA} = {A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerToysSetupCustomActions", "PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj", "{32F3882B-F2D6-4586-B5ED-11E39E522BD3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "utils\utils.vcxproj", "{74485049-C722-400F-ABE5-86AC52D929B3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "overlay_window", "modules\overlay_window\overlay_window.vcxproj", "{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PowerToysSetup", "src\installer\PowerToysSetup\PowerToysSetup.wixproj", "{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD}"
 	ProjectSection(ProjectDependencies) = postProject
-		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27} = {9412D5C6-2CF2-4FC2-A601-B55508EA9B27}
+		{74485049-C722-400F-ABE5-86AC52D929B3} = {74485049-C722-400F-ABE5-86AC52D929B3}
+		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {44CC9375-3E6E-4D99-8913-7FB748807EBD}
+		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA} = {A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_powertoy", "modules\example_powertoy\example_powertoy.vcxproj", "{44CC9375-3E6E-4D99-8913-7FB748807EBD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerToysSetupCustomActions", "src\installer\PowerToysSetupCustomActions\PowerToysSetupCustomActions.vcxproj", "{32F3882B-F2D6-4586-B5ED-11E39E522BD3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "src\powertoys\utils\utils.vcxproj", "{74485049-C722-400F-ABE5-86AC52D929B3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shortcut_guide", "src\powertoys\modules\shortcut_guide\shortcut_guide.vcxproj", "{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_powertoy", "src\powertoys\modules\example_powertoy\example_powertoy.vcxproj", "{44CC9375-3E6E-4D99-8913-7FB748807EBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{4574FDD0-F61D-4376-98BF-E5A1262C11EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installer", "installer", "{A30833E4-8711-4C2E-8EB8-16B62BAA67CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "powertoys", "powertoys", "{BDA02A7F-26A0-4545-8811-9A7BB2B94924}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "interface", "interface", "{3BB8493E-D18E-4485-A320-CB40F90F55AE}"
+	ProjectSection(SolutionItems) = preProject
+		src\powertoys\modules\interface\lowlevel_keyboard_event_data.h = src\powertoys\modules\interface\lowlevel_keyboard_event_data.h
+		src\powertoys\modules\interface\powertoy_module_interface.h = src\powertoys\modules\interface\powertoy_module_interface.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,8 +98,14 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{9412D5C6-2CF2-4FC2-A601-B55508EA9B27} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
+		{022A9D30-7C4F-416D-A9DF-5FF2661CC0AD} = {A30833E4-8711-4C2E-8EB8-16B62BAA67CD}
+		{32F3882B-F2D6-4586-B5ED-11E39E522BD3} = {A30833E4-8711-4C2E-8EB8-16B62BAA67CD}
+		{74485049-C722-400F-ABE5-86AC52D929B3} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
 		{A46629C4-1A6C-40FA-A8B6-10E5102BB0BA} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
+		{4574FDD0-F61D-4376-98BF-E5A1262C11EC} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
+		{3BB8493E-D18E-4485-A320-CB40F90F55AE} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3A2F9D1-7930-4EF4-A6FC-7EE0A99821D0}
