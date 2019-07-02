@@ -18,6 +18,9 @@
     <ClCompile Include="trace.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="settings_window.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -35,6 +38,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="trace.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="settings_window.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

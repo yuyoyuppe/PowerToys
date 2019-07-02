@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "resource.h"
+#include "settings_window.h"
 #include <Windows.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
@@ -27,6 +28,9 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
     break;
   case WM_COMMAND:
     switch(wparam) {
+      case ID_SETTINGS_MENU_COMMAND:
+        open_settings_window();
+        break;
       case ID_EXIT_MENU_COMMAND:
         DestroyWindow(window);
         break;

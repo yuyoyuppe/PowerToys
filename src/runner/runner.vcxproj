@@ -95,6 +95,7 @@
     </ClCompile>
     <ClCompile Include="powertoy_module.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="settings_window.cpp" />
     <ClCompile Include="trace.cpp" />
     <ClCompile Include="tray_icon.cpp" />
     <ClCompile Include="unhandled_exception_handler.cpp" />
@@ -104,6 +105,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="powertoy_module.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="settings_window.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="tray_icon.h" />
     <ClInclude Include="unhandled_exception_handler.h" />
