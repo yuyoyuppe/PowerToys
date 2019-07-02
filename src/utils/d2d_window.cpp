@@ -84,7 +84,7 @@ void D2DWindow::initialize() {
 }
 
 void D2DWindow::base_init() {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   // D2D1Factory is independent from the device, no need to recreate it if we need to recreate the device.
   if (!d2d_factory) {
 #ifdef _DEBUG
@@ -123,7 +123,7 @@ void D2DWindow::base_init() {
 }
 
 void D2DWindow::base_resize(int width, int height) {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (!initialized)
     return;
   window_width = width;
@@ -173,7 +173,7 @@ void D2DWindow::base_resize(int width, int height) {
 }
 
 void D2DWindow::base_render() {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (!initialized || !d2d_dc || !d2d_bitmap)
     return;
   d2d_dc->BeginDraw();
@@ -184,7 +184,7 @@ void D2DWindow::base_render() {
 }
 
 void D2DWindow::render_empty() {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (!initialized || !d2d_dc || !d2d_bitmap)
     return;
   d2d_dc->BeginDraw();

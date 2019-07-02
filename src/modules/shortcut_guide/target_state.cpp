@@ -7,7 +7,7 @@ TargetState::TargetState() : thread(&TargetState::thread_proc, this)
 { }
 
 bool TargetState::signal_event(unsigned vk_code, bool key_down) {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   // some special case:
   if (state == Shown && key_down &&
     (vk_code == VK_OEM_COMMA ||
@@ -51,7 +51,7 @@ void TargetState::was_hiden() {
 }
 
 void TargetState::exit() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   events.clear();
   state = Exiting;
   lock.unlock();
@@ -66,7 +66,7 @@ KeyEvent TargetState::next() {
 }
 
 void TargetState::handle_hidden() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (events.empty())
     cv.wait(lock);
   if (events.empty() || state == Exiting)
@@ -79,7 +79,7 @@ void TargetState::handle_hidden() {
 }
 
 void TargetState::handle_shown() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (events.empty())
     cv.wait(lock);
   if (events.empty() || state == Exiting)
@@ -119,7 +119,7 @@ void TargetState::thread_proc() {
 }
 
 void TargetState::handle_timeout() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   auto wait_time = delay - (std::chrono::system_clock::now() - winkey_timestamp);
   if (events.empty())
     cv.wait_for(lock, delay);

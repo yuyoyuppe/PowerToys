@@ -40,7 +40,7 @@ D2DWindowManagerPopup::~D2DWindowManagerPopup() {
 
 void D2DWindowManagerPopup::init()
 {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   target_window = NULL;
   // D2D1Factory is independent from the device, no need to recreate it if
   // we need to recreate the device.
@@ -138,7 +138,7 @@ void D2DWindowManagerPopup::hide() {
 }
 
 void D2DWindowManagerPopup::resize() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   auto window_rect = *get_window_pos(hwnd);
   auto width = window_rect.right - window_rect.left;
   auto height = window_rect.bottom - window_rect.top;
@@ -197,7 +197,7 @@ void D2DWindowManagerPopup::resize() {
 }
 
 void D2DWindowManagerPopup::render() {
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (!d2d_bitmap)
     return;
   d2d_dc->BeginDraw();

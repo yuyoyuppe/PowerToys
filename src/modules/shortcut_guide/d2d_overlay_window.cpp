@@ -158,7 +158,7 @@ D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_monitor({}) {
       if (visible) {
         std::vector<TasklistButton> buttons;
         if (tasklist.update_buttons(buttons)) {
-          std::unique_lock<std::recursive_mutex> lock(mutex);
+          std::unique_lock lock(mutex);
           tasklist_buttons.swap(buttons);
         }
       }
@@ -167,7 +167,7 @@ D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_monitor({}) {
 }
 
 void D2DOverlayWindow::show(HWND active_window) {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (visible) {
     return;
   }
@@ -303,7 +303,7 @@ void D2DOverlayWindow::animate(int vk_code, int offset) {
   animation.button->GetAttributeValue(L"fill", paint.put());
   paint->GetColor(&animation.original);
   animate(vk_code, offset + 1);
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   animation.animation.reset(0.1, 0, 1);
   key_animations.push_back(animation);
 }

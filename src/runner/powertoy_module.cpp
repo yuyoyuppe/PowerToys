@@ -15,21 +15,20 @@ PowertoysEvents& powertoys_events() {
 }
 
 void PowertoysEvents::register_receiver(const std::wstring & event, PowertoyModuleIface * module) {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   receivers[event].push_back(module);
 }
 
 void PowertoysEvents::unregister_receiver(PowertoyModuleIface* module) {
-  std::unique_lock<std::recursive_mutex> lock(mutex);
-  for (auto& kv : receivers) {
-    auto& vec = kv.second;
-    vec.erase(remove(begin(vec), end(vec), module), end(vec));
+  std::unique_lock lock(mutex);
+  for (auto& [key, value] : receivers) {
+    value.erase(remove(begin(value), end(value), module), end(value));
   }
 }
 
 intptr_t PowertoysEvents::signal_event(const std::wstring & event, intptr_t data) {
   intptr_t rvalue = 0;
-  std::unique_lock<std::recursive_mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   if (auto it = receivers.find(event); it != end(receivers)) {
     for (auto& module : it->second) {
       rvalue |= module->signal_event(event.c_str(), data);
