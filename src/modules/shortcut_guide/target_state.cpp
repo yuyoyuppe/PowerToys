@@ -119,6 +119,7 @@ void TargetState::thread_proc() {
 }
 
 void TargetState::handle_timeout() {
+  std::pair pair(2, true);
   std::unique_lock lock(mutex);
   auto wait_time = delay - (std::chrono::system_clock::now() - winkey_timestamp);
   if (events.empty())

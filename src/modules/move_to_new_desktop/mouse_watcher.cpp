@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "mouse_watcher.h"
 #include "virtual_desktops.h"
-#include "monitors.h"
+#include <utils/monitors.h>
+#include <utils/utils.h>
 #include <uiautomation.h>
 
 namespace {
@@ -452,11 +453,12 @@ namespace {
     return result;
   }
 
-
+  bool terminate_mouse_thread_proc = false;
+  std::thread mouse_thread;
   void mouse_thread_proc() {
     initialize_ui_automation_strategy();
 
-    while (true) {
+    while (!terminate_mouse_thread_proc) {
       std::this_thread::sleep_for(mousein_sleep);
       auto mouse_pos = get_mouse_pos();
       if (!mouse_pos) {
@@ -531,6 +533,13 @@ void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_
     mouse_out_cb = on_mouse_out;
     mousein_wait = std::chrono::milliseconds(ms_delay);
     mousein_sleep = std::chrono::milliseconds(probe_ms_delay);
-    std::thread(mouse_thread_proc).detach();
+    terminate_mouse_thread_proc = false;
+    mouse_thread = std::thread(mouse_thread_proc);
   }
+}
+
+void stop_mouse_watcher() {
+  terminate_mouse_thread_proc = true;
+  mouse_thread.join();
+  mouse_initialized = false;
 }

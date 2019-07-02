@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "interface", "interface", "{
 		src\powertoys\modules\interface\powertoy_module_interface.h = src\powertoys\modules\interface\powertoy_module_interface.h
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "move_to_new_desktop", "src\modules\move_to_new_desktop\move_to_new_desktop.vcxproj", "{5034142A-C50E-404B-B794-A5C4144E9AFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -93,6 +95,14 @@ Global
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD}.Release|x64.Build.0 = Release|x64
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD}.Release|x86.ActiveCfg = Release|Win32
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD}.Release|x86.Build.0 = Release|Win32
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Debug|x64.ActiveCfg = Debug|x64
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Debug|x64.Build.0 = Debug|x64
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Debug|x86.ActiveCfg = Debug|Win32
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Debug|x86.Build.0 = Debug|Win32
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Release|x64.ActiveCfg = Release|x64
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Release|x64.Build.0 = Release|x64
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Release|x86.ActiveCfg = Release|Win32
+		{5034142A-C50E-404B-B794-A5C4144E9AFE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +116,7 @@ Global
 		{44CC9375-3E6E-4D99-8913-7FB748807EBD} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
 		{4574FDD0-F61D-4376-98BF-E5A1262C11EC} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
 		{3BB8493E-D18E-4485-A320-CB40F90F55AE} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
+		{5034142A-C50E-404B-B794-A5C4144E9AFE} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3A2F9D1-7930-4EF4-A6FC-7EE0A99821D0}

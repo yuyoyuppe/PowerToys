@@ -9,7 +9,7 @@
 #include <dcomp.h>
 #include <dwmapi.h>
 #include <string>
-#include "d2d_window.h"
+#include <utils/d2d_window.h>
 #include "mouse_track_events.h"
 
 class D2DWindowManagerPopup

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "functionalities.h"
+#include "tray_icon.h"
 #include <ShellScalingApi.h>
 
 #include "powertoy_module.h"
@@ -42,7 +42,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     chdir_current_executable();
     // Load Powertyos DLLS
     // For now only load know DLLs
-    std::unordered_set<std::wstring> know_dlls = { L"example_powertoy.dll", L"shortcut_guide.dll" };
+    std::unordered_set<std::wstring> know_dlls = {
+      L"example_powertoy.dll",
+      L"shortcut_guide.dll",
+      L"move_to_new_desktop.dll" 
+    };
     for (auto& file : std::filesystem::directory_iterator("modules/")) {
       if (file.path().extension() != L".dll")
         continue;
@@ -55,7 +59,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     } 
     // Start our events providers
     start_lowlevel_keyboard_hook();
-    start_mouse_handler();
 
     TraceLoggingWrite(
         g_hProvider,
