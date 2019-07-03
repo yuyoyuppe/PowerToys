@@ -324,7 +324,7 @@ void move_window_to_primary_desktop(HWND hwnd) {
   const UINT PRIMARY_DESKTOP_INDEX = 0;
   objDestkop = get_desktop_at_index(PRIMARY_DESKTOP_INDEX);
   if (objDestkop == nullptr) {
-    MessageBoxW(NULL, L"PowerToys failed to get the primary desktop object.", L"Error", MB_OK | MB_ICONERROR);
+    MessageBox(NULL, L"PowerToys failed to get the primary desktop object.", L"Error", MB_OK | MB_ICONERROR);
     return;
   }
 

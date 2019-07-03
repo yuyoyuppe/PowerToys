@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "functionalities.h"
 #include "resource.h"
 #include <Windows.h>
 

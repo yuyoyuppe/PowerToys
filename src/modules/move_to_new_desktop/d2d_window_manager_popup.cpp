@@ -8,21 +8,21 @@
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
-LPSTR maximize_tooltip_message = (LPSTR)"Maximize to new desktop";
-LPSTR restore_tooltip_message = (LPSTR)"Return to primary desktop";
+const LPWSTR maximize_tooltip_message = (LPWSTR)L"Maximize to new desktop";
+const LPWSTR restore_tooltip_message = (LPWSTR)L"Return to primary desktop";
 
 D2DWindowManagerPopup::D2DWindowManagerPopup() {
-  static const char* class_name = "PToyD2DWindowManagerPopup";
-  WNDCLASSA wc = {};
+  static const TCHAR* class_name = L"PToyD2DWindowManagerPopup";
+  WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   wc.lpszClassName = class_name;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
-  RegisterClassA(&wc);
-  hwnd = CreateWindowExA(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_NOACTIVATE,
+  RegisterClass(&wc);
+  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_NOACTIVATE,
                          wc.lpszClassName,
-                         "PToyD2DWindowManagerPopup",
+                         L"PToyD2DWindowManagerPopup",
                          WS_POPUP | WS_VISIBLE,
                          CW_USEDEFAULT, CW_USEDEFAULT,
                          CW_USEDEFAULT, CW_USEDEFAULT,
@@ -93,7 +93,7 @@ void D2DWindowManagerPopup::create_tooltip(HWND window) {
 
   SetWindowPos(hwnd_tooltip, HWND_TOPMOST,0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
   // Associate the tooltip with the tool.
-  TOOLINFOA tool_info = { 0 };
+  TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE; // sizeof(TOOLINFO) doesn't work...
   tool_info.hwnd = window;
   tool_info.uFlags = TTF_SUBCLASS;
@@ -101,7 +101,7 @@ void D2DWindowManagerPopup::create_tooltip(HWND window) {
   tool_info.hinst = reinterpret_cast<HINSTANCE>(&__ImageBase);
   GetClientRect(hwnd, &tool_info.rect);
   if(!SendMessage(hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM)&tool_info)) {
-    MessageBoxA(NULL, "Couldn't create the ToolTip control.", "Error", MB_OK);
+    MessageBox(NULL, L"Couldn't create the ToolTip control.", L"Error", MB_OK);
   }
 }
 
@@ -119,7 +119,7 @@ void D2DWindowManagerPopup::show(HWND targetWindow, RECT area) {
   current_icon = (current_desktop_index == 0 ? &maximize_to_new_desktop : &restore_to_primary_desktop);
   target_window_on_primary_desktop = (current_desktop_index == 0 ? TRUE : FALSE);
 
-  TOOLINFOA tool_info = { 0 };
+  TOOLINFO tool_info = { 0 };
   tool_info.cbSize = TTTOOLINFO_V1_SIZE;
   tool_info.hwnd = hwnd;
   // Get the current tooltip definition.
