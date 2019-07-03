@@ -171,14 +171,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="d2d_overlay_window.h" />
+    <ClInclude Include="overlay_window.h" />
     <ClInclude Include="keyboard_state.h" />
     <ClInclude Include="shortcut_guide.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="target_state.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="d2d_overlay_window.cpp" />
+    <ClCompile Include="overlay_window.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="keyboard_state.cpp" />
     <ClCompile Include="shortcut_guide.cpp" />

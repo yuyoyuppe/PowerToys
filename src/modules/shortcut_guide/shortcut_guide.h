@@ -1,7 +1,7 @@
 #pragma once
 #include <interface/powertoy_module_interface.h>
 #include <interface/lowlevel_keyboard_event_data.h>
-#include "d2d_overlay_window.h"
+#include "overlay_window.h"
 
 // We support only one instance of the overlay
 extern class OverlayWindow* instance;

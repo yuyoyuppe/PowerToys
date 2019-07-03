@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "d2d_overlay_window.h"
+#include "overlay_window.h"
 #include "utils/monitors.h"
 #include "utils/tasklist_positions.h"
 #include "utils/start_visible.h"

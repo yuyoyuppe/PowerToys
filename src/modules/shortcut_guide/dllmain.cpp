@@ -2,7 +2,7 @@
 #include "pch.h"
 #include <mutex>
 #include "shortcut_guide.h"
-#include "d2d_overlay_window.h"
+#include "overlay_window.h"
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <interface/powertoy_module_interface.h>
 #include <interface/lowlevel_keyboard_event_data.h>
-#include "d2d_window_manager_popup.h"
+#include "window_manager_popup.h"
 #include "mouse_watcher.h"
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {

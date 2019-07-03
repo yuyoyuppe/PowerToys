@@ -3,9 +3,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="d2d_overlay_window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="keyboard_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -15,12 +12,12 @@
     <ClCompile Include="target_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="overlay_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="d2d_overlay_window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="keyboard_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -28,6 +25,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="target_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
