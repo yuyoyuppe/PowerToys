@@ -12,8 +12,16 @@
 
 #include <iostream>
 #include <strutil.h>
+#include <ProjectTelemetry.h>
 
 using namespace std;
+
+TRACELOGGING_DEFINE_PROVIDER(
+  g_hProvider,
+  "Microsoft.PowerToys",
+  // {38e8889b-9731-53f5-e901-e8a7c1753074}
+  (0x38e8889b, 0x9731, 0x53f5, 0xe9, 0x01, 0xe8, 0xa7, 0xc1, 0x75, 0x30, 0x74),
+  TraceLoggingOptionProjectTelemetry());
 
 const DWORD USERNAME_DOMAIN_LEN = DNLEN + UNLEN + 2; // Domain Name + '\' + User Name + '\0'
 const DWORD USERNAME_LEN = UNLEN + 1; // User Name + '\0'
@@ -350,14 +358,92 @@ LExit:
   return WcaFinalize(er);
 }
 
+UINT __stdcall TelemetryLogInstalledCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogInstalledCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Application::Installed",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogUninstalledCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogUninstalledCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Application::Uninstalled",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogCancelledCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogCancelledCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Install::Cancelled",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogFailedCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogFailedCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Install::Failed",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
 // DllMain - Initialize and cleanup WiX custom action utils.
 extern "C" BOOL WINAPI DllMain(__in HINSTANCE hInst, __in ULONG ulReason, __in LPVOID) {
   switch (ulReason) {
   case DLL_PROCESS_ATTACH:
     WcaGlobalInitialize(hInst);
+    TraceLoggingRegister(g_hProvider);
     break;
 
   case DLL_PROCESS_DETACH:
+    TraceLoggingUnregister(g_hProvider);
     WcaGlobalFinalize();
     break;
   }
