@@ -34,8 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "powertoys", "powertoys", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "interface", "interface", "{3BB8493E-D18E-4485-A320-CB40F90F55AE}"
 	ProjectSection(SolutionItems) = preProject
-		src\powertoys\modules\interface\lowlevel_keyboard_event_data.h = src\powertoys\modules\interface\lowlevel_keyboard_event_data.h
-		src\powertoys\modules\interface\powertoy_module_interface.h = src\powertoys\modules\interface\powertoy_module_interface.h
+		src\modules\interface\lowlevel_keyboard_event_data.h = src\modules\interface\lowlevel_keyboard_event_data.h
+		src\modules\interface\powertoy_module_interface.h = src\modules\interface\powertoy_module_interface.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "maximize_to_new_desktop", "src\modules\maximize_to_new_desktop\maximize_to_new_desktop.vcxproj", "{5034142A-C50E-404B-B794-A5C4144E9AFE}"
