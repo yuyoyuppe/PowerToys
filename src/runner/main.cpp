@@ -45,7 +45,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     std::unordered_set<std::wstring> know_dlls = {
       L"example_powertoy.dll",
       L"shortcut_guide.dll",
-      L"move_to_new_desktop.dll" 
+      L"maximize_to_new_desktop.dll" 
     };
     for (auto& file : std::filesystem::directory_iterator("modules/")) {
       if (file.path().extension() != L".dll")
