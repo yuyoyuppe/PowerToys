@@ -10,32 +10,32 @@
 static IMAGEHLP_SYMBOL64* p_symbol = (IMAGEHLP_SYMBOL64*)malloc(sizeof(IMAGEHLP_SYMBOL64) + MAX_PATH * sizeof(TCHAR));
 static IMAGEHLP_LINE64 line;
 static bool processing_exception = false;
-static CHAR module_path[MAX_PATH];
+static TCHAR module_path[MAX_PATH];
 static LPTOP_LEVEL_EXCEPTION_FILTER default_top_level_exception_handler = NULL;
 
-static const char* exception_description(const DWORD& code) {
+static const TCHAR* exception_description(const DWORD& code) {
   switch (code) {
-  case EXCEPTION_ACCESS_VIOLATION:         return "EXCEPTION_ACCESS_VIOLATION";
-  case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:    return "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
-  case EXCEPTION_BREAKPOINT:               return "EXCEPTION_BREAKPOINT";
-  case EXCEPTION_DATATYPE_MISALIGNMENT:    return "EXCEPTION_DATATYPE_MISALIGNMENT";
-  case EXCEPTION_FLT_DENORMAL_OPERAND:     return "EXCEPTION_FLT_DENORMAL_OPERAND";
-  case EXCEPTION_FLT_DIVIDE_BY_ZERO:       return "EXCEPTION_FLT_DIVIDE_BY_ZERO";
-  case EXCEPTION_FLT_INEXACT_RESULT:       return "EXCEPTION_FLT_INEXACT_RESULT";
-  case EXCEPTION_FLT_INVALID_OPERATION:    return "EXCEPTION_FLT_INVALID_OPERATION";
-  case EXCEPTION_FLT_OVERFLOW:             return "EXCEPTION_FLT_OVERFLOW";
-  case EXCEPTION_FLT_STACK_CHECK:          return "EXCEPTION_FLT_STACK_CHECK";
-  case EXCEPTION_FLT_UNDERFLOW:            return "EXCEPTION_FLT_UNDERFLOW";
-  case EXCEPTION_ILLEGAL_INSTRUCTION:      return "EXCEPTION_ILLEGAL_INSTRUCTION";
-  case EXCEPTION_IN_PAGE_ERROR:            return "EXCEPTION_IN_PAGE_ERROR";
-  case EXCEPTION_INT_DIVIDE_BY_ZERO:       return "EXCEPTION_INT_DIVIDE_BY_ZERO";
-  case EXCEPTION_INT_OVERFLOW:             return "EXCEPTION_INT_OVERFLOW";
-  case EXCEPTION_INVALID_DISPOSITION:      return "EXCEPTION_INVALID_DISPOSITION";
-  case EXCEPTION_NONCONTINUABLE_EXCEPTION: return "EXCEPTION_NONCONTINUABLE_EXCEPTION";
-  case EXCEPTION_PRIV_INSTRUCTION:         return "EXCEPTION_PRIV_INSTRUCTION";
-  case EXCEPTION_SINGLE_STEP:              return "EXCEPTION_SINGLE_STEP";
-  case EXCEPTION_STACK_OVERFLOW:           return "EXCEPTION_STACK_OVERFLOW";
-  default:                                 return "UNKNOWN EXCEPTION";
+  case EXCEPTION_ACCESS_VIOLATION:         return TEXT("EXCEPTION_ACCESS_VIOLATION");
+  case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:    return TEXT("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
+  case EXCEPTION_BREAKPOINT:               return TEXT("EXCEPTION_BREAKPOINT");
+  case EXCEPTION_DATATYPE_MISALIGNMENT:    return TEXT("EXCEPTION_DATATYPE_MISALIGNMENT");
+  case EXCEPTION_FLT_DENORMAL_OPERAND:     return TEXT("EXCEPTION_FLT_DENORMAL_OPERAND");
+  case EXCEPTION_FLT_DIVIDE_BY_ZERO:       return TEXT("EXCEPTION_FLT_DIVIDE_BY_ZERO");
+  case EXCEPTION_FLT_INEXACT_RESULT:       return TEXT("EXCEPTION_FLT_INEXACT_RESULT");
+  case EXCEPTION_FLT_INVALID_OPERATION:    return TEXT("EXCEPTION_FLT_INVALID_OPERATION");
+  case EXCEPTION_FLT_OVERFLOW:             return TEXT("EXCEPTION_FLT_OVERFLOW");
+  case EXCEPTION_FLT_STACK_CHECK:          return TEXT("EXCEPTION_FLT_STACK_CHECK");
+  case EXCEPTION_FLT_UNDERFLOW:            return TEXT("EXCEPTION_FLT_UNDERFLOW");
+  case EXCEPTION_ILLEGAL_INSTRUCTION:      return TEXT("EXCEPTION_ILLEGAL_INSTRUCTION");
+  case EXCEPTION_IN_PAGE_ERROR:            return TEXT("EXCEPTION_IN_PAGE_ERROR");
+  case EXCEPTION_INT_DIVIDE_BY_ZERO:       return TEXT("EXCEPTION_INT_DIVIDE_BY_ZERO");
+  case EXCEPTION_INT_OVERFLOW:             return TEXT("EXCEPTION_INT_OVERFLOW");
+  case EXCEPTION_INVALID_DISPOSITION:      return TEXT("EXCEPTION_INVALID_DISPOSITION");
+  case EXCEPTION_NONCONTINUABLE_EXCEPTION: return TEXT("EXCEPTION_NONCONTINUABLE_EXCEPTION");
+  case EXCEPTION_PRIV_INSTRUCTION:         return TEXT("EXCEPTION_PRIV_INSTRUCTION");
+  case EXCEPTION_SINGLE_STEP:              return TEXT("EXCEPTION_SINGLE_STEP");
+  case EXCEPTION_STACK_OVERFLOW:           return TEXT("EXCEPTION_STACK_OVERFLOW");
+  default:                                 return TEXT("UNKNOWN EXCEPTION");
   }
 }
 
@@ -46,7 +46,7 @@ void init_symbols() {
   SymInitialize(process, NULL, TRUE);
 }
 
-void log_stack_trace(std::string& generalErrorDescription) {
+void log_stack_trace(std::wstring& generalErrorDescription) {
   memset(p_symbol, '\0', sizeof(*p_symbol) + MAX_PATH);
   memset(&module_path[0], '\0', sizeof(module_path));
   line.LineNumber = 0;
@@ -64,7 +64,7 @@ void log_stack_trace(std::string& generalErrorDescription) {
   stack.AddrFrame.Offset = context.Rbp;
   stack.AddrFrame.Mode = AddrModeFlat;
 
-  std::stringstream ss;
+  std::wstringstream ss;
   ss << generalErrorDescription << std::endl;
   for (ULONG frame = 0;; frame++) {
     auto result = StackWalk64(IMAGE_FILE_MACHINE_AMD64,
@@ -87,7 +87,7 @@ void log_stack_trace(std::string& generalErrorDescription) {
 
     auto module_base = SymGetModuleBase64(process, stack.AddrPC.Offset);
     if (module_base) {
-      GetModuleFileNameA((HINSTANCE)module_base, module_path, MAX_PATH);
+      GetModuleFileName((HINSTANCE)module_base, module_path, MAX_PATH);
     }
     ss << module_path << "!"
        << p_symbol->Name
@@ -97,7 +97,7 @@ void log_stack_trace(std::string& generalErrorDescription) {
     }
   }
   auto errorString = ss.str();
-  MessageBox(NULL, errorString.c_str(), "Unhandled Error", MB_OK | MB_ICONERROR);
+  MessageBox(NULL, errorString.c_str(), TEXT("Unhandled Error"), MB_OK | MB_ICONERROR);
 
 }
 
@@ -106,7 +106,7 @@ LONG WINAPI unhandled_exceptiont_handler(PEXCEPTION_POINTERS info) {
     processing_exception = true;
     try {
       init_symbols();
-      std::string ex_description = "Exception code not available";
+      std::wstring ex_description = TEXT("Exception code not available");
       if (info != NULL && info->ExceptionRecord != NULL && info->ExceptionRecord->ExceptionCode != NULL) {
         ex_description = exception_description(info->ExceptionRecord->ExceptionCode);
       }
@@ -123,7 +123,7 @@ LONG WINAPI unhandled_exceptiont_handler(PEXCEPTION_POINTERS info) {
 
 extern "C" void AbortHandler(int signal_number) {
   init_symbols();
-  std::string ex_description = "SIGABRT was raised.";
+  std::wstring ex_description = TEXT("SIGABRT was raised.");
   log_stack_trace(ex_description);
 }
 

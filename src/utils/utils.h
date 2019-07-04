@@ -19,7 +19,7 @@ RECT keep_rect_inside_rect(const RECT& small_rect, const RECT& big_rect);
 // Initializes and runs windows message loop
 int run_message_loop();
 
-void show_last_error_message(LPTSTR lpszFunction, DWORD dw);
+void show_last_error_message(LPCTSTR lpszFunction, DWORD dw);
 
 enum WindowState {
   UNKNONW,

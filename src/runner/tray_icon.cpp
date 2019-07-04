@@ -57,12 +57,12 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
 }
 
 void start_tray_icon() {
-  id_tray_icon = wm_icon_notify = RegisterWindowMessage("WM_PowerToysIconNotify");
+  id_tray_icon = wm_icon_notify = RegisterWindowMessage(TEXT("WM_PowerToysIconNotify"));
 
   auto h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   auto icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
 
-  static const char* class_name = "PToyTrayIconWindow";
+  static LPCTSTR class_name = TEXT("PToyTrayIconWindow");
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = h_instance;
@@ -72,7 +72,7 @@ void start_tray_icon() {
   wc.hIcon = icon;
   RegisterClass(&wc);
   auto hwnd = CreateWindow(wc.lpszClassName,
-                           "PToyTrayIconWindow",
+                           TEXT("PToyTrayIconWindow"),
                            WS_OVERLAPPEDWINDOW | WS_POPUP,
                            CW_USEDEFAULT,
                            CW_USEDEFAULT,
@@ -90,7 +90,7 @@ void start_tray_icon() {
   tray_icon_data.hWnd = hwnd;
   tray_icon_data.uID = id_tray_icon;
   tray_icon_data.uCallbackMessage = wm_icon_notify;
-  strcpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip), "PowerToys");
+  wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip), TEXT("PowerToys"));
   tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
 
   Shell_NotifyIcon(NIM_ADD, &tray_icon_data);

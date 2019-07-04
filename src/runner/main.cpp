@@ -19,11 +19,11 @@ TRACELOGGING_DEFINE_PROVIDER(
 
 void chdir_current_executable() {
   // Change current directory to the path of the executable.
-  CCHAR executable_path[MAX_PATH];
+  TCHAR executable_path[MAX_PATH];
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
   if(!SetCurrentDirectory(executable_path)) {
-    show_last_error_message((LPSTR)"Change Directory to Executable Path", GetLastError());
+    show_last_error_message(TEXT("Change Directory to Executable Path"), GetLastError());
   }
 }
 
@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
       L"shortcut_guide.dll",
       L"maximize_to_new_desktop.dll" 
     };
-    for (auto& file : std::filesystem::directory_iterator("modules/")) {
+    for (auto& file : std::filesystem::directory_iterator(TEXT("modules/"))) {
       if (file.path().extension() != L".dll")
         continue;
       if (know_dlls.find(file.path().filename()) == know_dlls.end())
@@ -70,7 +70,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     result = run_message_loop();
   } catch (std::runtime_error err) {
-    MessageBox(NULL, err.what(), "Error", MB_OK | MB_ICONERROR);
+    std::string err_what = err.what();
+    MessageBox(NULL, std::wstring(err_what.begin(),err_what.end()).c_str(), TEXT("Error"), MB_OK | MB_ICONERROR);
     result = -1;
   }
   TraceLoggingUnregister(g_hProvider);

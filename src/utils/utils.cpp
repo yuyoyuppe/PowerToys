@@ -92,7 +92,7 @@ int run_message_loop() {
   return static_cast<int>(msg.wParam);
 }
 
-void show_last_error_message(LPSTR lpszFunction, DWORD dw) {
+void show_last_error_message(LPCTSTR lpszFunction, DWORD dw) {
   // Retrieve the system error message for the error code
   LPVOID lpMsgBuf;
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
