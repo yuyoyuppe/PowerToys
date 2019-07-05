@@ -310,6 +310,7 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
     // Check if the moved window was the last window present in this desktop.
     if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
       manager_internal->RemoveDesktop(old_desktop.get(), primary_desktop.get());
+      Trace::EventDesktopClosed();
     }
   }
 }

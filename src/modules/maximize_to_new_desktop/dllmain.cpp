@@ -54,6 +54,7 @@ public:
 };
 
 D2DWindowManagerPopup* MTNDPowertoy::maximize_popup = nullptr;
+unsigned __int64 pop_up_start_time = 0ULL;
 
 RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
   auto dpi = GetDpiForWindow(hwnd);
@@ -69,12 +70,14 @@ RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
   result = keep_rect_inside_rect(result, monitor);
   MTNDPowertoy::maximize_popup->show(hwnd, result);
   Trace::EventShow();
+  pop_up_start_time = GetTickCount64();
   return result;
 }
 
 void on_mouse_out() {
   MTNDPowertoy::maximize_popup->hide();
-  Trace::EventHide();
+  unsigned __int64 pop_up_end_time = GetTickCount64();
+  Trace::EventHide(pop_up_end_time - pop_up_start_time);
 }
 
 MTNDPowertoy::MTNDPowertoy() {

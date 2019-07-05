@@ -25,10 +25,20 @@ void Trace::EventShow() {
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
 }
 
-void Trace::EventHide() {
+void Trace::EventHide(const unsigned __int64 duration) {
   TraceLoggingWrite(
     g_hProvider,
     "MTND::Event::HideOverlay",
+    TraceLoggingInt64(duration, "Duration in ms"),
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+}
+
+void Trace::EventDesktopClosed() {
+  TraceLoggingWrite(
+    g_hProvider,
+    "MTND::Event::DesktopClosedViaLastWindowClosed",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
