@@ -15,6 +15,9 @@
     <ClCompile Include="powertoy_module.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="trace.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -28,13 +31,10 @@
     <ClInclude Include="tray_icon.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Telemetry\ProjectTelemetry.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Telemetry\TraceLoggingDefines.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="powertoy_module.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="trace.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

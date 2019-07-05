@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "virtual_desktops.h"
+#include "trace.h"
 
 /* 
   Some APIs have been designed based on 
@@ -341,6 +342,7 @@ void move_window_to_primary_desktop(HWND hwnd) {
   winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
 
   std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktop_id).detach();
+  Trace::ActionRestore();
 }
 
 void switch_to_window_desktop_after_delay(HWND hwnd, GUID new_desktop_id) {
@@ -384,4 +386,5 @@ void move_window_to_new_desktop(HWND hwnd) {
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
   winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), new_desktop.get()));
   std::thread(switch_to_window_desktop_after_delay, hwnd, id).detach();
+  Trace::ActionMaximize();
 }

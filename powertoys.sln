@@ -40,6 +40,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "interface", "interface", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "maximize_to_new_desktop", "src\modules\maximize_to_new_desktop\maximize_to_new_desktop.vcxproj", "{5034142A-C50E-404B-B794-A5C4144E9AFE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{3EC8D046-19E4-4463-A64D-0E6D174D57FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Telemetry", "Telemetry", "{DCFC23F0-704E-4BC6-9977-3C23ADC078CB}"
+	ProjectSection(SolutionItems) = preProject
+		src\common\Telemetry\ProjectTelemetry.h = src\common\Telemetry\ProjectTelemetry.h
+		src\common\Telemetry\TraceLoggingDefines.h = src\common\Telemetry\TraceLoggingDefines.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -118,6 +126,8 @@ Global
 		{4574FDD0-F61D-4376-98BF-E5A1262C11EC} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
 		{3BB8493E-D18E-4485-A320-CB40F90F55AE} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
 		{5034142A-C50E-404B-B794-A5C4144E9AFE} = {4574FDD0-F61D-4376-98BF-E5A1262C11EC}
+		{3EC8D046-19E4-4463-A64D-0E6D174D57FA} = {BDA02A7F-26A0-4545-8811-9A7BB2B94924}
+		{DCFC23F0-704E-4BC6-9977-3C23ADC078CB} = {3EC8D046-19E4-4463-A64D-0E6D174D57FA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3A2F9D1-7930-4EF4-A6FC-7EE0A99821D0}

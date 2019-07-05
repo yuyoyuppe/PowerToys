@@ -3,13 +3,19 @@
 #include <interface/lowlevel_keyboard_event_data.h>
 #include "window_manager_popup.h"
 #include "mouse_watcher.h"
+#include "trace.h"
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
+    Trace::RegisterProvider();
+    break;
   case DLL_THREAD_ATTACH:
   case DLL_THREAD_DETACH:
+    break;
   case DLL_PROCESS_DETACH:
-      break;
+    Trace::UnregisterProvider();
+    break;
   }
   return TRUE;
 }
@@ -62,11 +68,13 @@ RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
   // Make sure resulting rect is inside monitor.
   result = keep_rect_inside_rect(result, monitor);
   MTNDPowertoy::maximize_popup->show(hwnd, result);
+  Trace::EventShow();
   return result;
 }
 
 void on_mouse_out() {
   MTNDPowertoy::maximize_popup->hide();
+  Trace::EventHide();
 }
 
 MTNDPowertoy::MTNDPowertoy() {
@@ -83,5 +91,3 @@ extern "C" __declspec(dllexport) PowertoyModuleIface*  __cdecl powertoy_create()
     return nullptr;
   }
 }
-
-

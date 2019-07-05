@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -109,7 +109,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -128,7 +128,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -149,7 +149,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>inc;telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -168,6 +168,7 @@
     </ClCompile>
     <ClCompile Include="powertoy_module.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="trace.cpp" />
     <ClCompile Include="tray_icon.cpp" />
     <ClCompile Include="unhandled_exception_handler.cpp" />
   </ItemGroup>
@@ -176,9 +177,8 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="powertoy_module.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="trace.h" />
     <ClInclude Include="tray_icon.h" />
-    <ClInclude Include="Telemetry\ProjectTelemetry.h" />
-    <ClInclude Include="Telemetry\TraceLoggingDefines.h" />
     <ClInclude Include="unhandled_exception_handler.h" />
   </ItemGroup>
   <ItemGroup>
