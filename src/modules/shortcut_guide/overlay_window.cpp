@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "overlay_window.h"
-#include "utils/monitors.h"
-#include "utils/tasklist_positions.h"
-#include "utils/start_visible.h"
+#include "common/monitors.h"
+#include "common/tasklist_positions.h"
+#include "common/start_visible.h"
 #include "keyboard_state.h"
 #include "shortcut_guide.h"
 

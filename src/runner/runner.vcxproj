@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\Telemetry;..;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -109,7 +109,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\Telemetry;..;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
@@ -128,7 +128,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\Telemetry;..;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -149,7 +149,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\common\inc;..\common\telemetry;..\utils;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common\inc;..\common\Telemetry;..;..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -315,7 +315,7 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\utils\utils.vcxproj">
+    <ProjectReference Include="..\common\common.vcxproj">
       <Project>{74485049-c722-400f-abe5-86ac52d929b3}</Project>
     </ProjectReference>
   </ItemGroup>

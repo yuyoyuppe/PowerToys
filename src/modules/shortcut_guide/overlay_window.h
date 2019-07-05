@@ -1,11 +1,11 @@
 #pragma once
-#include "utils/d2d_svg.h"
-#include "utils/d2d_window.h"
-#include "utils/d2d_text.h"
-#include "utils/monitors.h"
-#include "utils/animation.h"
-#include "utils/windows_colors.h"
-#include "utils/tasklist_positions.h"
+#include "common/d2d_svg.h"
+#include "common/d2d_window.h"
+#include "common/d2d_text.h"
+#include "common/monitors.h"
+#include "common/animation.h"
+#include "common/windows_colors.h"
+#include "common/tasklist_positions.h"
 
 struct ScaleResult {
   double scale;

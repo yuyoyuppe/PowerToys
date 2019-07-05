@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "target_state.h"
-#include "utils/start_visible.h"
+#include "common/start_visible.h"
 #include "keyboard_state.h"
 
 TargetState::TargetState() : thread(&TargetState::thread_proc, this)

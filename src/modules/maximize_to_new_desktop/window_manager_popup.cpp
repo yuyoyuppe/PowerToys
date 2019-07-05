@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "window_manager_popup.h"
-#include <utils/monitors.h>
+#include <common/monitors.h>
 #include "virtual_desktops.h"
 #include "mouse_track_events.h"
-#include <utils/windows_colors.h>
+#include <common/windows_colors.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;

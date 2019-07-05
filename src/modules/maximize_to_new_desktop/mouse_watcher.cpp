@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "mouse_watcher.h"
 #include "virtual_desktops.h"
-#include <utils/monitors.h>
-#include <utils/utils.h>
+#include <common/monitors.h>
+#include <common/common.h>
 #include <uiautomation.h>
 
 namespace {
