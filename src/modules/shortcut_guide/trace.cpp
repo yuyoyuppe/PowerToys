@@ -19,7 +19,7 @@ void Trace::UnregisterProvider() {
 void Trace::EventShow() {
   TraceLoggingWrite(
     g_hProvider,
-    "MTND::Event::ShowOverlay",
+    "ShortcutGuide::Event::ShowGuide",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -28,25 +28,7 @@ void Trace::EventShow() {
 void Trace::EventHide() {
   TraceLoggingWrite(
     g_hProvider,
-    "MTND::Event::HideOverlay",
-    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
-    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
-    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
-}
-
-void Trace::ActionMaximize() {
-  TraceLoggingWrite(
-    g_hProvider,
-    "MTND::Action::MaximizeToNewDesktop",
-    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
-    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
-    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
-}
-
-void Trace::ActionRestore() {
-  TraceLoggingWrite(
-    g_hProvider,
-    "MTND::Action::ReturnToPrimaryDesktop",
+    "ShortcutGuide::Event::HideGuide",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));

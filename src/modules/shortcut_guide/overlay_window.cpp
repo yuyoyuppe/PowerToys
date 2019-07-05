@@ -5,6 +5,7 @@
 #include "common/start_visible.h"
 #include "keyboard_state.h"
 #include "shortcut_guide.h"
+#include "trace.h"
 
 D2DOverlaySVG& D2DOverlaySVG::load(const std::wstring& filename, ID2D1DeviceContext5* d2d_dc) {
   D2DSVG::load(filename, d2d_dc);
@@ -313,12 +314,14 @@ void D2DOverlayWindow::on_show() {
 }
 
 void D2DOverlayWindow::on_hide() {
-  if (!visible)
+  if (!visible) {
     return;
+  }
   visible = false;
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
+  Trace::EventHide();
 }
 
 D2DOverlayWindow::~D2DOverlayWindow() {
