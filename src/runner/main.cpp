@@ -59,6 +59,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     } 
     // Start our events providers
     start_lowlevel_keyboard_hook();
+    // Start all the powertoys
+    for (auto& [name, powertoy] : modules()) {
+      powertoy.enable();
+    }
 
     TraceLoggingWrite(
         g_hProvider,
