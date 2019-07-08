@@ -66,7 +66,6 @@ private:
   RECT window_rect = {};
   Tasklist tasklist;
   std::vector<TasklistButton> tasklist_buttons;
-  std::chrono::system_clock::time_point update_timestamp;
   std::thread tasklist_thread;
   HTHUMBNAIL thumbnail;
   HWND active_window = nullptr;
@@ -74,4 +73,5 @@ private:
   D2DOverlaySVG* use_overlay;
   D2DSVG no_active;
   std::vector<D2DSVG> arrows;
+  std::chrono::steady_clock::time_point shown_start_time;
 };

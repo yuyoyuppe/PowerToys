@@ -25,10 +25,11 @@ void Trace::EventShow() {
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
 }
 
-void Trace::EventHide() {
+void Trace::EventHide(const __int64 duration_ms) {
   TraceLoggingWrite(
     g_hProvider,
     "ShortcutGuide::Event::HideGuide",
+    TraceLoggingInt64(duration_ms, "Duration in ms"),
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));

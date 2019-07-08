@@ -54,7 +54,7 @@ public:
 };
 
 D2DWindowManagerPopup* MTNDPowertoy::maximize_popup = nullptr;
-unsigned __int64 pop_up_start_time = 0ULL;
+std::chrono::steady_clock::time_point shown_start_time;
 
 RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
   auto dpi = GetDpiForWindow(hwnd);
@@ -70,14 +70,14 @@ RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
   result = keep_rect_inside_rect(result, monitor);
   MTNDPowertoy::maximize_popup->show(hwnd, result);
   Trace::EventShow();
-  pop_up_start_time = GetTickCount64();
+  shown_start_time = std::chrono::steady_clock::now();
   return result;
 }
 
 void on_mouse_out() {
   MTNDPowertoy::maximize_popup->hide();
-  unsigned __int64 pop_up_end_time = GetTickCount64();
-  Trace::EventHide(pop_up_end_time - pop_up_start_time);
+  std::chrono::steady_clock::time_point shown_end_time = std::chrono::steady_clock::now();
+  Trace::EventHide(std::chrono::duration_cast<std::chrono::milliseconds>(shown_end_time - shown_start_time).count());
 }
 
 MTNDPowertoy::MTNDPowertoy() {

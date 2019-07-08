@@ -220,9 +220,10 @@ void D2DOverlayWindow::show(HWND active_window) {
   }
   animation.reset();
   auto primary_screen = get_primary_monitor();
-  update_timestamp = std::chrono::system_clock::now();
+  shown_start_time = std::chrono::steady_clock::now();
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
+  Trace::EventShow();
 }
 
 void D2DOverlayWindow::animate(int vk_code) {
@@ -321,7 +322,8 @@ void D2DOverlayWindow::on_hide() {
   if (thumbnail) {
     DwmUnregisterThumbnail(thumbnail);
   }
-  Trace::EventHide();
+  std::chrono::steady_clock::time_point shown_end_time = std::chrono::steady_clock::now();
+  Trace::EventHide(std::chrono::duration_cast<std::chrono::milliseconds>(shown_end_time - shown_start_time).count());
 }
 
 D2DOverlayWindow::~D2DOverlayWindow() {

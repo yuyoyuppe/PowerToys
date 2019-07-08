@@ -64,7 +64,6 @@ void OverlayWindow::on_held() {
     active_window = nullptr;
   }
   winkey_popup->show(active_window);
-  Trace::EventShow();
 }
 
 void OverlayWindow::on_held_press(DWORD vkCode) {
