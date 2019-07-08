@@ -225,6 +225,7 @@ void D2DOverlayWindow::show(HWND active_window) {
   shown_start_time = std::chrono::steady_clock::now();
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
+  key_pressed.clear();
   Trace::EventShow();
 }
 
@@ -319,6 +320,7 @@ void D2DOverlayWindow::animate(int vk_code, int offset) {
   std::unique_lock lock(mutex);
   animation.animation.reset(0.1, 0, 1);
   key_animations.push_back(animation);
+  key_pressed.push_back(vk_code);
 }
 
 void D2DOverlayWindow::on_show() { 
@@ -334,7 +336,8 @@ void D2DOverlayWindow::on_hide() {
     DwmUnregisterThumbnail(thumbnail);
   }
   std::chrono::steady_clock::time_point shown_end_time = std::chrono::steady_clock::now();
-  Trace::EventHide(std::chrono::duration_cast<std::chrono::milliseconds>(shown_end_time - shown_start_time).count());
+  Trace::EventHide(std::chrono::duration_cast<std::chrono::milliseconds>(shown_end_time - shown_start_time).count(), key_pressed);
+  key_pressed.clear();
 }
 
 D2DOverlayWindow::~D2DOverlayWindow() {

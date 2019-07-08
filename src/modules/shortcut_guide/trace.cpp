@@ -25,11 +25,22 @@ void Trace::EventShow() {
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
 }
 
-void Trace::EventHide(const __int64 duration_ms) {
+void Trace::EventHide(const __int64 duration_ms, std::vector<int> &key_pressed) {
+  std::string vk_codes;
+  std::vector<int>::iterator it;
+  for (it = key_pressed.begin(); it != key_pressed.end(); ) {
+    vk_codes += std::to_string(*it);
+    if (++it != key_pressed.end()) {
+      vk_codes += " ";
+    }
+  }
+
   TraceLoggingWrite(
     g_hProvider,
     "ShortcutGuide::Event::HideGuide",
     TraceLoggingInt64(duration_ms, "Duration in ms"),
+    TraceLoggingInt64(key_pressed.size(), "# of key pressed"),
+    TraceLoggingString(vk_codes.c_str(), "list of key pressed"),
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));

@@ -57,6 +57,7 @@ private:
   bool visible = false;
   bool running = true;
   std::vector<AnimateKeys> key_animations;
+  std::vector<int> key_pressed;
   std::vector<MonitorInfo> monitors;
   MonitorInfo total_monitor;
   int monitor_dx = 0, monitor_dy = 0;
