@@ -48,8 +48,9 @@ D2DOverlaySVG& D2DOverlaySVG::find_window_group(const std::wstring& id) {
 }
 
 ScaleResult D2DOverlaySVG::get_thumbnail_rect_and_scale(int x_offset, int y_offset, int window_cx, int window_cy, float fill) {
-  if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0)
+  if (thumbnail_bottom_right.x == 0 && thumbnail_bottom_right.y == 0) {
     return {};
+  }
   int thumbnail_scaled_rect_width = thumbnail_scaled_rect.right - thumbnail_scaled_rect.left;
   int thumbnail_scaled_rect_heigh = thumbnail_scaled_rect.bottom - thumbnail_scaled_rect.top;
   if (thumbnail_scaled_rect_heigh == 0 || thumbnail_scaled_rect_width == 0 ||
@@ -77,8 +78,9 @@ winrt::com_ptr<ID2D1SvgElement> D2DOverlaySVG::find_element(const std::wstring& 
 }
 
 D2DOverlaySVG& D2DOverlaySVG::toggle_window_group(bool active) {
-  if (window_group)
+  if (window_group) {
     window_group->SetAttributeValue(L"fill-opacity", active ? 1.0f : 0.3f);
+  }
   return *this;
 }
 
@@ -230,8 +232,9 @@ void D2DOverlayWindow::animate(int vk_code) {
   animate(vk_code, 0);
 }
 void D2DOverlayWindow::animate(int vk_code, int offset) {
-  if (!initialized || !use_overlay)
+  if (!initialized || !use_overlay) {
     return;
+  }
   bool done = false;
   for (auto& animation : key_animations) {
     if (animation.vk_code == vk_code) {
@@ -239,8 +242,9 @@ void D2DOverlayWindow::animate(int vk_code, int offset) {
       done = true;
     }
   }
-  if (done)
+  if (done) {
     return;
+  }
   AnimateKeys animation;
   std::wstring id;
   animation.vk_code = vk_code;
@@ -288,19 +292,26 @@ void D2DOverlayWindow::animate(int vk_code, int offset) {
       return;
     }
   }
-  if (offset > 0)
+
+  if (offset > 0) {
     id += L"_" + std::to_wstring(offset);
+  }
   button_letter = use_overlay->find_element(id);
-  if (!button_letter) return;
+  if (!button_letter) {
+    return;
+  }
   button_letter->GetParent(parrent.put());
-  if (!parrent) return;
+  if (!parrent) {
+    return;
+  }
   parrent->GetPreviousChild(button_letter.get(), animation.button.put());
   if (!animation.button || !animation.button->IsAttributeSpecified(L"fill")) {
     animation.button = nullptr;
     parrent->GetNextChild(button_letter.get(), animation.button.put());
   }
-  if (!animation.button || !animation.button->IsAttributeSpecified(L"fill"))
+  if (!animation.button || !animation.button->IsAttributeSpecified(L"fill")) {
     return;
+  }
   winrt::com_ptr<ID2D1SvgPaint> paint;
   animation.button->GetAttributeValue(L"fill", paint.put());
   paint->GetColor(&animation.original);
@@ -424,16 +435,18 @@ void render_arrow(D2DSVG& arrow, TasklistButton& button, RECT window, float max_
 }
 
 bool D2DOverlayWindow::show_thumbnail(const RECT& rect, double alpha) {
-  if (!thumbnail)
+  if (!thumbnail) {
     return false;
+  }
   DWM_THUMBNAIL_PROPERTIES thumb_properties;
   thumb_properties.dwFlags = DWM_TNP_SOURCECLIENTAREAONLY | DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION | DWM_TNP_OPACITY;
   thumb_properties.fSourceClientAreaOnly = FALSE;
   thumb_properties.fVisible = TRUE;
   thumb_properties.opacity = (BYTE)(255*alpha);
   thumb_properties.rcDestination = rect;
-  if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK)
+  if (DwmUpdateThumbnailProperties(thumbnail, &thumb_properties) != S_OK) {
     return false;
+  }
   return true;
 }
 
@@ -495,8 +508,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     thumb_window->top += dy;
     thumb_window->bottom -= dy;
   }
-  if (minature_shown && thumb_window->right - thumb_window->left <= 0 || thumb_window->bottom - thumb_window->top <= 0)
+  if (minature_shown && thumb_window->right - thumb_window->left <= 0 || thumb_window->bottom - thumb_window->top <= 0) {
     minature_shown = false;
+  }
   bool render_monitors = true;
   auto total_monitor_with_screen = total_monitor;
   if (thumb_window) {
@@ -510,8 +524,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
       total_monitor_with_screen.height() - total_monitor.height() > (thumb_window->bottom - thumb_window->top) / 2) {
     render_monitors = false;
   }
-  if (window_state == MINIMIZED)
+  if (window_state == MINIMIZED) {
     total_monitor_with_screen = total_monitor;
+  }
   auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor_with_screen.width(), total_monitor_with_screen.height(), 1);
   if (minature_shown) {
     RECT thumbnail_pos;
@@ -529,8 +544,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   } else {
     hide_thumbnail();
   }
-  if (window_state == MINIMIZED)
+  if (window_state == MINIMIZED) {
     render_monitors = true;
+  }
   // render the monitors
   if (render_monitors) {
     brushColor = D2D1::ColorF(colors.desktop_fill_color, minature_shown ? current_anim_value : current_anim_value * 0.3f);
@@ -666,9 +682,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   text.set_aligment_left().write(d2d_dc, text_color, use_overlay->get_snap_right(), right);
   // ... and the arrows with numbers
   for (auto&& button : tasklist_buttons) {
-    if ((unsigned)button.keynum - 1 >= arrows.size())
+    if ((unsigned)button.keynum - 1 >= arrows.size()) {
       continue;
+    }
     render_arrow(arrows[button.keynum - 1], button, window_rect, use_overlay->get_scale(), d2d_dc);
   }
-
 }

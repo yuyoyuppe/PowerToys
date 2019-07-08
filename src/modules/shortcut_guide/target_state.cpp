@@ -17,8 +17,9 @@ bool TargetState::signal_event(unsigned vk_code, bool key_down) {
     state = Hidden;
     return false;
   }
-  if (!events.empty() && events.back().key_down == key_down && events.back().vk_code == vk_code)
+  if (!events.empty() && events.back().key_down == key_down && events.back().vk_code == vk_code) {
     return false;
+  }
   bool supress = false;
   if (!key_down && (vk_code == VK_LWIN || vk_code == VK_RWIN) &&
     state == Shown &&
@@ -80,13 +81,16 @@ void TargetState::handle_hidden() {
 
 void TargetState::handle_shown() {
   std::unique_lock lock(mutex);
-  if (events.empty())
+  if (events.empty()) {
     cv.wait(lock);
-  if (events.empty() || state == Exiting)
+  }
+  if (events.empty() || state == Exiting) {
     return;
+  }
   auto event = next();
-  if (event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN))
+  if (event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN)) {
     return;
+  }
   if (!event.key_down && (event.vk_code == VK_LWIN || event.vk_code == VK_RWIN) || !winkey_held()) {
     state = Hidden;
     lock.unlock();
