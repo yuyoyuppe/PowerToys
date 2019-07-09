@@ -32,6 +32,8 @@
             Control="Finish"
             Event="DoAction"
             Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogCancelled">1</Publish>
+      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogFailed">1</Publish>
     </UI>
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Bitmaps\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
@@ -58,11 +60,6 @@
       <Custom Action="TelemetryLogUninstalled" After="InstallFinalize">
         Installed and (NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")
       </Custom>
-
-      <!-- The two following actions are not triggered, a problem that may be
-           happening because we use the default dialogs for Cancel and Error -->
-      <Custom Action="TelemetryLogCancelled" OnExit="cancel">1</Custom>
-      <Custom Action="TelemetryLogFailed" OnExit="error">1</Custom>
     </InstallExecuteSequence>
 
     <CustomAction Id="SetRegisterPowerToysSchTaskParam"
