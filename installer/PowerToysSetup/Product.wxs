@@ -130,8 +130,10 @@
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="ModulesInstallFolder" FileSource="$(var.runner.TargetDir)\modules\">
-      <Component Id="PowerToysModules" Guid="a983f9d8-e7d6-4b10-a8a9-679cb3465398" Win64="yes">
+      <Component Id="Module_MTND" Guid="a983f9d8-e7d6-4b10-a8a9-679cb3465398" Win64="yes">
         <File Source="$(var.runner.TargetDir)\modules\maximize_to_new_desktop.dll" />
+      </Component>
+      <Component Id="Module_ShortcutGuide" Guid="cbd0ac09-91d3-428e-b2b3-05745adf3473" Win64="yes">
         <File Source="$(var.runner.TargetDir)\modules\shortcut_guide.dll" />
       </Component>
     </DirectoryRef>
@@ -182,7 +184,8 @@
       <ComponentRef Id="powertoys_exe" />
       <ComponentRef Id="License_rtf" />
       <ComponentRef Id="PowerToysSvgs" />
-      <ComponentRef Id="PowerToysModules" />
+      <ComponentRef Id="Module_MTND" />
+      <ComponentRef Id="Module_ShortcutGuide" />
       <ComponentRef Id="ApplicationShortcut" />
       <ComponentRef Id="DesktopShortcut" />
 		</ComponentGroup>
