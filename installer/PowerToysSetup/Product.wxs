@@ -32,8 +32,10 @@
             Control="Finish"
             Event="DoAction"
             Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
-      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogCancelled">1</Publish>
-      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogFailed">1</Publish>
+      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogInstallCancel">NOT Installed</Publish>
+      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogInstallFail">NOT Installed</Publish>
+      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallCancel">Installed</Publish>
+      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallFail">Installed</Publish>
     </UI>
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Bitmaps\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
@@ -54,10 +56,10 @@
       <Custom Action="RemovePowerToysSchTasks" After="RemoveFiles">
         Installed and (NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")
       </Custom>
-      <Custom Action="TelemetryLogInstalled" After="InstallFinalize">
+      <Custom Action="TelemetryLogInstallSuccess" After="InstallFinalize">
         NOT Installed
       </Custom>
-      <Custom Action="TelemetryLogUninstalled" After="InstallFinalize">
+      <Custom Action="TelemetryLogUninstallSuccess" After="InstallFinalize">
         Installed and (NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")
       </Custom>
     </InstallExecuteSequence>
@@ -84,32 +86,46 @@
                   DllEntry="RemoveScheduledTasksCA"
                    />
 
-    <CustomAction Id="TelemetryLogInstalled"
+    <CustomAction Id="TelemetryLogInstallSuccess"
                   Return="ignore"
                   Impersonate="yes"
                   BinaryKey="PTCustomActions"
-                  DllEntry="TelemetryLogInstalledCA"
+                  DllEntry="TelemetryLogInstallSuccessCA"
                    />
 
-    <CustomAction Id="TelemetryLogUninstalled"
+    <CustomAction Id="TelemetryLogInstallCancel"
                   Return="ignore"
                   Impersonate="yes"
                   BinaryKey="PTCustomActions"
-                  DllEntry="TelemetryLogUninstalledCA"
+                  DllEntry="TelemetryLogInstallCancelCA"
                    />
 
-    <CustomAction Id="TelemetryLogCancelled"
+    <CustomAction Id="TelemetryLogInstallFail"
                   Return="ignore"
                   Impersonate="yes"
                   BinaryKey="PTCustomActions"
-                  DllEntry="TelemetryLogCancelledCA"
+                  DllEntry="TelemetryLogInstallFailCA"
                    />
 
-    <CustomAction Id="TelemetryLogFailed"
+    <CustomAction Id="TelemetryLogUninstallSuccess"
                   Return="ignore"
                   Impersonate="yes"
                   BinaryKey="PTCustomActions"
-                  DllEntry="TelemetryLogFailedCA"
+                  DllEntry="TelemetryLogUninstallSuccessCA"
+                   />
+
+    <CustomAction Id="TelemetryLogUninstallCancel"
+                  Return="ignore"
+                  Impersonate="yes"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="TelemetryLogUninstallCancelCA"
+                   />
+
+    <CustomAction Id="TelemetryLogUninstallFail"
+                  Return="ignore"
+                  Impersonate="yes"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="TelemetryLogUninstallFailCA"
                    />
     
     <!-- Close 'powertoys.exe' before uninstall-->

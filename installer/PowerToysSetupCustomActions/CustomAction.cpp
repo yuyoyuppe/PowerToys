@@ -358,16 +358,16 @@ LExit:
   return WcaFinalize(er);
 }
 
-UINT __stdcall TelemetryLogInstalledCA(MSIHANDLE hInstall) {
+UINT __stdcall TelemetryLogInstallSuccessCA(MSIHANDLE hInstall) {
   HRESULT hr = S_OK;
   UINT er = ERROR_SUCCESS;
 
-  hr = WcaInitialize(hInstall, "TelemetryLogInstalledCA");
+  hr = WcaInitialize(hInstall, "TelemetryLogInstallSuccessCA");
   ExitOnFailure(hr, "Failed to initialize");
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Application::Installed",
+    "MSI::Install::Success",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -377,16 +377,16 @@ LExit:
   return WcaFinalize(er);
 }
 
-UINT __stdcall TelemetryLogUninstalledCA(MSIHANDLE hInstall) {
+UINT __stdcall TelemetryLogInstallCancelCA(MSIHANDLE hInstall) {
   HRESULT hr = S_OK;
   UINT er = ERROR_SUCCESS;
 
-  hr = WcaInitialize(hInstall, "TelemetryLogUninstalledCA");
+  hr = WcaInitialize(hInstall, "TelemetryLogInstallCancelCA");
   ExitOnFailure(hr, "Failed to initialize");
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Application::Uninstalled",
+    "MSI::Install::Cancel",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -396,16 +396,16 @@ LExit:
   return WcaFinalize(er);
 }
 
-UINT __stdcall TelemetryLogCancelledCA(MSIHANDLE hInstall) {
+UINT __stdcall TelemetryLogInstallFailCA(MSIHANDLE hInstall) {
   HRESULT hr = S_OK;
   UINT er = ERROR_SUCCESS;
 
-  hr = WcaInitialize(hInstall, "TelemetryLogCancelledCA");
+  hr = WcaInitialize(hInstall, "TelemetryLogInstallFailCA");
   ExitOnFailure(hr, "Failed to initialize");
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Install::Cancelled",
+    "MSI::Install::Fail",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -415,16 +415,54 @@ LExit:
   return WcaFinalize(er);
 }
 
-UINT __stdcall TelemetryLogFailedCA(MSIHANDLE hInstall) {
+UINT __stdcall TelemetryLogUninstallSuccessCA(MSIHANDLE hInstall) {
   HRESULT hr = S_OK;
   UINT er = ERROR_SUCCESS;
 
-  hr = WcaInitialize(hInstall, "TelemetryLogFailedCA");
+  hr = WcaInitialize(hInstall, "TelemetryLogUninstallSuccessCA");
   ExitOnFailure(hr, "Failed to initialize");
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Install::Failed",
+    "MSI::Uninstall::Success",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogUninstallCancelCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogUninstallCancelCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Uninstall::Cancel",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogUninstallFailCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogUninstallFailCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Uninstall::Fail",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
