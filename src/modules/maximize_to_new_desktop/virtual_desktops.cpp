@@ -10,7 +10,8 @@
 const CLSID CLSID_ImmersiveShell = { 0xC2F03A33, 0x21F5, 0x47FA, 0xB4, 0xBB, 0x15, 0x63, 0x62, 0xA2, 0xF2, 0x39 };
 const CLSID CLSID_VirtualDesktopAPI_Unknown = { 0xC5E0CDCA, 0x7B6E, 0x41B2, 0x9F, 0xC4, 0xD9, 0x39, 0x75, 0xCC, 0x46, 0x7B };
 const CLSID CLSID_IVirtualDesktopManagerInternal = { 0xF31574D6, 0xB682, 0x4CDC, 0xBD, 0x56, 0x18, 0x27, 0x86, 0x0A, 0xBE, 0xC6 };
-const CLSID CLSID_IApplicationViewCollection = { 0x1841C6D7, 0x4F9D, 0x42C0, 0xAF, 0x41, 0x87, 0x47, 0x53, 0x8F, 0x10, 0xE5 };
+const CLSID CLSID_IApplicationViewCollection_1809 = { 0x1841C6D7, 0x4F9D, 0x42C0, 0xAF, 0x41, 0x87, 0x47, 0x53, 0x8F, 0x10, 0xE5 };
+const CLSID CLSID_IApplicationViewCollection_1803 = { 0x2C08ADF0, 0xA386, 0x4B35, 0x92, 0x50, 0x0F, 0xE1, 0x83, 0x47, 0x6F, 0xCC};
 const CLSID CLSID_IVirtualNotificationService = { 0xA501FDEC, 0x4A09, 0x464C, 0xAE, 0x4E, 0x1B, 0x9C, 0x21, 0xB8, 0x49, 0x18 };
 
 EXTERN_C const IID IID_IApplicationView;
@@ -174,7 +175,12 @@ namespace {
     auto provider = get_service_provider();
     static winrt::com_ptr<IApplicationViewCollection> collection;
     if (!collection) {
-      winrt::check_hresult(provider->QueryService(CLSID_IApplicationViewCollection, __uuidof(collection), collection.put_void()));
+      auto result = provider->QueryService(CLSID_IApplicationViewCollection_1809, CLSID_IApplicationViewCollection_1809, collection.put_void());
+      // Windows 1803 had different GUID for that interface
+      if (result < 0) {
+        result = provider->QueryService(CLSID_IApplicationViewCollection_1803, CLSID_IApplicationViewCollection_1803, collection.put_void());
+      }
+      winrt::check_hresult(result);
     }
     return collection.get();
   }
