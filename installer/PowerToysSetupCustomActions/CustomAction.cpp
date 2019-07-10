@@ -472,6 +472,44 @@ LExit:
   return WcaFinalize(er);
 }
 
+UINT __stdcall TelemetryLogRepairCancelCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogRepairCancelCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Repair::Cancel",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
+UINT __stdcall TelemetryLogRepairFailCA(MSIHANDLE hInstall) {
+  HRESULT hr = S_OK;
+  UINT er = ERROR_SUCCESS;
+
+  hr = WcaInitialize(hInstall, "TelemetryLogRepairFailCA");
+  ExitOnFailure(hr, "Failed to initialize");
+
+  TraceLoggingWrite(
+    g_hProvider,
+    "MSI::Repair::Fail",
+    ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
+    TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
+    TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+
+LExit:
+  er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+  return WcaFinalize(er);
+}
+
 // DllMain - Initialize and cleanup WiX custom action utils.
 extern "C" BOOL WINAPI DllMain(__in HINSTANCE hInst, __in ULONG ulReason, __in LPVOID) {
   switch (ulReason) {

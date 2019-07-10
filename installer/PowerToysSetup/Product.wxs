@@ -32,10 +32,13 @@
             Control="Finish"
             Event="DoAction"
             Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Property="_REMOVE_ALL" Value="Yes">1</Publish>
       <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogInstallCancel">NOT Installed</Publish>
       <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogInstallFail">NOT Installed</Publish>
-      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallCancel">Installed</Publish>
-      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallFail">Installed</Publish>
+      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallCancel">Installed AND _REMOVE_ALL="Yes"</Publish>
+      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogUninstallFail">Installed AND _REMOVE_ALL="Yes"</Publish>
+      <Publish Dialog="UserExit" Control="Finish" Event="DoAction" Value="TelemetryLogRepairCancel">Installed AND NOT (_REMOVE_ALL="Yes")</Publish>
+      <Publish Dialog="FatalError" Control="Finish" Event="DoAction" Value="TelemetryLogRepairFail">Installed AND NOT (_REMOVE_ALL="Yes")</Publish>
     </UI>
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Bitmaps\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Bitmaps\dialog.bmp" />
@@ -128,6 +131,20 @@
                   DllEntry="TelemetryLogUninstallFailCA"
                    />
     
+    <CustomAction Id="TelemetryLogRepairCancel"
+                  Return="ignore"
+                  Impersonate="yes"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="TelemetryLogRepairCancelCA"
+                   />
+
+    <CustomAction Id="TelemetryLogRepairFail"
+                  Return="ignore"
+                  Impersonate="yes"
+                  BinaryKey="PTCustomActions"
+                  DllEntry="TelemetryLogRepairFailCA"
+                   />
+
     <!-- Close 'powertoys.exe' before uninstall-->
     <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
     <util:CloseApplication CloseMessage="yes" Target="powertoys.exe" ElevatedCloseMessage="yes" RebootPrompt="no" TerminateProcess="0" />

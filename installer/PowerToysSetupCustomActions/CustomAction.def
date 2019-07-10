@@ -9,3 +9,5 @@ EXPORTS
 	TelemetryLogUninstallSuccessCA
 	TelemetryLogUninstallCancelCA
 	TelemetryLogUninstallFailCA
+	TelemetryLogRepairCancelCA
+	TelemetryLogRepairFailCA
