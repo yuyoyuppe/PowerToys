@@ -3,7 +3,7 @@
 #include "common/start_visible.h"
 #include "keyboard_state.h"
 
-TargetState::TargetState() : thread(&TargetState::thread_proc, this)
+TargetState::TargetState(int ms_delay) : delay(std::chrono::milliseconds(ms_delay)), thread(&TargetState::thread_proc, this)
 { }
 
 bool TargetState::signal_event(unsigned vk_code, bool key_down) {
@@ -123,7 +123,6 @@ void TargetState::thread_proc() {
 }
 
 void TargetState::handle_timeout() {
-  std::pair pair(2, true);
   std::unique_lock lock(mutex);
   auto wait_time = delay - (std::chrono::system_clock::now() - winkey_timestamp);
   if (events.empty())

@@ -8,17 +8,14 @@ bool winkey_held() {
 }
 
 bool only_winkey_key_held() {
-  BYTE keys_state[256];
-  memset(keys_state, 0, 256);
-  GetKeyboardState(keys_state);
+  /* There are situations, when some of the keys are not registered correctly by
+     GetKeyboardState. The M key can get stuck as "pressed" after Win+M, and
+     Shift etc. keys are not always reported as expected.
+  */
   for (int vk = 0; vk < 256; ++vk) {
     if (vk == VK_LWIN || vk == VK_RWIN)
       continue;
-    auto key_held = keys_state[vk] & 0x80; // test high bit
-    // Pressing WinKey + M can get M key stuck in "pressed" state
-    if (key_held)
-      key_held = GetAsyncKeyState(vk) & 0x8000;
-    if (key_held)
+    if (GetAsyncKeyState(vk) & 0x8000)
       return false;
   }
   return true;

@@ -5,7 +5,7 @@
 
 OverlayWindow* instance = nullptr;
 
-OverlayWindow::OverlayWindow() : winkey_popup(new D2DOverlayWindow()), target_state(new TargetState()) {
+OverlayWindow::OverlayWindow() : winkey_popup(new D2DOverlayWindow()), target_state(new TargetState(300)) {
   winkey_popup->initialize();
   desktop = GetDesktopWindow();
   shell = GetShellWindow();

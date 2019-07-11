@@ -13,7 +13,7 @@ struct KeyEvent {
 
 class TargetState {
 public:
-  TargetState();
+  TargetState(int ms_delay);
   bool signal_event(unsigned vk_code, bool key_down);
   void was_hiden();
   void exit();
