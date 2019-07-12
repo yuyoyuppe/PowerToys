@@ -8,5 +8,9 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="trace.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="example_powertoy.rc" />
   </ItemGroup>
 </Project>

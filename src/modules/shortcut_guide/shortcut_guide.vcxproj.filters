@@ -36,6 +36,7 @@
     <ClInclude Include="trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -44,5 +45,8 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{aa4b6713-589d-42ef-804d-3a045833f83f}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="shortcut_guide.rc" />
   </ItemGroup>
 </Project>

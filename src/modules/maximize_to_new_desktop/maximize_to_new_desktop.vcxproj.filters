@@ -36,6 +36,7 @@
     <ClInclude Include="trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -44,5 +45,8 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{5fe85b0e-dca4-4211-ac18-291f58f40a56}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="maximize_to_new_desktop.rc" />
   </ItemGroup>
 </Project>
