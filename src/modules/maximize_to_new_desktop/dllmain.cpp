@@ -82,7 +82,7 @@ void on_mouse_out() {
 
 MTNDPowertoy::MTNDPowertoy() {
   maximize_popup = new D2DWindowManagerPopup();
-  start_mouse_watcher(300, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
+  start_mouse_watcher(400, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
 }
 
 
