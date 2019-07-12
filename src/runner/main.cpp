@@ -1,9 +1,10 @@
 #include "pch.h"
-#include "tray_icon.h"
 #include <ShellScalingApi.h>
+#include <lmcons.h>
+#include <filesystem>
+#include "tray_icon.h"
 #include "powertoy_module.h"
 #include "lowlevel_keyboard_event.h"
-#include <filesystem>
 #include "trace.h"
 
 #if _DEBUG && _WIN64
@@ -21,6 +22,16 @@ void chdir_current_executable() {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  WCHAR username[UNLEN + 1];
+  DWORD username_length = UNLEN + 1;
+  GetUserNameW(username, &username_length);
+  auto runner_mutex = CreateMutexW(NULL, TRUE, (std::wstring(L"Local\\PowerToyRunMutex") + username).c_str());
+  if (runner_mutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
+    // The app is already running
+    return 0;
+  }
+  
+
   #if _DEBUG && _WIN64
   //Global error handlers to diagnose errors.
   //We prefer this not not show any longer until there's a bug to diagnose.
