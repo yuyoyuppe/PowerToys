@@ -1,23 +1,113 @@
-# PowerToys
 
-Two toys improving Windows experience:
-  * When WinKey is held for more than 300ms an overlay is displayed showing various keyboard shortcuts.
-  * Hovering with the mouse over maximize button displays popup window with extra options: for starters "maximize to new desktop".
+# Overview
 
-## Build instructions
-  * Use Visual Studio 2017, with Visual C++ features and `Windows 10 SDK (10.0.17763.0)` installed.
-  * Open `powertoys.sln` in Visual Studio and build the `powertoys` project. PowerToys require admin privileges to run. In order to run and debug it from Visual Studio, it has to be started with elevated privileges.
-  * For debugging outside of Visual Studio, copy the `svgs` folder from `src/runner/svgs` to the same path as `powertoys.exe`.
+PowerToys is a set of utilities for power users to tune and streamline their Windows experience for greater productivity.  
 
-### Building the installer
-  * Detailed instructions in the [PowerToysSetup project README.](installer/PowerToysSetup/README.md)
+Inspired by the [Windows 95 era PowerToys project](https://en.wikipedia.org/wiki/Microsoft_PowerToys), this reboot provides power users with ways to squeeze more efficiency out of the Windows 10 shell and customize it for individual workflows.  A great overview of the Windows 95 PowerToys can be found [here](https://socket3.wordpress.com/2016/10/22/using-windows-95-powertoys/).
 
-## Creating new PowerToys
+The first preview of these utilities and corresponding source code will be released Summer 2019.
 
-To create a new PowerToy:
+![logo](doc/images/Logo.jpg)
 
-  * Install the [PowerToy Module project template](tools/project_template)
-  * Add a new `PowerToy Module` project under `src/modules`,
-  * Take a look at [the interface](src/modules/interface/powertoy_module_interface.h) and
-    [the example PowerToy implementation](src/modules/example_powertoy/dllmain.cpp),
-  * Each PowerToy is built as a DLL and in order to be loaded at run-time, the PowerToy's dll name needs to be added to the know_dlls map in the [src/runner/main.cpp](src/runner/main.cpp).
+# What's Happening
+
+## June Update
+Since the announcement of the PowerToys reboot at BUILD, the interest in the project has been incredible to see.  Due to the excitement we are optimizing the first preview to make it easy to integrate new utilities into the repo.  We also have two interns working on additional PowerToys.  The specs for these are:
+
+* [Process terminate tool](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/Terminate%20Spec.md)
+* [Batch file renamer](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/File%20Classification%20Spec.md)
+* [Animated gif screen recorder](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/GIF%20Maker%20Spec.md)
+
+Finally, we are organizing a team to productize an internal window manager into the PowerToys project for the 2019 [One Week Hackathon](https://www.onmsft.com/news/take-a-peek-inside-microsofts-recent-one-week-hackathon).
+
+We are still targeting to release the preview and code during Summer 2019.
+
+## The first two utilities we're working on are:
+
+1. Maximize to new desktop widget - The MTND widget shows a pop-up button when a user hovers over the maximize / restore button on any window.  Clicking it creates a new desktop, sends the app to that desktop and maximizes the app on the new desktop.
+
+![Maximize to new desktop widget](doc/images/MTNDWidget.jpg)
+
+2. Windows key shortcut guide - The shortcut guide appears when a user holds the Windows key down for more than one second and shows the available shortcuts for the current state of the desktop.
+
+![Windows key shortcut guide](doc/images/WindowsKeyShortcutGuide.jpg)
+
+# Backlog
+
+Here's the current set of utilities we're considering.  Please use issues and +1's to guide the project to suggest new ideas and help us prioritize the list below.
+
+1. [Full window manager including specific layouts for docking and undocking laptops](https://github.com/microsoft/PowerToys/issues/4)
+2. [Keyboard shortcut manager](https://github.com/microsoft/PowerToys/issues/6)
+3. [Win+R replacement](https://github.com/microsoft/PowerToys/issues/44)
+4. Better Alt+Tab including browser tab integration and search for running apps
+5. [Battery tracker](https://github.com/microsoft/PowerToys/issues/7)
+6. [Batch file re-namer](https://github.com/microsoft/PowerToys/issues/101)
+7. [Quick resolution swaps in taskbar](https://github.com/microsoft/PowerToys/issues/27)
+8. Mouse events without focus
+9. Cmd (or PS or Bash) from here
+10. Contents menu file browsing
+
+# Developer Guidance
+
+## Build Prerequisites
+ * Windows 10 1903 (build 10.0.18362.0) or above in order to build and run PowerToys.
+ * Visual Studio 2017 Community version 15.9.12 or higher, with the 'Desktop Development with C++' component and the Windows 10 SDK version 10.0.17763.0.
+ 
+ ### Prerequisites to Build the Installer
+  * Install the [WiX Toolset Visual Studio 2017 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
+  * Install the [WiX Toolset build tools](https://wixtoolset.org/releases/).
+ 
+## Building the Code
+ * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop down menu select `Release` and in the `Solution Platforms` drop down menu select `x64`. In the `Solution Explorer` expand the `powertoys` folder and right click the `runnner` project and select the `Build` command (this will built the PowerToys modules and the PowerToys executable but not the installer).
+ * The PowerToys binary will be be located in your repo root under `x64\Release`.
+ * If you want to copy the `powertoys.exe` binary to a different location, you also need to copy the `modules` and the `svgs` folders.
+
+## Building the .msi Installer
+  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop down menu select `Release` and in the `Solution Platforms` drop down menu select `x64` and build the `PowerToysSetup` project or the `powertoys` solution.
+  * The resulting `PowerToysSetup.msi` installer will be available in the `installer\PowerToysSetup\bin\Release\` folder.
+
+## Debugging
+  The following configuration issue only applies if the user is a member of the Administrators group.
+  
+  Some PowerToys modules require to run with the highest permission level available for the current user if the user is a member of the Administrators group. The highest permission level is required in order to be able to perform some actions when an elevated application is in the foreground or is the target of an action (e.g. the Task Manager is running as elevated process if the user is a member of the Administrators group). Without elevated privileges some PowerToys modules will still work but with some limitations:
+ - the `Maximize to New Desktop` module will be able to move an elevated window to a new desktop but it will not be able to maximize it.
+ - the `Shortcut Guide` module will not appear if the foreground window belongs to an elevated application.
+ 
+ In order to run and debug PowerToys from Visual Studio when the user is a member of the Administrators group, Visual Studio has to be started with elevated privileges. It is possible to change this requirement by editing the settings of the `runner` project:
+ open the `runner` project properties and navigate to the `Linker -> Manifest File` settings, edit the `UAC Execution Level` property and change it from `highestAvailable (/level='highestAvailable')` to `asInvoker (/level='asInvoker')`, save the changes and you will be able to debug PowerToys without running Visual Studio with elevated privileges, with the previously described limitations for some PowerToy modules.
+ 
+ For debugging outside of Visual Studio, copy the `svgs` folder from `src\runner\svgs` to the same path as `powertoys.exe`, you will also need to create the `modules` folder and copy the modules DLLs.
+
+## How to create new PowerToys
+
+Install the [PowerToy Module project template and follow the instructions.](tools/project_template)
+
+  
+## Coding Guidance
+
+Please review these brief docs below relating to our coding standards etc.
+
+> 👉 If you find something missing from these docs, feel free to contribute to any of our documentation files anywhere in the repository (or make some new ones\!)
+
+This is a work in progress as we learn what we'll need to provide people in order to be effective contributors to our project.
+- [Coding Style](doc/coding/style.md)
+- [Code Organization](doc/coding/organization.md)
+
+# Contributing
+
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.microsoft.com.
+
+When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
+a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
+provided by the bot. You will only need to do this once across all repos using our CLA.
+
+# Code of Conduct
+
+This project has adopted the [Microsoft Open Source Code of Conduct][conduct-code].
+For more information see the [Code of Conduct FAQ][conduct-FAQ] or contact [opencode@microsoft.com][conduct-email] with any additional questions or comments.
+
+[conduct-code]: https://opensource.microsoft.com/codeofconduct/
+[conduct-FAQ]: https://opensource.microsoft.com/codeofconduct/faq/
+[conduct-email]: mailto:opencode@microsoft.com
