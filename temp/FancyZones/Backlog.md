@@ -11,11 +11,11 @@ Handle work area changes better somehow [135](https://github.com/JaneaSystems/po
 Streamline the win+~ experience for choosing a layout and applying that layout automatically to open windows [155](https://github.com/JaneaSystems/powertoys/issues/155)  
 Make a good vertical 50/50 layout [129](https://github.com/JaneaSystems/powertoys/issues/129)  
 Change editing mode to use windows instead of custom rectangles [154](https://github.com/JaneaSystems/powertoys/issues/154)  
+
+## Backlog
 Cycle through windows in a Zone [145](https://github.com/JaneaSystems/powertoys/issues/145)  
 Hitting Esc while dragging should cancel the drag and not move the window into a zone [140](https://github.com/JaneaSystems/powertoys/issues/140)  
 Flash Zones is wayyyy too slow with multiple large monitors [137](https://github.com/JaneaSystems/powertoys/issues/137)  
-
-## v2
 Automatically move windows into previous zone based on appid [126](https://github.com/JaneaSystems/powertoys/issues/126)  
 Create layout from current windows [127](https://github.com/JaneaSystems/powertoys/issues/127)  
 Zone sets that have a dynamic number of zones [128](https://github.com/JaneaSystems/powertoys/issues/128)  
