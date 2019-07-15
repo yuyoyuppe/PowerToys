@@ -58,29 +58,26 @@ Here's the current set of utilities we're considering.  Please use issues and +1
   * Install the [WiX Toolset build tools](https://wixtoolset.org/releases/).
  
 ## Building the Code
- * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop down menu select `Release` and in the `Solution Platforms` drop down menu select `x64`. In the `Solution Explorer` expand the `powertoys` folder and right click the `runnner` project and select the `Build` command (this will built the PowerToys modules and the PowerToys executable but not the installer).
- * The PowerToys binary will be be located in your repo root under `x64\Release`.
- * If you want to copy the `powertoys.exe` binary to a different location, you also need to copy the `modules` and the `svgs` folders.
+ * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` and in the `Solution Platforms` drop-down menu select `x64`. In the `Solution Explorer` expand the `powertoys` folder and right click the `runnner` project and select the `Build` command (this will build the PowerToys modules and the PowerToys executable but not the installer).
+ * The PowerToys binaries will be located in your repo under `x64\Release`.
+ * If you want to copy the `powertoys.exe` binary to a different location, you'll also need to copy the `modules` and the `svgs` folders.
 
 ## Building the .msi Installer
-  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop down menu select `Release` and in the `Solution Platforms` drop down menu select `x64` and build the `PowerToysSetup` project or the `powertoys` solution.
+  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` and in the `Solution Platforms` drop-down menu select `x64` and build the `PowerToysSetup` project or the `powertoys` solution.
   * The resulting `PowerToysSetup.msi` installer will be available in the `installer\PowerToysSetup\bin\Release\` folder.
 
 ## Debugging
   The following configuration issue only applies if the user is a member of the Administrators group.
   
-  Some PowerToys modules require to run with the highest permission level available for the current user if the user is a member of the Administrators group. The highest permission level is required in order to be able to perform some actions when an elevated application is in the foreground or is the target of an action (e.g. the Task Manager is running as elevated process if the user is a member of the Administrators group). Without elevated privileges some PowerToys modules will still work but with some limitations:
+  Some PowerToys modules require to run with the highest permission level if the current user is a member of the Administrators group. The highest permission level is required in order to be able to perform some actions when an elevated application (e.g. Task Manager) is in the foreground or is the target of an action. Without elevated privileges some PowerToys modules will still work but with some limitations:
  - the `Maximize to New Desktop` module will be able to move an elevated window to a new desktop but it will not be able to maximize it.
  - the `Shortcut Guide` module will not appear if the foreground window belongs to an elevated application.
  
- In order to run and debug PowerToys from Visual Studio when the user is a member of the Administrators group, Visual Studio has to be started with elevated privileges. It is possible to change this requirement by editing the settings of the `runner` project:
- open the `runner` project properties and navigate to the `Linker -> Manifest File` settings, edit the `UAC Execution Level` property and change it from `highestAvailable (/level='highestAvailable')` to `asInvoker (/level='asInvoker')`, save the changes and you will be able to debug PowerToys without running Visual Studio with elevated privileges, with the previously described limitations for some PowerToy modules.
+ In order to run and debug PowerToys from Visual Studio when the user is a member of the Administrators group, Visual Studio has to be started with elevated privileges. If you want to avoid running Visual Studio with elevated privileges and don't mind the limitations described above, you can do the following: open the `runner` project properties and navigate to the `Linker -> Manifest File` settings, edit the `UAC Execution Level` property and change it from `highestAvailable (/level='highestAvailable')` to `asInvoker (/level='asInvoker')`, save the changes.
  
- For debugging outside of Visual Studio, copy the `svgs` folder from `src\runner\svgs` to the same path as `powertoys.exe`, you will also need to create the `modules` folder and copy the modules DLLs.
-
 ## How to create new PowerToys
 
-Install the [PowerToy Module project template and follow the instructions.](tools/project_template)
+See the instructions on [how to install the PowerToy Module project template](tools/project_template).
 
   
 ## Coding Guidance
