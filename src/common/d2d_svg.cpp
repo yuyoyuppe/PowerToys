@@ -43,6 +43,8 @@ D2DSVG& D2DSVG::recolor(uint32_t oldcolor, uint32_t newcolor) {
   auto new_color = D2D1::ColorF(newcolor & 0xFFFFFF, 1);
   auto old_color = D2D1::ColorF(oldcolor & 0xFFFFFF, 1);
   std::function<void(ID2D1SvgElement* element)> recurse = [&](ID2D1SvgElement* element) {
+    if (!element)
+      return;
     if (element->IsAttributeSpecified(L"fill")) {
       D2D1_COLOR_F elem_fill;
       winrt::com_ptr<ID2D1SvgPaint> paint;
@@ -80,6 +82,8 @@ D2DSVG& D2DSVG::render(ID2D1DeviceContext5* d2d_dc) {
 D2DSVG& D2DSVG::toggle_element(const wchar_t* id, bool visible) {
   winrt::com_ptr<ID2D1SvgElement> element;
   if (svg->FindElementById(id, element.put()) != S_OK)
+    return *this;
+  if (!element)
     return *this;
   element->SetAttributeValue(L"display", visible ? D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_INLINE : D2D1_SVG_DISPLAY::D2D1_SVG_DISPLAY_NONE);
   return *this;

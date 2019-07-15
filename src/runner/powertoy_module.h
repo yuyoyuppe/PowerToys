@@ -41,6 +41,8 @@ struct PowertoyModuleDLLDeleter {
 class PowertoyModule {
 public:
   PowertoyModule(PowertoyModuleIface* module, HMODULE  handle) : handle(handle), module(module) {
+    if (!module)
+      throw std::runtime_error("Module not initialized");
     name = module->get_name();
     config = module->get_config();
     auto want_signals = module->get_events();

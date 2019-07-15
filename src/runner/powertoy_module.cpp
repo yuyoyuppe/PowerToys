@@ -31,7 +31,8 @@ intptr_t PowertoysEvents::signal_event(const std::wstring & event, intptr_t data
   std::unique_lock lock(mutex);
   if (auto it = receivers.find(event); it != end(receivers)) {
     for (auto& module : it->second) {
-      rvalue |= module->signal_event(event.c_str(), data);
+      if (module)
+        rvalue |= module->signal_event(event.c_str(), data);
     }
   }
   return rvalue;

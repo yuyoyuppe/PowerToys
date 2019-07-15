@@ -24,7 +24,7 @@ void Tasklist::update() {
 }
 
 bool Tasklist::update_buttons(std::vector<TasklistButton>& buttons) {  
-  if (!automation) {
+  if (!automation || !element) {
     return false;
   }
   winrt::com_ptr<IUIAutomationElementArray> elements;

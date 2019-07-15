@@ -119,6 +119,9 @@ namespace {
   void initialize_ui_automation_strategy() {
     initialize_ui_automation();
 
+    if (!ui_automation)
+      return;
+
     if (ui_automation->CreateTrueCondition(condition_true.put()) < 0) {
       return;
     }
