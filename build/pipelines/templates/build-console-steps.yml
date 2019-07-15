@@ -1,0 +1,18 @@
+parameters:
+  additionalBuildArguments: ''
+
+steps:
+- checkout: self
+  submodules: true
+  clean: true
+
+- task: VSBuild@1
+  displayName: 'Build solution **\powertoys.sln'
+  inputs:
+    solution: '**\powertoys.sln'
+    vsVersion: 15.0
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    msbuildArgs: ${{ parameters.additionalBuildArguments }}
+    clean: true
+    maximumCpuCount: true
