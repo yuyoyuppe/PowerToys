@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\common\inc;..\..\common\Telemetry;..\..\;..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\common\inc;..\..\common\Telemetry;..\..\;..\;..\..\common\cpprestsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -84,7 +84,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\common\inc;..\..\common\Telemetry;..\..\;..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\common\inc;..\..\common\Telemetry;..\..\;..\;..\..\common\cpprestsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>

@@ -9,19 +9,30 @@ export class GeneralSettings extends React.Component <any, any> {
     this.references={};
     this.startup_reference=null;
     this.state = {
+      settings_key: props.settings_key,
       settings: props.settings,
     }
   }
-
+/*
+  static getDerivedStateFromProps(props: any, state: any) {
+    if (state.settings!=props.settings) {
+      alert('b');
+      return { settings: props.settings };
+    }
+    return null;
+  }
+*/
   public get_data(): any {
     let enabled : any = {};
     Object.keys(this.references).forEach(key => {
       enabled[key]=this.references[key].checked;
     });
-    return {
+    let result : any = {};
+    result[this.state.settings_key]= {
       startup: this.startup_reference.checked,
       enabled: enabled
     };
+    return result;
   }
 
   public render(): JSX.Element {

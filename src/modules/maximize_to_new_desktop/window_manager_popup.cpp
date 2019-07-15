@@ -258,11 +258,12 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     InvalidateRect(window, NULL, TRUE);
     return DefWindowProc(window, message, wparam, lparam);
   case WM_LBUTTONUP:
-    this_from_hwnd(window)->hide();
-    if (this_from_hwnd(window)->target_window_on_primary_desktop) {
-      move_window_to_new_desktop(this_from_hwnd(window)->target_window);
+    _this = this_from_hwnd(window);
+    _this->hide();
+    if (_this->target_window_on_primary_desktop) {
+      move_window_to_new_desktop(_this->target_window);
     } else {
-      move_window_to_primary_desktop(this_from_hwnd(window)->target_window);
+      move_window_to_primary_desktop(_this->target_window, _this->delete_after_restore);
     }
     return 0;
   case WM_MOUSEMOVE:
@@ -284,4 +285,12 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
   default:
     return DefWindowProc(window, message, wparam, lparam);
   }
+}
+
+void D2DWindowManagerPopup::set_delete_after_restore(bool value)   {
+  this->delete_after_restore = value;
+}
+
+bool D2DWindowManagerPopup::get_delete_after_restore() {
+  return this->delete_after_restore;
 }

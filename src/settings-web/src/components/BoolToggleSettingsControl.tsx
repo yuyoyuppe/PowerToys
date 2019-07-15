@@ -12,6 +12,20 @@ export class BoolToggleSettingsControl extends BaseSettingsControl {
       property_values: props.setting
     }
   }
+  /*
+  static getDerivedStateFromProps(props: any, state: any) {
+    if (state.property_values!=props.setting) {
+      alert('d');
+      return { property_values: props.setting };
+    }
+    return null;
+  }
+*/
+
+  componentWillReceiveProps(props: any) {
+    this.setState({ property_values: props.setting })
+  }
+
 
   public get_value() : any {
     return {value: this.toggleref.checked};
@@ -20,7 +34,18 @@ export class BoolToggleSettingsControl extends BaseSettingsControl {
   public render(): JSX.Element {
     return (
       <Toggle
-        defaultChecked={this.state.property_values.value}
+        onChange={
+          (_event,_check) => { 
+            this.setState( (prev_state:any) => ({
+                property_values: { 
+                  ...(prev_state.property_values),
+                  value: _check
+                }
+              })
+            );
+          }
+        }
+        checked={this.state.property_values.value}
         label={this.state.property_values.display_name}
         onText="Enabled"
         offText="Disabled"

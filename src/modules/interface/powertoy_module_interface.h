@@ -38,14 +38,21 @@ public:
      to any event.
   */
   virtual const wchar_t** get_events() = 0;
-  /* Returns the available configuration settings. */
-  virtual const wchar_t* get_config() = 0;
+  /* Fills a wchar_t* with the available configuration settings. 
+   * Returns true if successful.
+   * The wchar_t* returned must be freed through free_get_config after use.
+   */
+  virtual bool get_config(const wchar_t**) = 0;
+  /* Frees a wchar_t* returned by get_config. */
+  virtual void free_get_config(const wchar_t*) = 0;
   /* Sets the configuration values. */
   virtual void set_config(const wchar_t* config) = 0;
   /* Enables the PowerToy. */
   virtual void enable() = 0;
   /* Disables the PowerToy, should free as much memory as possible. */
   virtual void disable() = 0;
+  /* Should return if the PowerToys is enabled or disabled. */
+  virtual bool is_enabled() = 0;
   /* Handle event. Only the events the PowerToy subscribed to will be signaled.
      The data argument and return value meaning are event-specific:
        * ll_keyboard: see lowlevel_keyboard_evet_data.h.

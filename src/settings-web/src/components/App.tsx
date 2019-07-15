@@ -1,5 +1,5 @@
 import React from 'react';
-import {Stack, Text, Nav, CommandButton, DefaultButton, PrimaryButton, IconButton, ScrollablePane, INavLink} from 'office-ui-fabric-react';
+import {Stack, Text, Nav, CommandButton, DefaultButton, PrimaryButton, IconButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
 import {GeneralSettings} from './GeneralSettings';
 import {CustomSettingsScreen} from './CustomSettingsScreen';
 import '../css/layout.css';
@@ -14,71 +14,24 @@ export class App extends React.Component <any, any> {
     this.settingsscreenref = null;
     this.state = {
       selectedmenu : 'general',
-      settings: {
-        general: {
-          startup: true,
-          enabled: {
-            'Move To New Desktop':true,
-            'Shortcut Guide':false,
-          }
-        },
-        powertoys: {
-          'Move To New Desktop' : {
-            name: 'Move To New Desktop',
-            description: 'Adds popup that Maximizes a Window to a new Desktop.',
-            properties: {
-              'close desktop on restore' : {
-                display_name: 'Remove a virtual desktop when the last window is restored',
-                editor_type: 'bool_toggle',
-                value: true
-              },
-              'close desktop on window close' : {
-                display_name: 'Remove a virtual desktop when the last window is closed',
-                editor_type: 'bool_toggle',
-                value: false
-              },
-            },
-          },
-          'Shortcut Guide': {
-            name: 'Shortcut Guide',
-            description: 'Shows a help overlay with Windows shortcuts when the Windows key is pressed.',
-            properties: {
-              'press time' : {
-                display_name: 'How long to press the Windows key before showing the Shortcut Guide (ms)',
-                editor_type: 'int_spinner',
-                value: 300
-              },
-            }
-          },
-          'Example PowerToy': {
-            name: 'Example PowerToy',
-            description: 'Shows the different controls for the settings.',
-            properties: {
-              'test bool_toggle': {
-                display_name: 'This is what a bool_toggle looks like',
-                editor_type: 'bool_toggle',
-                value: false
-              },
-              'test int_spinner': {
-                display_name: 'This is what a int_spinner looks like',
-                editor_type: 'int_spinner',
-                value: 10
-              },
-              'test string_text': {
-                display_name: 'This is what a string_text looks like',
-                editor_type: 'string_text',
-                value: 'A sample string value'
-              },
-              'test color_picker': {
-                display_name: 'This is what a color_picker looks like',
-                editor_type: 'color_picker',
-                value: '#0450fd'
-              },
-            }
-          }
-        }
-      }
+      settings: {}
     }
+  }
+
+  public componentDidMount() {
+    this.send_message_to_application(JSON.stringify({'refresh':true}));
+  }
+
+  public send_message_to_application(msg: string) {
+    (window as any).output_from_webview(msg);
+  }
+
+  public receive_config_msg(config: any):void {
+    let current_selected_menu = this.state.selectedmenu;
+    if(!config.hasOwnProperty('powertoys') || !config.powertoys.hasOwnProperty(current_selected_menu)) {
+      current_selected_menu='general';
+    }
+    this.setState({settings: config, selectedmenu: current_selected_menu});
   }
 
   public render(): JSX.Element {
@@ -96,11 +49,14 @@ export class App extends React.Component <any, any> {
     }
 
     const saveClicked = (): void => {
+      /*
       if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
         (window.external as any).notify(JSON.stringify(this.settingsscreenref.get_data()));
       } else {
         alert(JSON.stringify(this.settingsscreenref.get_data()));
-      }
+      }*/
+      // output_from_webview should be declared in index.html
+      (window as any).output_from_webview(JSON.stringify(this.settingsscreenref.get_data()));
     };
     const discardChanges = (): void => {
       this.settingsscreenref.forceUpdate();
@@ -189,20 +145,22 @@ export class App extends React.Component <any, any> {
             >
             {
               (() => {
-                if(this.state.selectedmenu === 'general') {
+                if(this.state.selectedmenu === 'general' && this.state.settings.hasOwnProperty('general')) {
                   return <GeneralSettings
                     key="general"
+                    settings_key="general"
                     settings={this.state.settings.general}
                     ref={(input:any) => {this.settingsscreenref = input;}}
                   />
-                } else if(this.state.selectedmenu in this.state.settings.powertoys) {
+                } else if( this.state.settings.hasOwnProperty('powertoys') && this.state.selectedmenu in this.state.settings.powertoys) {
                   return <CustomSettingsScreen
                     key={this.state.selectedmenu}
+                    settings_key={this.state.selectedmenu}
                     powertoy={this.state.settings.powertoys[this.state.selectedmenu]}
                     ref={(input:any) => {this.settingsscreenref = input;}}
-                    />
-                } else {
-                  return null;
+                    /> 
+                } else { 
+                  return <Spinner size={SpinnerSize.large} label="Loading the Settings..." labelPosition="top" />
                 }
               })()
             }

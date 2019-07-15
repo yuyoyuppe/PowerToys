@@ -14,4 +14,8 @@ mergeStyles({
   }
 });
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ReactDOM.render(<App 
+  ref={(app_component) => {(window as any).react_app_component=app_component;}} // in order to call the app from outside react.
+  />, 
+  document.getElementById('app')
+  );

@@ -4,6 +4,13 @@
 #include "window_manager_popup.h"
 #include "mouse_watcher.h"
 #include "trace.h"
+#include <cpprest/json.h>
+
+using namespace web;
+
+//Forward declarations
+RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor);
+void on_mouse_out();
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {
@@ -25,28 +32,86 @@ class MTNDPowertoy* instance = nullptr;
 class MTNDPowertoy : public PowertoyModuleIface {
 public:
   MTNDPowertoy();
-
+  bool _enabled = false;
   virtual const wchar_t* get_name() override {
-    return L"Move To New Desktop Powertoy";
+    return L"Move To New Desktop";
   }
 
   virtual const wchar_t** get_events() override {
     return nullptr;
   }
 
-  virtual const wchar_t* get_config() override {
-    return  L"";
+  virtual bool get_config(const wchar_t** config) override {
+    json::value _settings = json::value::object();
+    _settings.as_object()[L"name"] = json::value::string(get_name());
+    _settings.as_object()[L"description"] = json::value::string(L"Adds popup that Maximizes a Window to a new Desktop.");
+    {
+      json::value _properties = json::value::object(true); //Keep order
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"display_name"] = json::value::string(L"Remove a virtual desktop when the last window is restored");
+        _property.as_object()[L"editor_type"] = json::value::string(L"bool_toggle");
+        _property.as_object()[L"value"] = json::value::boolean((maximize_popup != nullptr ? maximize_popup->get_delete_after_restore() : true));
+        _properties.as_object()[L"close desktop on restore"] = _property;
+      }
+      _settings.as_object()[L"properties"] = _properties;
+    }
+    std::wstringstream ss;
+    ss << _settings;
+    std::wstring w_str = ss.str();
+    const wchar_t* result_wstr = w_str.c_str();
+    size_t result_len = wcslen(result_wstr)+1;
+    wchar_t *result = new wchar_t[result_len];
+    wcscpy_s(result, result_len, result_wstr);
+    *config = result;
+    return true;
   }
-  virtual void set_config(const wchar_t* config) override { }
-  virtual void enable() { }
-  virtual void disable() { }
+
+  virtual void free_get_config(const wchar_t* config) override {
+    delete[] config;
+  };
+  virtual void set_config(const wchar_t* config) override {
+    web::json::value j = web::json::value::parse(config);
+    if (!j.is_object()) {
+      // Should be an object.
+      return;
+    }
+    if (!j.has_object_field(L"properties")) {
+      // Should have a properties field.
+      return;
+    }
+    web::json::value object_properties = j.at(L"properties");
+    if (object_properties.has_object_field(L"close desktop on restore")) {
+      web::json::value close_desktop = object_properties.at(L"close desktop on restore");
+      if (close_desktop.has_boolean_field(L"value")) {
+        if (maximize_popup != nullptr) {
+          maximize_popup->set_delete_after_restore(close_desktop.at(L"value").as_bool());
+        }
+      }
+    }
+  }
+  virtual void enable() override {
+    if (!_enabled) {
+      maximize_popup = new D2DWindowManagerPopup();
+      start_mouse_watcher(400, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
+    }
+    _enabled = true;
+  }
+  virtual void disable() override {
+    if (_enabled) {
+      stop_mouse_watcher();
+      delete maximize_popup;
+    }
+    _enabled = false;
+  }
+  virtual bool is_enabled() override {
+    return _enabled;
+  }
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data)  override {
     return 0;
   }
   
   virtual void destroy() override {
-    stop_mouse_watcher();
-    delete maximize_popup;
     delete this;
     instance = nullptr;
   }
@@ -81,10 +146,7 @@ void on_mouse_out() {
 }
 
 MTNDPowertoy::MTNDPowertoy() {
-  maximize_popup = new D2DWindowManagerPopup();
-  start_mouse_watcher(400, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
 }
-
 
 extern "C" __declspec(dllexport) PowertoyModuleIface*  __cdecl powertoy_create() {
   if (!instance) {

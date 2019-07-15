@@ -21,4 +21,16 @@
 #include <tuple>
 #include <unordered_set>
 #include <string>
+#include <vector>
+
+// cpprestsdk headers
+#include "cpprest/details/basic_types.h"
+#include "cpprest/details/cpprest_compat.h"
+#include "cpprest/version.h"
+// json
+#include "cpprest/json.h"
+// utilities
+#include "cpprest/asyncrt_utils.h"
+#include "cpprest/details/web_utilities.h"
+
 #include "common.h"

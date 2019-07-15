@@ -20,6 +20,8 @@ public:
   void hide();
   HWND get_hwnd();
   ~D2DWindowManagerPopup();
+  void set_delete_after_restore(bool value);
+  bool get_delete_after_restore();
 private:
   void init();
   static LRESULT __stdcall d2d_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
@@ -43,6 +45,9 @@ private:
   MouseTrackEvents mouse_track;
   bool should_highlight = false;
   bool is_pressed = false;
+
+  // If MTND should delete an empty virtual desktop after the last window has been restored.
+  bool delete_after_restore = true;
 
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;

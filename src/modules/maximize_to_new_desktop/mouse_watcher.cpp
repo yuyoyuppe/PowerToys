@@ -543,6 +543,8 @@ void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_
 
 void stop_mouse_watcher() {
   terminate_mouse_thread_proc = true;
-  mouse_thread.join();
-  mouse_initialized = false;
+  if (mouse_initialized) {
+    mouse_thread.join();
+    mouse_initialized = false;  
+  }
 }

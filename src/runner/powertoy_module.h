@@ -44,7 +44,6 @@ public:
     if (!module)
       throw std::runtime_error("Module not initialized");
     name = module->get_name();
-    config = module->get_config();
     auto want_signals = module->get_events();
     if (want_signals) {
       for (; *want_signals; ++want_signals) {
@@ -55,14 +54,21 @@ public:
   const std::wstring& get_name() const {
     return name;
   }
-  const std::wstring& get_confing() const {
-    return config;
+  const std::wstring get_config() const {
+    const wchar_t* config_wstr = NULL;
+    module->get_config(&config_wstr);
+    std::wstring result(config_wstr);
+    module->free_get_config(config_wstr);
+    return result;
   }
   void set_config(const std::wstring& config) {
     module->set_config(config.c_str());
   }
   intptr_t signal_event(const std::wstring& signal_event, intptr_t data) {
     return module->signal_event(signal_event.c_str(), data);
+  }
+  bool is_enabled() {
+    return module->is_enabled();
   }
   void enable() {
     module->enable();
@@ -74,7 +80,6 @@ private:
   std::unique_ptr<HMODULE, PowertoyModuleDLLDeleter> handle;
   std::unique_ptr<PowertoyModuleIface, PowertoyModuleDeleter> module;
   std::wstring name;
-  std::wstring config;
 };
 
 

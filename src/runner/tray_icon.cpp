@@ -1,23 +1,48 @@
 #include "pch.h"
 #include "resource.h"
 #include "settings_window.h"
+#include "tray_icon.h"
 #include <Windows.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
+
+HWND tray_icon_hwnd = NULL;
 
 // Message code that Windows will use for tray icon notifications.
 UINT wm_icon_notify = 0;
 UINT id_tray_icon = 0;
 
-// Contais the Windows Message for taskbar creation.
+// Contains the Windows Message for taskbar creation.
 UINT wm_taskbar_restart = 0;
+UINT wm_run_on_main_ui_thread = 0;
+
+// Struct to fill with callback and the data. The window_proc is responsible for cleaning it.
+struct run_on_main_ui_thread_msg {
+  main_loop_callback_function _callback;
+  PVOID data;
+};
+
+bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID data) {
+  if (tray_icon_hwnd == NULL) {
+    return false;
+  }
+  struct run_on_main_ui_thread_msg *wnd_msg = new struct run_on_main_ui_thread_msg();
+  wnd_msg->_callback = _callback;
+  wnd_msg->data = data;
+
+  PostMessage(tray_icon_hwnd, wm_run_on_main_ui_thread, 0, (LPARAM)wnd_msg);
+
+  return true;
+}
 
 NOTIFYICONDATA tray_icon_data;
 
 LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
   case WM_CREATE:
+    tray_icon_hwnd = window;
     wm_taskbar_restart = RegisterWindowMessage(TEXT("TaskbarCreated"));
+    wm_run_on_main_ui_thread = RegisterWindowMessage(TEXT("RunOnMainThreadCallback"));
     break;
   case WM_DESTROY:
     Shell_NotifyIcon(NIM_DELETE, &tray_icon_data);
@@ -52,9 +77,14 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         }
         break;
       }
-    } else if(message == wm_taskbar_restart) {
-      // To show tray icon when the taskbar is created/restarted.
-      Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+    } else if (message == wm_run_on_main_ui_thread) {
+      if (lparam != NULL) {
+        struct run_on_main_ui_thread_msg *msg = (struct run_on_main_ui_thread_msg *)lparam;
+        msg->_callback(msg->data);
+        delete msg;
+        lparam = NULL;
+      }
+      break;
     }
   }
   return DefWindowProc(window, message, wparam, lparam);

@@ -12,8 +12,22 @@ export class CustomSettingsScreen extends React.Component <any, any> {
     super(props);
     this.references={};
     this.state = {
+      settings_key: props.settings_key,
       powertoy: props.powertoy,
     }
+  }
+/*
+  static getDerivedStateFromProps(props: any, state: any) {
+
+    if (state.powertoy!=props.powertoy) {
+      alert('a');
+      return { powertoy: props.powertoy };
+    }
+    return null;
+  }
+*/
+  componentWillReceiveProps(props: any) {
+    this.setState({ powertoy: props.powertoy })
   }
 
   public get_data(): any {
@@ -21,10 +35,12 @@ export class CustomSettingsScreen extends React.Component <any, any> {
     Object.keys(this.references).forEach(key => {
       properties[key]= this.references[key].get_value();
     });
-    return {
+    let result : any = {};
+    result[this.state.settings_key] = {
       name: this.state.powertoy.name,
       properties:properties
     };
+    return {powertoys: result};
   }
 
   public render(): JSX.Element {

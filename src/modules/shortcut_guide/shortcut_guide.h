@@ -13,10 +13,13 @@ public:
   OverlayWindow();
   virtual const wchar_t* get_name() override;
   virtual const wchar_t** get_events() override;
-  virtual const wchar_t* get_config() override;
+  virtual bool get_config(const wchar_t** config) override;
+  virtual void free_get_config(const wchar_t* config) override;
+
   virtual void set_config(const wchar_t* config) override;
-  virtual void enable();
-  virtual void disable();
+  virtual void enable() override;
+  virtual void disable() override;
+  virtual bool is_enabled() override;
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data)  override;
 
   void on_held();
@@ -29,4 +32,5 @@ private:
   D2DOverlayWindow *winkey_popup;
   HWND desktop, shell;
   HWND active_window;
+  bool _enabled = false;
 };

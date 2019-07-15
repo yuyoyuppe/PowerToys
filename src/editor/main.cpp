@@ -2,6 +2,7 @@
 #include <Commdlg.h>
 #include "StreamUriResolverFromFile.h"
 #include <Shellapi.h>
+#include <common/two_way_pipe_message_ipc.h>
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shcore.lib")
@@ -12,6 +13,16 @@
 #pragma comment(lib, "dcomp")
 #pragma comment(lib, "dwmapi")
 
+#ifdef _DEBUG
+#define _DEBUG_WITH_LOCALHOST 0
+// Define as 1 For debug purposes, to access localhost servers.
+// webview_process_options.PrivateNetworkClientServerCapability(winrt::Windows::Web::UI::Interop::WebViewControlProcessCapabilityState::Enabled);
+// To access localhost:8080 for development, you'll also need to disable loopback restrictions for the webview:
+// > checknetisolation LoopbackExempt -a -n=Microsoft.Win32WebViewHost_cw5n1h2txyewy
+// To remove the exception after development:
+// > checknetisolation LoopbackExempt -d -n=Microsoft.Win32WebViewHost_cw5n1h2txyewy
+// Source: https://github.com/windows-toolkit/WindowsCommunityToolkit/issues/2226#issuecomment-396360314
+#endif
 HINSTANCE m_hInst;
 HWND main_window_handler = nullptr;
 using namespace winrt;
@@ -27,13 +38,19 @@ winrt::Windows::Web::UI::Interop::WebViewControl webview_control = nullptr;
 winrt::Windows::Web::UI::Interop::WebViewControlProcess webview_process = nullptr;
 winrt::Windows::Web::UI::Interop::WebViewControlProcessOptions webview_process_options = nullptr;
 StreamUriResolverFromFile local_uri_resolver;
-//Microsoft::WRL::ComPtr<ABI::Windows::Web::IUriToStreamResolver> coiso;
 
+// Contais the Windows Message for receiving copied data to send to the webview.
+UINT wm_copydata_webview = 0;
 
-
+TwoWayPipeMessageIPC* current_settings_ipc = NULL;
+#ifdef _DEBUG
+void NavigateToLocalhostReactServer() {
+  // Useful for connecting to instance running in react development server.
+  webview_control.Navigate(Uri(hstring(L"http://localhost:8080")));
+}
+#endif
 void NavigateToUri(_In_ LPCWSTR uriAsString) {
   Uri url = webview_control.BuildLocalStreamUri(hstring(L"settings-html"), hstring(uriAsString));
-  //m_webViewControl.Navigate(Uri(hstring(uriAsString)));
   webview_control.NavigateToLocalStreamUri(url, local_uri_resolver);
 
 }
@@ -60,6 +77,104 @@ void resize_web_view() {
 
 }
 
+#define SEND_TO_WEBVIEW_MSG 1
+
+void send_message_to_webview(const std::wstring& msg) {
+  if (main_window_handler != NULL && wm_copydata_webview!=0) {
+    // Allocate the COPYDATASTRUCT and message to pass to the Webview.
+    // This is needed in order to use PostMessage, since COM calls to
+    // webview_control.InvokeScriptAsync can't be made from 
+    PCOPYDATASTRUCT copy_data_message = new COPYDATASTRUCT();
+    const wchar_t* orig_msg = msg.c_str();
+    DWORD orig_len = wcslen(orig_msg);
+    wchar_t* copy_msg = new wchar_t[orig_len + 1];
+    wcscpy_s(copy_msg, orig_len + 1, orig_msg);
+    copy_data_message->dwData = SEND_TO_WEBVIEW_MSG;
+    copy_data_message->cbData = (orig_len + 1) * sizeof(wchar_t);
+    copy_data_message->lpData = (PVOID)copy_msg;
+    PostMessage(main_window_handler, wm_copydata_webview, (WPARAM)main_window_handler, (LPARAM)copy_data_message);
+    // wnd_static_proc will be responsible for freeing these.
+  }
+}
+
+void send_message_to_powertoys(const std::wstring msg) {
+  if (current_settings_ipc != NULL) {
+    current_settings_ipc->send(msg);
+  } else {
+    // For Debug purposes, in case the webview is being run alone.
+#ifdef _DEBUG
+    MessageBox(main_window_handler, msg.c_str(), L"From Webview", MB_OK);
+    //throw in some sample data
+    std::wstring debug_settings_info(LR"json({
+            "general": {
+              "startup": true,
+              "enabled": {
+                "Move To New Desktop":true,
+                "Shortcut Guide":false,
+                "Example PowerToy":true
+              }
+            },
+            "powertoys": {
+              "Move To New Desktop" : {
+                "name": "Move To New Desktop",
+                "description": "Adds popup that Maximizes a Window to a new Desktop.",
+                "properties": {
+                  "close desktop on restore" : {
+                    "display_name": "Remove a virtual desktop when the last window is restored",
+                    "editor_type": "bool_toggle",
+                    "value": true
+                  },
+                  "close desktop on window close" : {
+                    "display_name": "Remove a virtual desktop when the last window is closed",
+                    "editor_type": "bool_toggle",
+                    "value": false
+                  }
+                }
+              },
+              "Shortcut Guide": {
+                "name": "Shortcut Guide",
+                "description": "Shows a help overlay with Windows shortcuts when the Windows key is pressed.",
+                "properties": {
+                  "press time" : {
+                    "display_name": "How long to press the Windows key before showing the Shortcut Guide (ms)",
+                    "editor_type": "int_spinner",
+                    "value": 300
+                  }
+                }
+              },
+              "Example PowerToy": {
+                "name": "Example PowerToy",
+                "description": "Shows the different controls for the settings.",
+                "properties": {
+                  "test bool_toggle": {
+                    "display_name": "This is what a bool_toggle looks like",
+                    "editor_type": "bool_toggle",
+                    "value": false
+                  },
+                  "test int_spinner": {
+                    "display_name": "This is what a int_spinner looks like",
+                    "editor_type": "int_spinner",
+                    "value": 10
+                  },
+                  "test string_text": {
+                    "display_name": "This is what a string_text looks like",
+                    "editor_type": "string_text",
+                    "value": "A sample string value"
+                  },
+                  "test color_picker": {
+                    "display_name": "This is what a color_picker looks like",
+                    "editor_type": "color_picker",
+                    "value": "#0450fd"
+                  }
+                }
+              }
+            }
+          })json");
+    send_message_to_webview(debug_settings_info);
+#endif
+  }
+}
+
 void initialize_win32_webview() {
   
   // initialize the base_path for the html content relative to the executable.
@@ -75,25 +190,34 @@ void initialize_win32_webview() {
     }
 
     if (!webview_process) {
-      webview_process = winrt::Windows::Web::UI::Interop::WebViewControlProcess();
+      webview_process = winrt::Windows::Web::UI::Interop::WebViewControlProcess(webview_process_options);
     }
-
     auto asyncwebview = webview_process.CreateWebViewControlAsync((int64_t)main_window_handler, hwnd_client_rect_to_bounds_rect(main_window_handler));
     asyncwebview.Completed([=](IAsyncOperation<WebViewControl> const& sender, AsyncStatus args) {
       webview_control = sender.GetResults();
+      
       // In order to receive window.external.notify() calls in ScriptNotify
       webview_control.Settings().IsScriptNotifyAllowed(true);
+
       webview_control.Settings().IsJavaScriptEnabled(true);
+      
       webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
-        //auto scriptargs = { hstring(L"window.external.notify('test');") };
-        //m_webViewControl.InvokeScriptAsync(hstring(L"eval"), scriptargs);
+        /*
+        auto scriptargs = { hstring(L"window.external.notify('test');") };
+        webview_control.InvokeScriptAsync(hstring(L"eval"), scriptargs);
+        */
       });
       webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
         std::wstring message_sent = args_script_notify.Value().c_str();
-        MessageBox(main_window_handler, message_sent.c_str(), L"Message from WebView", MB_OK);
+        std::thread(send_message_to_powertoys, message_sent).detach();
+        //MessageBox(main_window_handler, message_sent.c_str(), L"Message from WebView", MB_OK);
       });
       resize_web_view();
+#if defined(_DEBUG) && _DEBUG_WITH_LOCALHOST
+      NavigateToLocalhostReactServer();
+#else
       NavigateToUri(L"index.html");
+#endif
     });
   }
   catch (hresult_error const& e) {
@@ -113,6 +237,23 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
   case WM_SIZE:
     if (webview_control != nullptr) {
       resize_web_view();
+    }
+    break;
+  case WM_CREATE:
+    wm_copydata_webview = RegisterWindowMessage(TEXT("TaskbarCreated"));
+    break;
+  default:
+    if (message == wm_copydata_webview) {
+      PCOPYDATASTRUCT msg = (PCOPYDATASTRUCT)lParam;
+      if (msg->dwData == SEND_TO_WEBVIEW_MSG) {
+        wchar_t* json_message = (wchar_t*)(msg->lpData);
+        if (webview_control != NULL) {
+          webview_control.InvokeScriptAsync(hstring(L"receive_from_settings_app"), { hstring(json_message) });
+        }
+        delete[] json_message;
+      }
+      // wnd_proc_static is responsible for freeing memory.
+      delete msg;
     }
     break;
   }
@@ -150,7 +291,25 @@ int init_instance(HINSTANCE hInstance, int nCmdShow) {
   return TRUE;
 }
 
+void read_arguments() {
+  LPWSTR *argument_list;
+  int n_args;
+
+  argument_list = CommandLineToArgvW(GetCommandLineW(), &n_args);
+  if (n_args > 2) {
+    current_settings_ipc = new TwoWayPipeMessageIPC(std::wstring(argument_list[2]), std::wstring(argument_list[1]), send_message_to_webview);
+    current_settings_ipc->start(NULL);
+  } else {
+#ifndef _DEBUG
+    MessageBox(NULL, L"This executable isn't supposed to be called as a stand-alone process", L"Error running settings", MB_OK);
+    PostQuitMessage(1);
+#endif
+  }
+  LocalFree(argument_list);
+}
+
 int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  read_arguments();
   register_classes(hInstance);
   init_instance(hInstance, nCmdShow);
   MSG msg;

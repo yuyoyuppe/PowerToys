@@ -61,7 +61,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;telemetry;cpprestsdk\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,7 +81,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>inc;telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;telemetry;cpprestsdk\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,6 +92,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="animation.h" />
+    <ClInclude Include="async_message_queue.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\asyncrt_utils.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\base_uri.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\details\basic_types.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\details\cpprest_compat.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\details\SafeInt3.hpp" />
+    <ClInclude Include="cpprestsdk\include\cpprest\details\web_utilities.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\json.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\uri.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\uri_builder.h" />
+    <ClInclude Include="cpprestsdk\include\cpprest\version.h" />
     <ClInclude Include="d2d_svg.h" />
     <ClInclude Include="d2d_text.h" />
     <ClInclude Include="d2d_window.h" />
@@ -102,10 +113,17 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="Telemetry\ProjectTelemetry.h" />
     <ClInclude Include="Telemetry\TraceLoggingDefines.h" />
+    <ClInclude Include="two_way_pipe_message_ipc.h" />
     <ClInclude Include="windows_colors.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animation.cpp" />
+    <ClCompile Include="cpprestsdk\src\json\json.cpp" />
+    <ClCompile Include="cpprestsdk\src\json\json_parsing.cpp" />
+    <ClCompile Include="cpprestsdk\src\json\json_serialization.cpp" />
+    <ClCompile Include="cpprestsdk\src\utilities\asyncrt_utils.cpp" />
+    <ClCompile Include="cpprestsdk\src\utilities\base64.cpp" />
+    <ClCompile Include="cpprestsdk\src\utilities\web_utilities.cpp" />
     <ClCompile Include="d2d_svg.cpp" />
     <ClCompile Include="d2d_text.cpp" />
     <ClCompile Include="d2d_window.cpp" />

@@ -1,6 +1,6 @@
 import React from 'react';
 import {BaseSettingsControl} from './BaseSettingsControl';
-import { ColorPicker, Stack, Label } from 'office-ui-fabric-react';
+import { ColorPicker, Stack, Label, getColorFromString, IColor } from 'office-ui-fabric-react';
 
 export class ColorPickerSettingsControl extends BaseSettingsControl {
   colorpickerref:any = null;
@@ -13,11 +13,16 @@ export class ColorPickerSettingsControl extends BaseSettingsControl {
     }
   }
 
+  componentWillReceiveProps(props: any) {
+    this.setState({ property_values: props.setting })
+  }
+
   public get_value() : any {
     return {value: this.colorpickerref.color.str};
   }
 
   public render(): JSX.Element {
+    let current_color : IColor | undefined = getColorFromString(this.state.property_values.value);
     return (
       <Stack>
         <Label>{this.state.property_values.display_name}</Label>
@@ -25,7 +30,7 @@ export class ColorPickerSettingsControl extends BaseSettingsControl {
           styles= {{
             panel: {padding:0}
           }}
-          color={this.state.property_values.value}
+          color={current_color===undefined?"#000000":current_color}
           componentRef= {(input) => {this.colorpickerref=input;}}
           alphaSliderHidden = {true}
         />

@@ -1,7 +1,92 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>UI Fabric App</title>
+    <script>
+        window.output_from_webview = function(arg) {
+          if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
+            window.external.notify(arg);
+          } else {
+            // Running outside of the embedded webview. Have some debug data provided.
+            alert(arg);
+            send_debug_values();
+          }
+        }
+        function receive_from_settings_app(arg) {
+          window.react_app_component.receive_config_msg(JSON.parse(arg));
+          return "";
+        }
+    
+        function send_debug_values() {
+          let debug_settings_info = {
+            general: {
+              startup: true,
+              enabled: {
+                'Move To New Desktop':true,
+                'Shortcut Guide':false,
+                'Example PowerToy':true
+              }
+            },
+            powertoys: {
+              'Move To New Desktop' : {
+                name: 'Move To New Desktop',
+                description: 'Adds popup that Maximizes a Window to a new Desktop.',
+                properties: {
+                  'close desktop on restore' : {
+                    display_name: 'Remove a virtual desktop when the last window is restored',
+                    editor_type: 'bool_toggle',
+                    value: true
+                  },
+                  'close desktop on window close' : {
+                    display_name: 'Remove a virtual desktop when the last window is closed',
+                    editor_type: 'bool_toggle',
+                    value: false
+                  },
+                },
+              },
+              'Shortcut Guide': {
+                name: 'Shortcut Guide',
+                description: 'Shows a help overlay with Windows shortcuts when the Windows key is pressed.',
+                properties: {
+                  'press time' : {
+                    display_name: 'How long to press the Windows key before showing the Shortcut Guide (ms)',
+                    editor_type: 'int_spinner',
+                    value: 300
+                  },
+                }
+              },
+              'Example PowerToy': {
+                name: 'Example PowerToy',
+                description: 'Shows the different controls for the settings.',
+                properties: {
+                  'test bool_toggle': {
+                    display_name: 'This is what a bool_toggle looks like',
+                    editor_type: 'bool_toggle',
+                    value: false
+                  },
+                  'test int_spinner': {
+                    display_name: 'This is what a int_spinner looks like',
+                    editor_type: 'int_spinner',
+                    value: 10
+                  },
+                  'test string_text': {
+                    display_name: 'This is what a string_text looks like',
+                    editor_type: 'string_text',
+                    value: 'A sample string value'
+                  },
+                  'test color_picker': {
+                    display_name: 'This is what a color_picker looks like',
+                    editor_type: 'color_picker',
+                    value: '#0450fd'
+                  },
+                }
+              }
+            }
+          };
+          setTimeout(function() { receive_from_settings_app(JSON.stringify(debug_settings_info)); }, 1000);
+        };
+    
+      </script>
+         <title>UI Fabric App</title>
   </head>
   <body>
     <div id="app"></div>

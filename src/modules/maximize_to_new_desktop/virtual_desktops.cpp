@@ -286,7 +286,7 @@ void restore_animation() {
   ::SystemParametersInfo(SPI_SETANIMATION, sizeof(g_original_animation_settings), &g_original_animation_settings, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 }
 
-void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_desktop_id, GUID primary_desktop_id) {
+void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_desktop_id, GUID primary_desktop_id, bool close_desktop_if_last_window) {
   std::this_thread::sleep_for(std::chrono::milliseconds(MOVE_WINDOW_DELAY));
 
   // Restore the window to the original position.
@@ -311,7 +311,7 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
   auto manager_internal = get_manager_internal();
   winrt::com_ptr<IVirtualDesktop> primary_desktop = nullptr;
   winrt::com_ptr<IVirtualDesktop> old_desktop = nullptr;
-  if (manager_internal->FindDesktop(&primary_desktop_id, primary_desktop.put()) == S_OK &&
+  if (close_desktop_if_last_window && manager_internal->FindDesktop(&primary_desktop_id, primary_desktop.put()) == S_OK &&
     manager_internal->FindDesktop(&old_desktop_id, old_desktop.put()) == S_OK) {
     // Check if the moved window was the last window present in this desktop.
     if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
@@ -321,7 +321,7 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
   }
 }
 
-void move_window_to_primary_desktop(HWND hwnd) {
+void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
 
@@ -348,7 +348,7 @@ void move_window_to_primary_desktop(HWND hwnd) {
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
   winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
 
-  std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktop_id).detach();
+  std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktop_id, close_desktop_if_last_window).detach();
   Trace::ActionRestore();
 }
 
