@@ -18,9 +18,9 @@ using namespace std;
 
 TRACELOGGING_DEFINE_PROVIDER(
   g_hProvider,
-  "Microsoft.PowerToys",
-  // {38e8889b-9731-53f5-e901-e8a7c1753074}
-  (0x38e8889b, 0x9731, 0x53f5, 0xe9, 0x01, 0xe8, 0xa7, 0xc1, 0x75, 0x30, 0x74),
+  "Microsoft.PowerToysInstaller",
+  // {e1d8165d-5cb6-5c74-3b51-bdfbfe4f7a3b}
+  (0xe1d8165d, 0x5cb6, 0x5c74, 0x3b, 0x51, 0xbd, 0xfb, 0xfe, 0x4f, 0x7a, 0x3b),
   TraceLoggingOptionProjectTelemetry());
 
 const DWORD USERNAME_DOMAIN_LEN = DNLEN + UNLEN + 2; // Domain Name + '\' + User Name + '\0'
@@ -367,7 +367,7 @@ UINT __stdcall TelemetryLogInstallSuccessCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Install::Success",
+    "Install::Success",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -386,7 +386,7 @@ UINT __stdcall TelemetryLogInstallCancelCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Install::Cancel",
+    "Install::Cancel",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -405,7 +405,7 @@ UINT __stdcall TelemetryLogInstallFailCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Install::Fail",
+    "Install::Fail",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -424,7 +424,7 @@ UINT __stdcall TelemetryLogUninstallSuccessCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Uninstall::Success",
+    "Uninstall::Success",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -443,7 +443,7 @@ UINT __stdcall TelemetryLogUninstallCancelCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Uninstall::Cancel",
+    "Uninstall::Cancel",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -462,7 +462,7 @@ UINT __stdcall TelemetryLogUninstallFailCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Uninstall::Fail",
+    "Uninstall::Fail",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -481,7 +481,7 @@ UINT __stdcall TelemetryLogRepairCancelCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Repair::Cancel",
+    "Repair::Cancel",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
@@ -500,7 +500,7 @@ UINT __stdcall TelemetryLogRepairFailCA(MSIHANDLE hInstall) {
 
   TraceLoggingWrite(
     g_hProvider,
-    "MSI::Repair::Fail",
+    "Repair::Fail",
     ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
     TraceLoggingBoolean(TRUE, "UTCReplace_AppSessionGuid"),
     TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
