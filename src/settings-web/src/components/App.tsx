@@ -49,12 +49,6 @@ export class App extends React.Component <any, any> {
     }
 
     const saveClicked = (): void => {
-      /*
-      if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-        (window.external as any).notify(JSON.stringify(this.settingsscreenref.get_data()));
-      } else {
-        alert(JSON.stringify(this.settingsscreenref.get_data()));
-      }*/
       // output_from_webview should be declared in index.html
       (window as any).output_from_webview(JSON.stringify(this.settingsscreenref.get_data()));
     };

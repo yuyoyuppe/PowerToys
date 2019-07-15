@@ -216,9 +216,6 @@ LRESULT __stdcall D2DWindow::d2d_window_proc(HWND window, UINT message, WPARAM w
   case WM_PAINT:
     this_from_hwnd(window)->base_render();
     return 0;
-  case WM_DESTROY:
-    PostQuitMessage(0);
-    return 0;
   default:
     return DefWindowProc(window, message, wparam, lparam);
   }

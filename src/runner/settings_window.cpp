@@ -8,6 +8,7 @@
 #include "powertoy_module.h"
 #include <common/two_way_pipe_message_ipc.h>
 #include "tray_icon.h"
+#include "auto_start_helper.h"
 
 #define BUFSIZE 1024
 
@@ -17,7 +18,8 @@ TwoWayPipeMessageIPC* current_settings_ipc = NULL;
 
 json::value get_general_settings() {
   json::value result = json::value::object();
-  result.as_object()[L"startup"] = json::value::boolean(true);
+  bool startup = is_auto_start_task_active_for_this_user();
+  result.as_object()[L"startup"] = json::value::boolean(startup);
 
   json::value enabled = json::value::object();
   for (auto&[name, powertoy] : modules()) {
@@ -66,7 +68,14 @@ void apply_general_settings(const json::value& general_configs) {
   bool contains_startup = general_configs.has_boolean_field(L"startup");
   if (contains_startup) {
     bool startup = general_configs.at(L"startup").as_bool();
-    // TODO: Apply startup setting.
+    bool current_startup = is_auto_start_task_active_for_this_user();
+    if (current_startup != startup) {
+      if (startup) {
+        enable_auto_start_task_for_this_user();
+      } else {
+        disable_auto_start_task_for_this_user();
+      }
+    }
   }
   bool contains_enabled = general_configs.has_object_field(L"enabled");
   if (contains_enabled) {

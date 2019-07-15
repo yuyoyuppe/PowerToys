@@ -1,8 +1,9 @@
 import React from 'react';
-import { Stack, Text, Toggle } from 'office-ui-fabric-react';
+import { Stack, Text } from 'office-ui-fabric-react';
+import {BoolToggleSettingsControl} from './BoolToggleSettingsControl'
 
 export class GeneralSettings extends React.Component <any, any> {
-  references: any;
+  references: any = {};
   startup_reference: any;
   constructor(props: any) {
     super(props);
@@ -13,23 +14,19 @@ export class GeneralSettings extends React.Component <any, any> {
       settings: props.settings,
     }
   }
-/*
-  static getDerivedStateFromProps(props: any, state: any) {
-    if (state.settings!=props.settings) {
-      alert('b');
-      return { settings: props.settings };
-    }
-    return null;
+
+  componentWillReceiveProps(props: any) {
+    this.setState({ settings: props.settings })
   }
-*/
+
   public get_data(): any {
     let enabled : any = {};
     Object.keys(this.references).forEach(key => {
-      enabled[key]=this.references[key].checked;
+      enabled[key]=this.references[key].get_value().value;
     });
     let result : any = {};
     result[this.state.settings_key]= {
-      startup: this.startup_reference.checked,
+      startup: this.startup_reference.get_value().value,
       enabled: enabled
     };
     return result;
@@ -43,24 +40,18 @@ export class GeneralSettings extends React.Component <any, any> {
         { Object.keys(power_toys_enabled).map(
           (key) => {
             let enabled_value=power_toys_enabled[key];
-            return <Toggle
+            return <BoolToggleSettingsControl
+              setting={{display_name: key, value: enabled_value}}
               key={key}
-              defaultChecked={enabled_value}
-              label={key}
-              onText="Enabled"
-              offText="Disabled"
-              componentRef={(input) => {this.references[key]=input;}}
-            /> ;
+              ref={(input) => {this.references[key]=input;}}
+            />;
           })
         }
         <Text variant='xLarge'>General</Text>
-        <Toggle
-          defaultChecked={this.state.startup}
-          label="Start at login"
-          onText="Enabled"
-          offText="Disabled"
-          componentRef= {(input) => {this.startup_reference=input;}}
-        />
+        <BoolToggleSettingsControl
+          setting={{display_name: "Start at login", value: this.state.settings.startup}}
+          ref={(input) => {this.startup_reference=input;}}
+          />;
       </Stack>
     )
   }

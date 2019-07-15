@@ -14,6 +14,10 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
     }
   }
 
+  componentWillReceiveProps(props: any) {
+    this.setState({ property_values: props.setting });
+  }
+
   public get_value() : any {
     return {value: parseInt(this.spinbuttonref.value)};
   }
@@ -22,6 +26,50 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
     return (
       <SpinButton
         value={this.state.property_values.value}
+        onValidate={(value: string) => {
+          if(value.trim().length === 0 || isNaN(+value)) {
+            value=String(this.state.property_values.value);
+          } else if (Number(value)<this.spinbuttonref.props.min) {
+            value=String(this.spinbuttonref.props.min);
+          } else if (Number(value)>this.spinbuttonref.props.max) {
+            value=String(this.spinbuttonref.props.max);
+          }
+          this.setState( (prev_state:any) => ({
+            property_values: { 
+              ...(prev_state.property_values),
+              value: parseInt(value)
+            }
+          }));
+          return value;
+        }}
+        onIncrement={(value: string) => {
+          if (Number(value) + this.spinbuttonref.props.step > this.spinbuttonref.props.max) {
+            value = String(this.spinbuttonref.props.max);
+          } else {
+            value = String(+value + this.spinbuttonref.props.step) ;
+          }
+          this.setState( (prev_state:any) => ({
+            property_values: { 
+              ...(prev_state.property_values),
+              value: parseInt(value)
+            }
+          }));
+          return value;
+        }}
+        onDecrement={(value: string) => {
+          if (Number(value) - this.spinbuttonref.props.step < this.spinbuttonref.props.min) {
+            value = String(this.spinbuttonref.props.min);
+          } else {
+            value = String(+value - this.spinbuttonref.props.step) ;
+          }
+          this.setState( (prev_state:any) => ({
+            property_values: { 
+              ...(prev_state.property_values),
+              value: parseInt(value)
+            }
+          }));
+          return value;
+        }}
         precision={0}
         step={1}
         min={0}

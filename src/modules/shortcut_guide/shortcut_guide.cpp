@@ -8,10 +8,7 @@ using namespace web;
 
 OverlayWindow* instance = nullptr;
 
-OverlayWindow::OverlayWindow() : winkey_popup(new D2DOverlayWindow()), target_state(new TargetState(900)) {
-  winkey_popup->initialize();
-  desktop = GetDesktopWindow();
-  shell = GetShellWindow();
+OverlayWindow::OverlayWindow() {
 }
 
 const wchar_t * OverlayWindow::get_name() {
@@ -33,7 +30,7 @@ bool OverlayWindow::get_config(const wchar_t** config) {
       json::value _property = json::value::object();
       _property.as_object()[L"display_name"] = json::value::string(L"How long to press the Windows key before showing the Shortcut Guide (ms)");
       _property.as_object()[L"editor_type"] = json::value::string(L"int_spinner");
-      _property.as_object()[L"value"] = json::value::number(300);
+      _property.as_object()[L"value"] = json::value::number(get_current_delay_setting());
       _properties.as_object()[L"press time"] = _property;
     }
     _settings.as_object()[L"properties"] = _properties;
@@ -68,16 +65,36 @@ void OverlayWindow::set_config(const wchar_t * config) {
     web::json::value object_value = object_properties.at(L"press time");
     if (object_value.has_number_field(L"value")) {
       //Will be replaced by actual property update.
-      int test_int_prop = (object_value.at(L"value").as_integer());
+      int press_delay_time = (object_value.at(L"value").as_integer());
+      set_current_delay_setting(press_delay_time);
+      if (target_state) {
+        target_state->set_delay(press_delay_time);
+      }
     }
   }
 }
 
 void OverlayWindow::enable() {
+  if (!_enabled) {
+    winkey_popup = new D2DOverlayWindow();
+    target_state = new TargetState(get_current_delay_setting());
+    winkey_popup->initialize();
+    desktop = GetDesktopWindow();
+    shell = GetShellWindow();
+  }
   _enabled = true;
 }
 
 void OverlayWindow::disable() {
+  if (_enabled) {
+    winkey_popup->hide();
+    target_state->exit();
+    int a = 0;
+    delete target_state;
+    delete winkey_popup;
+    target_state = nullptr;
+    winkey_popup = nullptr;
+  }
   _enabled = false;
 }
 
@@ -86,7 +103,7 @@ bool OverlayWindow::is_enabled() {
 }
 
 intptr_t OverlayWindow::signal_event(const wchar_t * name, intptr_t data) {
-  if (wcscmp(name, L"ll_keyboard") == 0) {
+  if (_enabled && wcscmp(name, L"ll_keyboard") == 0) {
     auto& event = *(reinterpret_cast<LowlevelKeyboardEvent*>(data));
     if (event.wParam == WM_KEYDOWN ||
         event.wParam == WM_SYSKEYDOWN ||
@@ -130,10 +147,14 @@ void OverlayWindow::was_hidden() {
 }
 
 void OverlayWindow::destroy() {
-  winkey_popup->hide();
-  target_state->exit();
-  delete target_state;
-  delete winkey_popup;
   delete this;
   instance = nullptr;
+}
+
+int OverlayWindow::get_current_delay_setting() {
+  return current_delay_setting;
+}
+
+void OverlayWindow::set_current_delay_setting(int new_delay) {
+  current_delay_setting = new_delay;
 }

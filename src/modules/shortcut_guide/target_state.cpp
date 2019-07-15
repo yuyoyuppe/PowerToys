@@ -148,3 +148,7 @@ void TargetState::handle_timeout() {
   lock.unlock();
   instance->on_held();
 }
+
+void TargetState::set_delay(int ms_delay) {
+  delay = std::chrono::milliseconds(ms_delay);
+}

@@ -12,15 +12,6 @@ export class BoolToggleSettingsControl extends BaseSettingsControl {
       property_values: props.setting
     }
   }
-  /*
-  static getDerivedStateFromProps(props: any, state: any) {
-    if (state.property_values!=props.setting) {
-      alert('d');
-      return { property_values: props.setting };
-    }
-    return null;
-  }
-*/
 
   componentWillReceiveProps(props: any) {
     this.setState({ property_values: props.setting })

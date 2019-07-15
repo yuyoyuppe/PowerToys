@@ -16,16 +16,6 @@ export class CustomSettingsScreen extends React.Component <any, any> {
       powertoy: props.powertoy,
     }
   }
-/*
-  static getDerivedStateFromProps(props: any, state: any) {
-
-    if (state.powertoy!=props.powertoy) {
-      alert('a');
-      return { powertoy: props.powertoy };
-    }
-    return null;
-  }
-*/
   componentWillReceiveProps(props: any) {
     this.setState({ powertoy: props.powertoy })
   }

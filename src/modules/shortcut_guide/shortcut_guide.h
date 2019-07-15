@@ -22,6 +22,9 @@ public:
   virtual bool is_enabled() override;
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data)  override;
 
+  int get_current_delay_setting();
+  void set_current_delay_setting(int new_delay);
+
   void on_held();
   void on_held_press(DWORD vkCode);
   void was_hidden();
@@ -33,4 +36,5 @@ private:
   HWND desktop, shell;
   HWND active_window;
   bool _enabled = false;
+  int current_delay_setting = 900;
 };

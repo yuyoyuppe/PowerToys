@@ -17,6 +17,7 @@ public:
   bool signal_event(unsigned vk_code, bool key_down);
   void was_hiden();
   void exit();
+  void set_delay(int ms_delay);
 private:
   KeyEvent next();
   void handle_hidden();
