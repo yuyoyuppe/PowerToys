@@ -31,7 +31,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
   }
   
-
   #if _DEBUG && _WIN64
   //Global error handlers to diagnose errors.
   //We prefer this not not show any longer until there's a bug to diagnose.
@@ -45,16 +44,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   try {
     chdir_current_executable();
     // Load Powertyos DLLS
-    // For now only load know DLLs
-    std::unordered_set<std::wstring> know_dlls = {
-      L"example_powertoy.dll",
+    // For now only load known DLLs
+    std::unordered_set<std::wstring> known_dlls = {
       L"shortcut_guide.dll",
       L"maximize_to_new_desktop.dll" 
     };
     for (auto& file : std::filesystem::directory_iterator(TEXT("modules/"))) {
       if (file.path().extension() != L".dll")
         continue;
-      if (know_dlls.find(file.path().filename()) == know_dlls.end())
+      if (known_dlls.find(file.path().filename()) == known_dlls.end())
         continue;
       try {
         auto module = load_powertoy(file.path().wstring());

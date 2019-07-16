@@ -47,24 +47,29 @@ Here's the current set of utilities we're considering.  Please use issues and +1
 9. Cmd (or PS or Bash) from here
 10. Contents menu file browsing
 
+# Where to download PowerToys
+
+  The latest release of PowerToys can be downloaded from https://github.com/microsoft/PowerToys/releases <br />
+  Click on `Assets` to show the files available in the release and then click on `PowerToysSetup.msi` to download the PowerToys installer.
+
 # Developer Guidance
 
 ## Build Prerequisites
- * Windows 10 1903 (build 10.0.18362.0) or above in order to build and run PowerToys.
+ * Windows 10 1803 (build 10.0.17134.0) or above in order to build and run PowerToys.
  * Visual Studio 2017 Community version 15.9.12 or higher, with the 'Desktop Development with C++' component and the Windows 10 SDK version 10.0.17763.0.
  
- ### Prerequisites to Build the Installer
-  * Install the [WiX Toolset Visual Studio 2017 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
-  * Install the [WiX Toolset build tools](https://wixtoolset.org/releases/).
- 
 ## Building the Code
- * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` and in the `Solution Platforms` drop-down menu select `x64`. In the `Solution Explorer` expand the `powertoys` folder and right click the `runnner` project and select the `Build` command (this will build the PowerToys modules and the PowerToys executable but not the installer).
+ * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` or `Debug`, from the `Build` menu choose `Build Solution`.
  * The PowerToys binaries will be located in your repo under `x64\Release`.
  * If you want to copy the `powertoys.exe` binary to a different location, you'll also need to copy the `modules` and the `svgs` folders.
 
+## Prerequisites to Build the Installer
+ * Install the [WiX Toolset Visual Studio 2017 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
+ * Install the [WiX Toolset build tools](https://wixtoolset.org/releases/).
+ 
 ## Building the .msi Installer
-  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` and in the `Solution Platforms` drop-down menu select `x64` and build the `PowerToysSetup` project or the `powertoys` solution.
-  * The resulting `PowerToysSetup.msi` installer will be available in the `installer\PowerToysSetup\bin\Release\` folder.
+  * From the `installer` folder open `PowerToysSetup.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` or `Debug`, from the `Build` menu choose `Build Solution`.
+  * The resulting `PowerToysSetup.msi` installer will be available in the `installer\PowerToysSetup\x64\Release\` folder.
 
 ## Debugging
   The following configuration issue only applies if the user is a member of the Administrators group.
@@ -77,9 +82,9 @@ Here's the current set of utilities we're considering.  Please use issues and +1
  
 ## How to create new PowerToys
 
-See the instructions on [how to install the PowerToy Module project template](tools/project_template).
+See the instructions on [how to install the PowerToy Module project template](tools/project_template). <br />
+Specifications for the [PowerToys settings API](doc/specs/PowerToys-settings.md).
 
-  
 ## Coding Guidance
 
 Please review these brief docs below relating to our coding standards etc.
@@ -102,9 +107,9 @@ provided by the bot. You will only need to do this once across all repos using o
 
 # Code of Conduct
 
-This project has adopted the [Microsoft Open Source Code of Conduct][conduct-code].
+This project has adopted the [Microsoft Open Source Code of Conduct][conduct-code]. <br />
 For more information see the [Code of Conduct FAQ][conduct-FAQ] or contact [opencode@microsoft.com][conduct-email] with any additional questions or comments.
 
-[conduct-code]: https://opensource.microsoft.com/codeofconduct/
+[conduct-code]: https://opensource.microsoft.com/codeofconduct/ 
 [conduct-FAQ]: https://opensource.microsoft.com/codeofconduct/faq/
 [conduct-email]: mailto:opencode@microsoft.com
