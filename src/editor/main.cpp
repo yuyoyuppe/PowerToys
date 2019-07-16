@@ -283,7 +283,7 @@ void register_classes(HINSTANCE hInstance) {
 int init_instance(HINSTANCE hInstance, int nCmdShow) {
   m_hInst = hInstance;
   main_window_handler = CreateWindow(TEXT("PTSettingsClass"), TEXT("PowerToys Settings"), WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    CW_USEDEFAULT, 0, 1024, 700, nullptr, nullptr, hInstance, nullptr);
 
   initialize_win32_webview();
   ShowWindow(main_window_handler, nCmdShow);

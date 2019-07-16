@@ -1,5 +1,5 @@
 import React from 'react';
-import {Stack, Text, Nav, CommandButton, DefaultButton, PrimaryButton, IconButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
+import {Stack, Text, Nav, CommandButton, PrimaryButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
 import {GeneralSettings} from './GeneralSettings';
 import {CustomSettingsScreen} from './CustomSettingsScreen';
 import '../css/layout.css';
@@ -52,16 +52,14 @@ export class App extends React.Component <any, any> {
       // output_from_webview should be declared in index.html
       (window as any).output_from_webview(JSON.stringify(this.settingsscreenref.get_data()));
     };
-    const discardChanges = (): void => {
-      this.settingsscreenref.forceUpdate();
-    }
+
 
     return (
       <div className='body'>
         <div className='sidebar'>
           <CommandButton
             iconProps={{iconName: 'GlobalNavButton'}}
-            text='PowerToys'
+            text='Settings'
             styles={{
               textContainer: {fontSize:18},
             }}
@@ -96,7 +94,7 @@ export class App extends React.Component <any, any> {
               },
               {
                 links: [
-                  { name: 'General', key:'general', url:'', icon: 'Settings' },
+                  { name: 'General Settings', key:'general', url:'', icon: 'Settings' },
                 ],
               }
             ]}
@@ -111,7 +109,7 @@ export class App extends React.Component <any, any> {
               >
                 { this.state.selectedmenu!='general' ?
                   powertoys_dict[this.state.selectedmenu].name + " Settings" :
-                  "General Settings"
+                  "PowerToys General Settings"
                 }
               </Text>
             </div>
@@ -121,11 +119,6 @@ export class App extends React.Component <any, any> {
                   text='Save'
                   onClick={saveClicked}
                   />
-                <DefaultButton
-                  text='Discard'
-                  onClick={discardChanges}
-                  />
-                <IconButton iconProps={{iconName:'Cancel'}} title='Close' />
               </Stack>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack, Text } from 'office-ui-fabric-react';
 import {BoolToggleSettingsControl} from './BoolToggleSettingsControl'
+import { Separator } from 'office-ui-fabric-react/lib/Separator';
 
 export class GeneralSettings extends React.Component <any, any> {
   references: any = {};
@@ -36,7 +37,7 @@ export class GeneralSettings extends React.Component <any, any> {
     let power_toys_enabled = this.state.settings.enabled;
     return (
       <Stack tokens={{childrenGap:30}}>
-        <Text variant='xLarge'>Enabled PowerToys</Text>
+        <Text variant='xLarge'>Available PowerToys</Text>
         { Object.keys(power_toys_enabled).map(
           (key) => {
             let enabled_value=power_toys_enabled[key];
@@ -47,11 +48,12 @@ export class GeneralSettings extends React.Component <any, any> {
             />;
           })
         }
+        <Separator />
         <Text variant='xLarge'>General</Text>
         <BoolToggleSettingsControl
           setting={{display_name: "Start at login", value: this.state.settings.startup}}
           ref={(input) => {this.startup_reference=input;}}
-          />;
+          />
       </Stack>
     )
   }
