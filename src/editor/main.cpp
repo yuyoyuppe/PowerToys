@@ -3,6 +3,7 @@
 #include "StreamUriResolverFromFile.h"
 #include <Shellapi.h>
 #include <common/two_way_pipe_message_ipc.h>
+#include <ShellScalingApi.h>
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shcore.lib")
@@ -323,6 +324,7 @@ int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
   HRESULT hrInit = CoInitialize(nullptr);
   return start_webview_window(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
