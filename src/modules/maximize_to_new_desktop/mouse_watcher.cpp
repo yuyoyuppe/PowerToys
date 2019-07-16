@@ -116,6 +116,7 @@ namespace {
 
   std::unordered_map<HWND, UIAutomationCachedInfo> custom_ui_automation_cache;
 
+
   void initialize_ui_automation_strategy() {
     initialize_ui_automation();
 
@@ -545,6 +546,8 @@ void stop_mouse_watcher() {
   terminate_mouse_thread_proc = true;
   if (mouse_initialized) {
     mouse_thread.join();
-    mouse_initialized = false;  
+    mouse_initialized = false;
   }
+  ui_automation_strategy_element_found = nullptr;
+  custom_ui_automation_cache.clear();
 }
