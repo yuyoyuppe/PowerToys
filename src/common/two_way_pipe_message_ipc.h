@@ -18,9 +18,24 @@ public:
     dispatch_inc_message_function = p_func;
   }
   void start(HANDLE _restricted_pipe_token) {
-    std::thread(&TwoWayPipeMessageIPC::consume_output_queue_thread, this).detach();
-    std::thread(&TwoWayPipeMessageIPC::consume_input_queue_thread, this).detach();
-    std::thread(&TwoWayPipeMessageIPC::start_named_pipe_server, this, _restricted_pipe_token).detach();
+    output_queue_thread = std::thread(&TwoWayPipeMessageIPC::consume_output_queue_thread, this);
+    input_queue_thread = std::thread(&TwoWayPipeMessageIPC::consume_input_queue_thread, this);
+    input_pipe_thread = std::thread(&TwoWayPipeMessageIPC::start_named_pipe_server, this, _restricted_pipe_token);
+  }
+
+  void end() {
+    closed = true;
+    input_queue.interrupt();
+    input_queue_thread.join();
+    output_queue.interrupt();
+    output_queue_thread.join();
+    pipe_connect_handle_mutex.lock();
+    if (current_connect_pipe_handle != NULL) {
+      //Cancels the Pipe currently waiting for a connection.
+      CancelIoEx(current_connect_pipe_handle,NULL);
+    }
+    pipe_connect_handle_mutex.unlock();
+    input_pipe_thread.join();
   }
 
 private:
@@ -28,12 +43,19 @@ private:
   AsyncMessageQueue output_queue;
   std::wstring output_pipe_name;
   std::wstring input_pipe_name;
+  std::thread input_queue_thread;
+  std::thread output_queue_thread;
+  std::thread input_pipe_thread;
+  std::mutex pipe_connect_handle_mutex; // For manipulating the current_connect_pipe
+
+  HANDLE current_connect_pipe_handle = NULL;
   bool closed = false;
   TwoWayPipeMessageIPC::callback_function dispatch_inc_message_function;
   const DWORD BUFSIZE = 1024;
 
   void send_pipe_message(std::wstring message) {
-    HANDLE hPipe;
+    // Adapted from https://docs.microsoft.com/en-us/windows/win32/ipc/named-pipe-client
+    HANDLE output_pipe_handle;
     const wchar_t* message_send = message.c_str();
     BOOL   fSuccess = FALSE;
     DWORD  cbToWrite, cbWritten, dwMode;
@@ -42,7 +64,7 @@ private:
     // Try to open a named pipe; wait for it, if necessary. 
 
     while (1) {
-      hPipe = CreateFile(
+      output_pipe_handle = CreateFile(
         lpszPipename,   // pipe name 
         GENERIC_READ |  // read and write access 
         GENERIC_WRITE,
@@ -54,7 +76,7 @@ private:
 
       // Break if the pipe handle is valid. 
 
-      if (hPipe != INVALID_HANDLE_VALUE)
+      if (output_pipe_handle != INVALID_HANDLE_VALUE)
         break;
 
       // Exit if an error other than ERROR_PIPE_BUSY occurs. 
@@ -72,7 +94,7 @@ private:
     }
     dwMode = PIPE_READMODE_MESSAGE;
     fSuccess = SetNamedPipeHandleState(
-      hPipe,    // pipe handle 
+      output_pipe_handle,    // pipe handle 
       &dwMode,  // new pipe mode 
       NULL,     // don't set maximum bytes 
       NULL);    // don't set maximum time 
@@ -85,7 +107,7 @@ private:
     cbToWrite = (lstrlen(message_send)) * sizeof(TCHAR); // no need to send final '\0'. Pipe is in message mode.
 
     fSuccess = WriteFile(
-      hPipe,                  // pipe handle 
+      output_pipe_handle,                  // pipe handle 
       message_send,           // message 
       cbToWrite,              // message length 
       &cbWritten,             // bytes written 
@@ -93,13 +115,16 @@ private:
     if (!fSuccess) {
       return;
     }
-    CloseHandle(hPipe);
+    CloseHandle(output_pipe_handle);
     return;
   }
 
   void consume_output_queue_thread() {
     while (!closed) {
       std::wstring message = output_queue.pop_message();
+      if (message.length() == 0) {
+        break;
+      }
       send_pipe_message(message);
     }
   }
@@ -280,7 +305,8 @@ private:
     return restricted_token_handle;
   }
 
-  void handle_pipe_connection(HANDLE h_pipe) {
+  void handle_pipe_connection(HANDLE input_pipe_handle) {
+    //Adapted from https://docs.microsoft.com/en-us/windows/win32/ipc/multithreaded-pipe-server
     HANDLE hHeap = GetProcessHeap();
     uint8_t* pchRequest = (uint8_t*)HeapAlloc(hHeap, 0, BUFSIZE * sizeof(uint8_t));
 
@@ -291,7 +317,7 @@ private:
 
     std::list<std::vector<uint8_t>> message_parts;
 
-    if (h_pipe == NULL) {
+    if (input_pipe_handle == NULL) {
       if (pchRequest != NULL) HeapFree(hHeap, 0, pchRequest);
       return;
     }
@@ -306,7 +332,7 @@ private:
       // up to BUFSIZE characters in length.
       ZeroMemory(pchRequest, BUFSIZE * sizeof(uint8_t));
       fSuccess = ReadFile(
-        h_pipe,        // handle to pipe 
+        input_pipe_handle,        // handle to pipe 
         pchRequest,    // buffer to receive data 
         BUFSIZE * sizeof(uint8_t), // size of buffer 
         &cbBytesRead, // number of bytes read 
@@ -342,9 +368,9 @@ private:
     // before disconnecting. Then disconnect the pipe, and close the 
     // handle to this pipe instance. 
 
-    FlushFileBuffers(h_pipe);
-    DisconnectNamedPipe(h_pipe);
-    CloseHandle(h_pipe);
+    FlushFileBuffers(input_pipe_handle);
+    DisconnectNamedPipe(input_pipe_handle);
+    CloseHandle(input_pipe_handle);
 
     HeapFree(hHeap, 0, pchRequest);
 
@@ -352,40 +378,46 @@ private:
   }
 
   void start_named_pipe_server(HANDLE token) {
+    // Adapted from https://docs.microsoft.com/en-us/windows/win32/ipc/multithreaded-pipe-server
     const wchar_t* pipe_name = input_pipe_name.c_str();
     BOOL connected = FALSE;
-    DWORD thread_id = 0;
-    HANDLE h_pipe = INVALID_HANDLE_VALUE, h_thread = NULL;
-    for (;;) {
-      h_pipe = CreateNamedPipe(
-        pipe_name,
-        PIPE_ACCESS_DUPLEX |
-        WRITE_DAC,
-        PIPE_TYPE_MESSAGE |
-        PIPE_READMODE_MESSAGE |
-        PIPE_WAIT,
-        PIPE_UNLIMITED_INSTANCES,
-        BUFSIZE,
-        BUFSIZE,
-        0,
-        NULL
-      );
+    HANDLE connect_pipe_handle = INVALID_HANDLE_VALUE;
+    while(!closed) {
+      {
+        std::unique_lock lock(pipe_connect_handle_mutex);
+        connect_pipe_handle = CreateNamedPipe(
+          pipe_name,
+          PIPE_ACCESS_DUPLEX |
+          WRITE_DAC,
+          PIPE_TYPE_MESSAGE |
+          PIPE_READMODE_MESSAGE |
+          PIPE_WAIT,
+          PIPE_UNLIMITED_INSTANCES,
+          BUFSIZE,
+          BUFSIZE,
+          0,
+          NULL
+        );
 
-      if (h_pipe == INVALID_HANDLE_VALUE) {
-        //show_last_error_message(TEXT("Can't open Settings Window"), GetLastError());
-        return;
+        if (connect_pipe_handle == INVALID_HANDLE_VALUE) {
+          return;
+        }
+
+        if (token != NULL) {
+          int err = change_pipe_security_allow_restricted_token(connect_pipe_handle, token);
+        }
+        current_connect_pipe_handle = connect_pipe_handle;
       }
-
-      if (token != NULL) {
-        int err = change_pipe_security_allow_restricted_token(h_pipe, token);
+      connected = ConnectNamedPipe(connect_pipe_handle, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+      {
+        std::unique_lock lock(pipe_connect_handle_mutex);
+        current_connect_pipe_handle = NULL;
       }
-      connected = ConnectNamedPipe(h_pipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
-
       if (connected) {
-        std::thread(&TwoWayPipeMessageIPC::handle_pipe_connection, this, h_pipe).detach();
+        std::thread(&TwoWayPipeMessageIPC::handle_pipe_connection, this, connect_pipe_handle).detach();
       } else {
         // Client could not connect.
-        CloseHandle(h_pipe);
+        CloseHandle(connect_pipe_handle);
       }
     }
   }
@@ -394,6 +426,9 @@ private:
   void consume_input_queue_thread() {
     while (!closed) {
       std::wstring message = input_queue.pop_message();
+      if (message.length() == 0) {
+        break;
+      }
       dispatch_inc_message_function(message);
     }
   }

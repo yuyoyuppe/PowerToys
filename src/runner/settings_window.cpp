@@ -169,7 +169,10 @@ HANDLE create_medium_integrity_token() {
   return restricted_token_handle;
 }
 
+bool block_settings_window_start = false;
+
 void run_settings_window() {
+  block_settings_window_start = true;
   STARTUPINFO startup_info = { sizeof(startup_info) };
   PROCESS_INFORMATION process_info = { 0 };
   TCHAR executable_path[MAX_PATH];
@@ -177,7 +180,7 @@ void run_settings_window() {
   PathRemoveFileSpec(executable_path);
   wcscat_s(executable_path, TEXT("\\settings.exe"));
   HANDLE restricted_token;
-  TCHAR executable_args[MAX_PATH*3];
+  TCHAR executable_args[MAX_PATH * 3];
   // Generate unique names for the pipes, if getting a UUID is possible
   std::wstring powertoys_pipe_name(TEXT("\\\\.\\pipe\\powertoys_runner_"));
   std::wstring settings_pipe_name(TEXT("\\\\.\\pipe\\powertoys_settings_"));
@@ -206,24 +209,41 @@ void run_settings_window() {
 
   if (!restricted_token) {
     // Couldn't get the restricted token to spawn the new process.
+    block_settings_window_start = false;
     return;
   }
 
-  if (CreateProcessAsUser(restricted_token, executable_path, executable_args, NULL, NULL, TRUE, 0, NULL, NULL, &startup_info, &process_info)) {
-    CloseHandle(process_info.hProcess);
-    CloseHandle(process_info.hThread);
-  } else {
+  if (!CreateProcessAsUser(restricted_token, executable_path, executable_args, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, &startup_info, &process_info)) {
     show_last_error_message(TEXT("Can't open Settings Window"), GetLastError());
+    block_settings_window_start = false;
+    return;
   }
 
   current_settings_ipc = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
   current_settings_ipc->start(restricted_token);
-  /* Cleanup */
-  //TODO: we're leaking this token, but the two IPC needs this... A cleanup strategy is still needed.
-  //CloseHandle(restricted_token);
 
+  ResumeThread(process_info.hThread);
+  CloseHandle(process_info.hThread);
+
+  if (WaitForSingleObject(process_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
+    show_last_error_message(TEXT("Couldn't wait on the Settings Window to close."), GetLastError());
+  }
+
+  current_settings_ipc->end();
+  delete current_settings_ipc;
+  current_settings_ipc = NULL;
+
+  CloseHandle(restricted_token);
+
+  CloseHandle(process_info.hProcess);
+  block_settings_window_start = false;
 }
 
 void open_settings_window() {
-  std::thread(run_settings_window).detach();
+  if (block_settings_window_start) {
+    MessageBox(NULL, L"There's a Settings Window already running. Close the first instance first.", L"Settings", MB_OK && MB_TOPMOST);
+  } else {
+    block_settings_window_start = true;
+    std::thread(run_settings_window).detach();
+  }
 }
