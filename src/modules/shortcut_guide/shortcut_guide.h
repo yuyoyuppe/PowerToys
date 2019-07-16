@@ -36,5 +36,8 @@ private:
   HWND desktop, shell;
   HWND active_window;
   bool _enabled = false;
+
   int current_delay_setting = 900;
+  void init_settings();
+  void save_settings();
 };

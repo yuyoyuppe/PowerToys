@@ -14,8 +14,8 @@
 #include <Shlobj.h>
 
 
-#define ExitOnFailure(x)   if (FAILED(x)) { goto LExit; }
-#define ExitWithLastError(x) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; }  goto LExit; }
+#define ExitOnFailure(x,a,b)   if (FAILED(x)) { goto LExit; }
+#define ExitWithLastError(x,a,b) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; }  goto LExit; }
 #define ExitFunction()        { goto LExit; }
 
 

@@ -3,6 +3,7 @@
 #include <interface/lowlevel_keyboard_event_data.h>
 #include "trace.h"
 #include <cpprest/json.h>
+#include <common/settings_helpers.h>
 
 using namespace web;
 
@@ -24,10 +25,17 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 // All methods called by the main PowerToys app
 class ExamplePowertoy : public PowertoyModuleIface {
 private:
+  // PowerToys properties can be saved here.
   bool test_bool_prop = false;
   int test_int_prop = 3;
   std::wstring test_string_prop = L"a string";
   std::wstring test_color_prop = L"#1212FF";
+  
+  // Load and save Settings from/to local app data.
+  void init_settings();
+  void save_settings();
+  
+  // If the PowerToy is enabled.
   bool _enabled = false;
 public:
   // Return the display name of the powertoy, this will be cached
@@ -129,6 +137,7 @@ public:
         test_color_prop = (object_value.at(L"value").as_string());
       }
     }
+    save_settings();
   }
 
   // Enable the powertoy
@@ -156,11 +165,92 @@ public:
     }
     return 0;
   }
+
+  // Constructor
+  ExamplePowertoy();
+
   // Destroy the powertoy and free memory
   virtual void destroy() override {
     delete this;
-  } 
+  }
 };
+
+// Constructor
+ExamplePowertoy::ExamplePowertoy() {
+  init_settings();
+}
+
+// Load the settings file.
+void ExamplePowertoy::init_settings() {
+  try {
+    std::wstring name = this->get_name();
+    json::value settings = PowerToysSettings::load_powertoy_settings_json(name);
+    web::json::value object_properties = settings.at(L"properties");
+    if (object_properties.has_object_field(L"test bool_toggle")) {
+      web::json::value object_value = object_properties.at(L"test bool_toggle");
+      if (object_value.has_boolean_field(L"value")) {
+        test_bool_prop = (object_value.at(L"value").as_bool());
+      }
+    }
+    if (object_properties.has_object_field(L"test int_spinner")) {
+      web::json::value object_value = object_properties.at(L"test int_spinner");
+      if (object_value.has_number_field(L"value")) {
+        test_int_prop = (object_value.at(L"value").as_integer());
+      }
+    }
+    if (object_properties.has_object_field(L"test string_text")) {
+      web::json::value object_value = object_properties.at(L"test string_text");
+      if (object_value.has_string_field(L"value")) {
+        test_string_prop = (object_value.at(L"value").as_string());
+      }
+    }
+    if (object_properties.has_object_field(L"test color_picker")) {
+      web::json::value object_value = object_properties.at(L"test color_picker");
+      if (object_value.has_string_field(L"value")) {
+        test_color_prop = (object_value.at(L"value").as_string());
+      }
+    }
+  }
+  catch (std::exception ex) {
+    // Error while loading from the settings file. Just let default values stay as they are.
+  }
+}
+
+void ExamplePowertoy::save_settings() {
+  try {
+    json::value _settings = json::value::object();
+    std::wstring name = get_name();
+    _settings.as_object()[L"name"] = json::value::string(name);
+    {
+      json::value _properties = json::value::object(true); //Keep order
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"value"] = json::value::boolean(test_bool_prop);
+        _properties.as_object()[L"test bool_toggle"] = _property;
+      }
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"value"] = json::value::number(test_int_prop);
+        _properties.as_object()[L"test int_spinner"] = _property;
+      }
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"value"] = json::value::string(test_string_prop);
+        _properties.as_object()[L"test string_text"] = _property;
+      }
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"value"] = json::value::string(test_color_prop);
+        _properties.as_object()[L"test color_picker"] = _property;
+      }
+      _settings.as_object()[L"properties"] = _properties;
+    }
+    PowerToysSettings::save_powertoy_settings_json(name, _settings);
+  }
+  catch (std::exception ex) {
+    //Couldn't save the settings.
+  }
+}
 
 extern "C" __declspec(dllexport) PowertoyModuleIface*  __cdecl powertoy_create() {
   return new ExamplePowertoy();

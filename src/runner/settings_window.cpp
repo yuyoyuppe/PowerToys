@@ -8,26 +8,13 @@
 #include "powertoy_module.h"
 #include <common/two_way_pipe_message_ipc.h>
 #include "tray_icon.h"
-#include "auto_start_helper.h"
+#include "general_settings.h"
 
 #define BUFSIZE 1024
 
 using namespace web;
 
 TwoWayPipeMessageIPC* current_settings_ipc = NULL;
-
-json::value get_general_settings() {
-  json::value result = json::value::object();
-  bool startup = is_auto_start_task_active_for_this_user();
-  result.as_object()[L"startup"] = json::value::boolean(startup);
-
-  json::value enabled = json::value::object();
-  for (auto&[name, powertoy] : modules()) {
-    enabled.as_object()[name] = json::value::boolean(powertoy.is_enabled());
-  }
-  result.as_object()[L"enabled"] = enabled;
-  return result;
-}
 
 json::value get_power_toys_settings() {
   json::value result = json::value::object();
@@ -63,37 +50,6 @@ void dispatch_json_config_to_modules(const json::value& powertoys_configs) {
     send_json_config_to_module(powertoy_element.first, ws.str());
   }
 };
-
-void apply_general_settings(const json::value& general_configs) {
-  bool contains_startup = general_configs.has_boolean_field(L"startup");
-  if (contains_startup) {
-    bool startup = general_configs.at(L"startup").as_bool();
-    bool current_startup = is_auto_start_task_active_for_this_user();
-    if (current_startup != startup) {
-      if (startup) {
-        enable_auto_start_task_for_this_user();
-      } else {
-        disable_auto_start_task_for_this_user();
-      }
-    }
-  }
-  bool contains_enabled = general_configs.has_object_field(L"enabled");
-  if (contains_enabled) {
-    for (auto enabled_element : general_configs.at(L"enabled").as_object()) {
-      if (enabled_element.second.is_boolean() && modules().find(enabled_element.first) != modules().end()) {
-        bool module_inst_enabled = modules().at(enabled_element.first).is_enabled();
-        bool target_enabled = enabled_element.second.as_bool();
-        if (module_inst_enabled != target_enabled) {
-          if (target_enabled) {
-            modules().at(enabled_element.first).enable();
-          } else {
-            modules().at(enabled_element.first).disable();
-          }
-        }
-      }
-    }
-  }
-}
 
 void dispatch_received_json(const std::wstring &json_to_parse) {
   json::value j = json::value::parse(json_to_parse);

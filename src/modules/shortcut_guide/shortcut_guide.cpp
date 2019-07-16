@@ -3,12 +3,14 @@
 #include "target_state.h"
 #include "trace.h"
 #include <cpprest/json.h>
+#include <common/settings_helpers.h>
 
 using namespace web;
 
 OverlayWindow* instance = nullptr;
 
 OverlayWindow::OverlayWindow() {
+  init_settings();
 }
 
 const wchar_t * OverlayWindow::get_name() {
@@ -30,7 +32,7 @@ bool OverlayWindow::get_config(const wchar_t** config) {
       json::value _property = json::value::object();
       _property.as_object()[L"display_name"] = json::value::string(L"How long to press the Windows key before showing the Shortcut Guide (ms)");
       _property.as_object()[L"editor_type"] = json::value::string(L"int_spinner");
-      _property.as_object()[L"value"] = json::value::number(get_current_delay_setting());
+      _property.as_object()[L"value"] = current_delay_setting;
       _properties.as_object()[L"press time"] = _property;
     }
     _settings.as_object()[L"properties"] = _properties;
@@ -66,18 +68,19 @@ void OverlayWindow::set_config(const wchar_t * config) {
     if (object_value.has_number_field(L"value")) {
       //Will be replaced by actual property update.
       int press_delay_time = (object_value.at(L"value").as_integer());
-      set_current_delay_setting(press_delay_time);
+      current_delay_setting=press_delay_time;
       if (target_state) {
         target_state->set_delay(press_delay_time);
       }
     }
   }
+  save_settings();
 }
 
 void OverlayWindow::enable() {
   if (!_enabled) {
     winkey_popup = new D2DOverlayWindow();
-    target_state = new TargetState(get_current_delay_setting());
+    target_state = new TargetState(current_delay_setting);
     winkey_popup->initialize();
     desktop = GetDesktopWindow();
     shell = GetShellWindow();
@@ -151,10 +154,40 @@ void OverlayWindow::destroy() {
   instance = nullptr;
 }
 
-int OverlayWindow::get_current_delay_setting() {
-  return current_delay_setting;
+void OverlayWindow::init_settings() {
+  try {
+    std::wstring name = this->get_name();
+    json::value settings = PowerToysSettings::load_powertoy_settings_json(name);
+    web::json::value object_properties = settings.at(L"properties");
+    if (object_properties.has_object_field(L"press time")) {
+      web::json::value object_value = object_properties.at(L"press time");
+      if (object_value.has_number_field(L"value")) {
+        current_delay_setting = (object_value.at(L"value").as_integer());
+      }
+    }
+  }
+  catch (std::exception ex) {
+    // Error while loading from the settings file. Just let default values stay as they are.
+  }
 }
 
-void OverlayWindow::set_current_delay_setting(int new_delay) {
-  current_delay_setting = new_delay;
+void OverlayWindow::save_settings() {
+  try {
+    json::value _settings = json::value::object();
+    std::wstring name = get_name();
+    _settings.as_object()[L"name"] = json::value::string(name);
+    {
+      json::value _properties = json::value::object(true); //Keep order
+      {
+        json::value _property = json::value::object();
+        _property.as_object()[L"value"] = json::value::number(current_delay_setting);
+        _properties.as_object()[L"press time"] = _property;
+      }
+      _settings.as_object()[L"properties"] = _properties;
+    }
+    PowerToysSettings::save_powertoy_settings_json(name, _settings);
+  }
+  catch (std::exception ex) {
+    //Couldn't save the settings.
+  }
 }

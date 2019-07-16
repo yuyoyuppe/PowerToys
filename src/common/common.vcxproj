@@ -108,6 +108,7 @@
     <ClInclude Include="d2d_window.h" />
     <ClInclude Include="monitors.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="settings_helpers.h" />
     <ClInclude Include="start_visible.h" />
     <ClInclude Include="tasklist_positions.h" />
     <ClInclude Include="common.h" />
@@ -132,6 +133,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="settings_helpers.cpp" />
     <ClCompile Include="start_visible.cpp" />
     <ClCompile Include="tasklist_positions.cpp" />
     <ClCompile Include="common.cpp" />

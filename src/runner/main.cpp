@@ -6,6 +6,7 @@
 #include "powertoy_module.h"
 #include "lowlevel_keyboard_event.h"
 #include "trace.h"
+#include "general_settings.h"
 
 #if _DEBUG && _WIN64
 #include "unhandled_exception_handler.h"
@@ -61,10 +62,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     } 
     // Start our events providers
     start_lowlevel_keyboard_hook();
-    // Start all the powertoys
-    for (auto& [name, powertoy] : modules()) {
-      powertoy.enable();
-    }
+     // Start initial powertoys
+    start_initial_powertoys();
 
     Trace::EventLaunch();
 
