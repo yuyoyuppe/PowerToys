@@ -64,7 +64,7 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
       case ID_ABOUT_MENU_COMMAND:
         if (!about_box_shown) {
           about_box_shown = true;
-          MessageBox(nullptr, L"PowerToys\nVersion 0.1.0\n© 2019 Microsoft Corporation", L"About PowerToys", MB_OK);
+          MessageBox(nullptr, L"PowerToys\nVersion 0.8.0\nï¿½ 2019 Microsoft Corporation", L"About PowerToys", MB_OK);
           about_box_shown = false;
         }
         break;
