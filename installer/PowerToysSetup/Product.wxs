@@ -180,7 +180,7 @@
         <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
       </Component>
       <Component Id="settings_exe" Guid="a5a461a9-7097-4cba-9d39-3dbbb6b7b80c" Win64="yes">
-        <File Id="powertoys_settings.exe" KeyPath="yes" Checksum="yes" />
+        <File Id="PowerToysSettings.exe" KeyPath="yes" Checksum="yes" />
       </Component>
       <Component Id="License_rtf" Guid="3e5ae43b-cfb4-449b-a346-94caaff3312e" Win64="yes">
         <File Source="$(var.RepoDir)\License.rtf" Id="License.rtf" KeyPath="yes" />

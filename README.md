@@ -61,7 +61,7 @@ Here's the current set of utilities we're considering.  Please use issues and +1
 ## Building the Code
  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` or `Debug`, from the `Build` menu choose `Build Solution`.
  * The PowerToys binaries will be located in your repo under `x64\Release`.
- * If you want to copy the `powertoys.exe` binary to a different location, you'll also need to copy the `modules` and the `svgs` folders.
+ * If you want to copy the `PowerToys.exe` binary to a different location, you'll also need to copy the `modules` and the `svgs` folders.
 
 ## Prerequisites to Build the Installer
  * Install the [WiX Toolset Visual Studio 2017 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
