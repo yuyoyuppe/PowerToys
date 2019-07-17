@@ -37,8 +37,15 @@ export class CustomSettingsScreen extends React.Component <any, any> {
     let power_toys_properties = this.state.powertoy.properties;
     return (
       <Stack tokens={{childrenGap:30}}>
-        { Object.keys(power_toys_properties).map(
-          (key) => {
+        {
+          Object.keys(power_toys_properties).
+          sort(function(a, b) {
+            return ( // Order powertoys settings
+              (power_toys_properties[a].order || 0) -
+              (power_toys_properties[b].order || 0)
+            )
+          }).
+          map( (key) => {
             switch(power_toys_properties[key].editor_type) {
               case 'bool_toggle':
                 return <BoolToggleSettingsControl

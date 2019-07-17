@@ -3,9 +3,7 @@
 #include <interface/lowlevel_keyboard_event_data.h>
 #include "trace.h"
 #include <cpprest/json.h>
-#include <common/settings_helpers.h>
-
-using namespace web;
+#include <common/settings_objects.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {
@@ -53,90 +51,90 @@ public:
   }
   // Return JSON with the configuration options.
   virtual bool get_config(const wchar_t** config) override {
-    json::value _settings = json::value::object();
-    _settings.as_object()[L"name"] = json::value::string(get_name());
-    _settings.as_object()[L"description"] = json::value::string(L"Shows the different controls for the settings.");
-    {
-      json::value _properties = json::value::object(true); //Keep order
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"display_name"] = json::value::string(L"This is what a bool_toggle looks like");
-        _property.as_object()[L"editor_type"] = json::value::string(L"bool_toggle");
-        _property.as_object()[L"value"] = json::value::boolean(test_bool_prop);
-        _properties.as_object()[L"test bool_toggle"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"display_name"] = json::value::string(L"This is what a int_spinner looks like");
-        _property.as_object()[L"editor_type"] = json::value::string(L"int_spinner");
-        _property.as_object()[L"value"] = json::value::number(test_int_prop);
-        _properties.as_object()[L"test int_spinner"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"display_name"] = json::value::string(L"This is what a string_text looks like");
-        _property.as_object()[L"editor_type"] = json::value::string(L"string_text");
-        _property.as_object()[L"value"] = json::value::string(test_string_prop);
-        _properties.as_object()[L"test string_text"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"display_name"] = json::value::string(L"This is what a color_picker looks like");
-        _property.as_object()[L"editor_type"] = json::value::string(L"color_picker");
-        _property.as_object()[L"value"] = json::value::string(test_color_prop);
-        _properties.as_object()[L"test color_picker"] = _property;
-      }
-      _settings.as_object()[L"properties"] = _properties;
-    }
-    std::wstringstream ss;
-    ss << _settings;
-    std::wstring w_str = ss.str();
-    const wchar_t* result_wstr = w_str.c_str();
-    size_t result_len = wcslen(result_wstr) + 1;
-    wchar_t *result = new wchar_t[result_len];
-    wcscpy_s(result, result_len, result_wstr);
-    *config = result;
+    // Create a Settings object.
+    PowerToysSettings::Settings _settings(
+      get_name(),
+      L"Serves as an example powertoy, with example settings."
+    );
+
+    // Add a bool property with a toggle editor.
+    _settings.add_property(
+      PowerToysSettings::BoolTogglePropertySetting(
+        L"test bool_toggle", // property name
+        L"This is what a BoolTogglePropertySetting looks like", // property display text
+        test_bool_prop // property value
+      )
+    );
+
+    // Add an integer property with a spinner editor.
+    _settings.add_property(
+      PowerToysSettings::IntSpinnerPropertySetting(
+        L"test int_spinner", // property name
+        L"This is what a IntSpinnerPropertySetting looks like", // property display text
+        test_int_prop // property value
+      )
+    );
+
+    // Add a string property with a textbox editor.
+    _settings.add_property(
+      PowerToysSettings::StringTextPropertySetting(
+        L"test string_text", // property name
+        L"This is what a StringTextPropertySetting looks like", // property display text
+        test_string_prop // property value
+      )
+    );
+
+    // Add a string property with a color picker editor.
+    _settings.add_property(
+      PowerToysSettings::ColorPickerPropertySetting(
+        L"test color_picker", // property name
+        L"This is what a ColorPickerPropertySetting looks like", // property display text
+        test_color_prop // property value
+      )
+    );
+
+    // Returns an allocated wchar_t*. free_get_config will get called later to free this value
+    *config = _settings.to_allocated_cstring();
+
     return true;
   }
   virtual void free_get_config(const wchar_t* config) override {
-    delete[] config;
+    PowerToysSettings::Settings::free_allocated_cstring(config);
   };
-  // Passes JSON with the configuration settings for the powertoy
+
+  // Passes JSON with the configuration settings for the powertoy.
   virtual void set_config(const wchar_t* config) override { 
-    web::json::value j = web::json::value::parse(config);
-    if (!j.is_object()) {
-      // Should be an object.
-      return;
-    }
-    if (!j.has_object_field(L"properties")) {
-      // Should have a properties field.
-      return;
-    }
-    web::json::value object_properties = j.at(L"properties");
-    if (object_properties.has_object_field(L"test bool_toggle")) {
-      web::json::value object_value = object_properties.at(L"test bool_toggle");
-      if (object_value.has_boolean_field(L"value")) {
-        test_bool_prop=(object_value.at(L"value").as_bool());
+    try {
+      // Parse the PowerToysValues object from the received json string.
+      PowerToysSettings::PowerToyValues _values =
+        PowerToysSettings::PowerToyValues::from_json_string(config);
+
+      // Update the bool property.
+      if (_values.is_bool_value(L"test bool_toggle")) {
+        test_bool_prop = _values.get_bool_value(L"test bool_toggle");
       }
-    }
-    if (object_properties.has_object_field(L"test int_spinner")) {
-      web::json::value object_value = object_properties.at(L"test int_spinner");
-      if (object_value.has_number_field(L"value")) {
-        test_int_prop = (object_value.at(L"value").as_integer());
+
+      // Update the int property.
+      if (_values.is_int_value(L"test int_spinner")) {
+        test_int_prop = _values.get_int_value(L"test int_spinner");
       }
-    }
-    if (object_properties.has_object_field(L"test string_text")) {
-      web::json::value object_value = object_properties.at(L"test string_text");
-      if (object_value.has_string_field(L"value")) {
-        test_string_prop = (object_value.at(L"value").as_string());
+
+      // Update the string property.
+      if (_values.is_string_value(L"test string_text")) {
+        test_string_prop = _values.get_string_value(L"test string_text");
       }
-    }
-    if (object_properties.has_object_field(L"test color_picker")) {
-      web::json::value object_value = object_properties.at(L"test color_picker");
-      if (object_value.has_string_field(L"value")) {
-        test_color_prop = (object_value.at(L"value").as_string());
+
+      // Update the color property.
+      if (_values.is_string_value(L"test color_picker")) {
+        test_color_prop = _values.get_string_value(L"test color_picker");
       }
+
     }
+    catch (std::exception ex) {
+      // Improper JSON.
+    }
+
+    // Persist the settings.
     save_settings();
   }
 
@@ -183,32 +181,28 @@ ExamplePowertoy::ExamplePowertoy() {
 // Load the settings file.
 void ExamplePowertoy::init_settings() {
   try {
-    std::wstring name = this->get_name();
-    json::value settings = PowerToysSettings::load_powertoy_settings_json(name);
-    web::json::value object_properties = settings.at(L"properties");
-    if (object_properties.has_object_field(L"test bool_toggle")) {
-      web::json::value object_value = object_properties.at(L"test bool_toggle");
-      if (object_value.has_boolean_field(L"value")) {
-        test_bool_prop = (object_value.at(L"value").as_bool());
-      }
+    // Load and parse the settings file for this PowerToy.
+    PowerToysSettings::PowerToyValues settings =
+      PowerToysSettings::PowerToyValues::load_from_settings_file(get_name());
+
+    // Load the bool property.
+    if (settings.is_bool_value(L"test bool_toggle")) {
+      test_bool_prop = settings.get_bool_value(L"test bool_toggle");
     }
-    if (object_properties.has_object_field(L"test int_spinner")) {
-      web::json::value object_value = object_properties.at(L"test int_spinner");
-      if (object_value.has_number_field(L"value")) {
-        test_int_prop = (object_value.at(L"value").as_integer());
-      }
+
+    // Load the int property.
+    if (settings.is_int_value(L"test int_spinner")) {
+      test_int_prop = settings.get_int_value(L"test int_spinner");
     }
-    if (object_properties.has_object_field(L"test string_text")) {
-      web::json::value object_value = object_properties.at(L"test string_text");
-      if (object_value.has_string_field(L"value")) {
-        test_string_prop = (object_value.at(L"value").as_string());
-      }
+
+    // Load the string property.
+    if (settings.is_string_value(L"test string_text")) {
+      test_string_prop = settings.get_string_value(L"test string_text");
     }
-    if (object_properties.has_object_field(L"test color_picker")) {
-      web::json::value object_value = object_properties.at(L"test color_picker");
-      if (object_value.has_string_field(L"value")) {
-        test_color_prop = (object_value.at(L"value").as_string());
-      }
+
+    // Load the color property.
+    if (settings.is_string_value(L"test color_picker")) {
+      test_color_prop = settings.get_string_value(L"test color_picker");
     }
   }
   catch (std::exception ex) {
@@ -218,34 +212,46 @@ void ExamplePowertoy::init_settings() {
 
 void ExamplePowertoy::save_settings() {
   try {
-    json::value _settings = json::value::object();
-    std::wstring name = get_name();
-    _settings.as_object()[L"name"] = json::value::string(name);
-    {
-      json::value _properties = json::value::object(true); //Keep order
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"value"] = json::value::boolean(test_bool_prop);
-        _properties.as_object()[L"test bool_toggle"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"value"] = json::value::number(test_int_prop);
-        _properties.as_object()[L"test int_spinner"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"value"] = json::value::string(test_string_prop);
-        _properties.as_object()[L"test string_text"] = _property;
-      }
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"value"] = json::value::string(test_color_prop);
-        _properties.as_object()[L"test color_picker"] = _property;
-      }
-      _settings.as_object()[L"properties"] = _properties;
-    }
-    PowerToysSettings::save_powertoy_settings_json(name, _settings);
+    // Create a PowerToyValues object for this PowerToy
+    PowerToysSettings::PowerToyValues values(
+      get_name()
+    );
+
+    // Save the bool property.
+    values.add_property_value(
+      PowerToysSettings::BoolSettingsValue(
+        L"test bool_toggle", // property name
+        test_bool_prop // property value
+      )
+    );
+
+    // Save the int property.
+    values.add_property_value(
+      PowerToysSettings::IntSettingsValue(
+        L"test int_spinner", // property name
+        test_int_prop // property value
+      )
+    );
+
+    // Save the string property.
+    values.add_property_value(
+      PowerToysSettings::StringSettingsValue(
+        L"test string_text", // property name
+        test_string_prop // property value
+      )
+    );
+
+    // Save the color property.
+    values.add_property_value(
+      PowerToysSettings::StringSettingsValue(
+        L"test color_picker", // property name
+        test_color_prop // property value
+      )
+    );
+
+    // Save the PowerToyValues JSON to the power toy settings file.
+    values.save_to_settings_file();
+
   }
   catch (std::exception ex) {
     //Couldn't save the settings.

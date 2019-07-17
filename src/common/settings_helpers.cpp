@@ -18,7 +18,7 @@ std::wstring PowerToysSettings::get_global_powertoys_save_folder_location() {
   return result;
 }
 
-std::wstring PowerToysSettings::get_powertoy_save_folder_location(std::wstring& powertoy_name) {
+std::wstring PowerToysSettings::get_powertoy_save_folder_location(const std::wstring& powertoy_name) {
   std::wstring result = get_global_powertoys_save_folder_location();
   result += L"\\";
   result += powertoy_name;
@@ -29,7 +29,7 @@ std::wstring PowerToysSettings::get_powertoy_save_folder_location(std::wstring& 
   return result;
 }
 
-std::wstring PowerToysSettings::get_powertoy_save_file_location(std::wstring& powertoy_name) {
+std::wstring PowerToysSettings::get_powertoy_save_file_location(const std::wstring& powertoy_name) {
   std::wstring result = get_powertoy_save_folder_location(powertoy_name);
   result += L"\\settings.json";
   return result;
@@ -41,14 +41,14 @@ std::wstring PowerToysSettings::get_powertoys_general_save_file_location() {
   return result;
 }
 
-void PowerToysSettings::save_powertoy_settings_json(std::wstring& powertoy_name, web::json::value& settings) {
+void PowerToysSettings::save_powertoy_settings_json(const std::wstring& powertoy_name, web::json::value& settings) {
   std::wstring save_file_location = get_powertoy_save_file_location(powertoy_name);
   std::ofstream save_file(save_file_location, std::ios::binary);
   settings.serialize(save_file);
   save_file.close();
 }
 
-web::json::value PowerToysSettings::load_powertoy_settings_json(std::wstring& powertoy_name) {
+web::json::value PowerToysSettings::load_powertoy_settings_json(const std::wstring& powertoy_name) {
   std::wstring save_file_location = get_powertoy_save_file_location(powertoy_name);
   std::ifstream save_file(save_file_location, std::ios::binary);
   web::json::value result = web::json::value::parse(save_file);

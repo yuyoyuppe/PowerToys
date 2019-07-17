@@ -117,6 +117,7 @@ void send_message_to_powertoys(const std::wstring msg) {
             },
             "powertoys": {
               "Move To New Desktop" : {
+                "version": "1.0",
                 "name": "Move To New Desktop",
                 "description": "Adds popup that Maximizes a Window to a new Desktop.",
                 "properties": {
@@ -133,6 +134,7 @@ void send_message_to_powertoys(const std::wstring msg) {
                 }
               },
               "Shortcut Guide": {
+                "version": "1.0",
                 "name": "Shortcut Guide",
                 "description": "Shows a help overlay with Windows shortcuts when the Windows key is pressed.",
                 "properties": {
@@ -144,6 +146,7 @@ void send_message_to_powertoys(const std::wstring msg) {
                 }
               },
               "Example PowerToy": {
+                "version": "1.0",
                 "name": "Example PowerToy",
                 "description": "Shows the different controls for the settings.",
                 "properties": {

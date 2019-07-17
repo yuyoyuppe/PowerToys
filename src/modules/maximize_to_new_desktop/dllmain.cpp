@@ -5,7 +5,7 @@
 #include "mouse_watcher.h"
 #include "trace.h"
 #include <cpprest/json.h>
-#include <common/settings_helpers.h>
+#include <common/settings_objects.h>
 
 using namespace web;
 
@@ -43,54 +43,40 @@ public:
   }
 
   virtual bool get_config(const wchar_t** config) override {
-    json::value _settings = json::value::object();
-    _settings.as_object()[L"name"] = json::value::string(get_name());
-    _settings.as_object()[L"description"] = json::value::string(L"Adds popup that Maximizes a Window to a new Desktop.");
-    {
-      json::value _properties = json::value::object(true); //Keep order
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"display_name"] = json::value::string(L"Remove a virtual desktop when the last window is restored");
-        _property.as_object()[L"editor_type"] = json::value::string(L"bool_toggle");
-        _property.as_object()[L"value"] = json::value::boolean(should_close_desktop_after_restoring_last_window);
-        _properties.as_object()[L"close desktop on restore"] = _property;
-      }
-      _settings.as_object()[L"properties"] = _properties;
-    }
-    std::wstringstream ss;
-    ss << _settings;
-    std::wstring w_str = ss.str();
-    const wchar_t* result_wstr = w_str.c_str();
-    size_t result_len = wcslen(result_wstr)+1;
-    wchar_t *result = new wchar_t[result_len];
-    wcscpy_s(result, result_len, result_wstr);
-    *config = result;
+    PowerToysSettings::Settings _settings(
+      get_name(),
+      L"Adds popup that Maximizes a Window to a new Desktop."
+    );
+    _settings.add_property(
+      PowerToysSettings::BoolTogglePropertySetting(
+        L"close desktop on restore",
+        L"Remove a virtual desktop when the last window is restored",
+        should_close_desktop_after_restoring_last_window
+      )
+    );
+    *config = _settings.to_allocated_cstring();
     return true;
   }
 
   virtual void free_get_config(const wchar_t* config) override {
-    delete[] config;
+    PowerToysSettings::Settings::free_allocated_cstring(config);
   };
+
   virtual void set_config(const wchar_t* config) override {
-    web::json::value j = web::json::value::parse(config);
-    if (!j.is_object()) {
-      // Should be an object.
-      return;
-    }
-    if (!j.has_object_field(L"properties")) {
-      // Should have a properties field.
-      return;
-    }
-    web::json::value object_properties = j.at(L"properties");
-    if (object_properties.has_object_field(L"close desktop on restore")) {
-      web::json::value close_desktop = object_properties.at(L"close desktop on restore");
-      if (close_desktop.has_boolean_field(L"value")) {
-        should_close_desktop_after_restoring_last_window = close_desktop.at(L"value").as_bool();
+    try {
+      PowerToysSettings::PowerToyValues _values =
+        PowerToysSettings::PowerToyValues::from_json_string(config);
+      if (_values.is_bool_value(L"close desktop on restore")) {
+        should_close_desktop_after_restoring_last_window = _values.get_bool_value(L"close desktop on restore");
         if (maximize_popup != nullptr) {
           maximize_popup->set_delete_after_restore(should_close_desktop_after_restoring_last_window);
         }
       }
     }
+    catch (std::exception ex) {
+      // Improper JSON.
+    }
+
     // Persist settings.
     save_settings();
   }
@@ -157,19 +143,16 @@ void on_mouse_out() {
 
 void MTNDPowertoy::save_settings() {
   try {
-    json::value _settings = json::value::object();
-    std::wstring name = get_name();
-    _settings.as_object()[L"name"] = json::value::string(name);
-    {
-      json::value _properties = json::value::object(true); //Keep order
-      {
-        json::value _property = json::value::object();
-        _property.as_object()[L"value"] = json::value::boolean(should_close_desktop_after_restoring_last_window);
-        _properties.as_object()[L"close desktop on restore"] = _property;
-      }
-      _settings.as_object()[L"properties"] = _properties;
-    }
-    PowerToysSettings::save_powertoy_settings_json(name, _settings);
+    PowerToysSettings::PowerToyValues values(
+      get_name()
+    );
+    values.add_property_value(
+      PowerToysSettings::BoolSettingsValue(
+        L"close desktop on restore",
+        should_close_desktop_after_restoring_last_window
+      )
+    );
+    values.save_to_settings_file();
   }
   catch (std::exception ex) {
     //Couldn't save the settings.
@@ -178,14 +161,10 @@ void MTNDPowertoy::save_settings() {
 
 void MTNDPowertoy::init_settings() {
   try {
-    std::wstring name = this->get_name();
-    json::value settings = PowerToysSettings::load_powertoy_settings_json(name);
-    web::json::value object_properties = settings.at(L"properties");
-    if (object_properties.has_object_field(L"close desktop on restore")) {
-      web::json::value close_desktop = object_properties.at(L"close desktop on restore");
-      if (close_desktop.has_boolean_field(L"value")) {
-        should_close_desktop_after_restoring_last_window = close_desktop.at(L"value").as_bool();
-      }
+    PowerToysSettings::PowerToyValues settings =
+      PowerToysSettings::PowerToyValues::load_from_settings_file(get_name());
+    if (settings.is_bool_value(L"close desktop on restore")) {
+      should_close_desktop_after_restoring_last_window = settings.get_bool_value(L"close desktop on restore");
     }
   }
   catch (std::exception ex) {
