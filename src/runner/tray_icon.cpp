@@ -37,6 +37,8 @@ bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID
 
 NOTIFYICONDATA tray_icon_data;
 
+static bool about_box_shown = false;
+
 LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
   case WM_CREATE:
@@ -58,6 +60,13 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         break;
       case ID_EXIT_MENU_COMMAND:
         DestroyWindow(window);
+        break;
+      case ID_ABOUT_MENU_COMMAND:
+        if (!about_box_shown) {
+          about_box_shown = true;
+          MessageBox(nullptr, L"PowerToys\nVersion 0.1.0\n© 2019 Microsoft Corporation", L"About PowerToys", MB_OK);
+          about_box_shown = false;
+        }
         break;
     }
     break;
