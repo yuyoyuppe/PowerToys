@@ -1,20 +1,15 @@
 # Web project for the Settings UI
 
-This is a fabricui website created to serve as the UI for the PowerToys Settings.
+The UI for the PowerToys Settings is created using FabricUI.
 
 ## Build Commands
 
-Here are several commands you can use to build and test this project:
+Here are the commands to build and test this project:
 
 ### To start the development server
 
 ```
 npm install
-```
-
-### To start the development server
-
-```
 npm run start
 ```
 
