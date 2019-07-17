@@ -4,6 +4,7 @@
 #include <Shellapi.h>
 #include <common/two_way_pipe_message_ipc.h>
 #include <ShellScalingApi.h>
+#include "resource.h"
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shcore.lib")
@@ -272,7 +273,7 @@ void register_classes(HINSTANCE hInstance) {
   wcex.cbClsExtra = 0;
   wcex.cbWndExtra = 0;
   wcex.hInstance = hInstance;
-  wcex.hIcon = nullptr;
+  wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(APPICON));
   wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
   wcex.lpszMenuName = nullptr;
