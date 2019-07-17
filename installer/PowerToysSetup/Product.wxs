@@ -162,6 +162,9 @@
         <Directory Id="INSTALLFOLDER" Name="PowerToys">
           <Directory Id="SvgsInstallFolder" Name="svgs"/>
           <Directory Id="ModulesInstallFolder" Name="modules"/>
+          <Directory Id="SettingsHtmlInstallFolder" Name="settings-html">
+            <Directory Id="SettingsHtmlDistInstallFolder" Name="dist"/>
+          </Directory>
         </Directory>
       </Directory>
       <Directory Id="ProgramMenuFolder">
@@ -175,6 +178,9 @@
     <DirectoryRef Id="INSTALLFOLDER" FileSource="$(var.BinX64Dir)">
       <Component Id="powertoys_exe" Guid="a2c66d91-3485-4d00-b04d-91844e6b345b" Win64="yes">
         <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
+      </Component>
+      <Component Id="settings_exe" Guid="a5a461a9-7097-4cba-9d39-3dbbb6b7b80c" Win64="yes">
+        <File Id="powertoys_settings.exe" KeyPath="yes" Checksum="yes" />
       </Component>
       <Component Id="License_rtf" Guid="3e5ae43b-cfb4-449b-a346-94caaff3312e" Win64="yes">
         <File Source="$(var.RepoDir)\License.rtf" Id="License.rtf" KeyPath="yes" />
@@ -205,6 +211,16 @@
       </Component>
       <Component Id="Module_ShortcutGuide" Guid="cbd0ac09-91d3-428e-b2b3-05745adf3473" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\shortcut_guide.dll" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="SettingsHtmlInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\">
+      <Component Id="settings_html" Guid="87881a99-e917-4b0d-b1d8-5c6eb9709f96" Win64="yes">
+        <File Source="$(var.RepoDir)\src\editor\settings-html\index.html" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="SettingsHtmlDistInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\dist\">
+      <Component Id="settings_js_bundle" Guid="9ef539c1-2f50-421e-b074-c58ed3a9785c" Win64="yes">
+        <File Source="$(var.RepoDir)\src\editor\settings-html\dist\bundle.js" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
@@ -258,6 +274,9 @@
       <ComponentRef Id="Module_ShortcutGuide" />
       <ComponentRef Id="ApplicationShortcut" />
       <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="settings_exe" />
+      <ComponentRef Id="settings_html" />
+      <ComponentRef Id="settings_js_bundle" />
     </ComponentGroup>
   </Fragment>
 </Wix>

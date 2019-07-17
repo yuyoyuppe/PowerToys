@@ -134,7 +134,7 @@ void run_settings_window() {
   TCHAR executable_path[MAX_PATH];
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
-  wcscat_s(executable_path, TEXT("\\settings.exe"));
+  wcscat_s(executable_path, TEXT("\\powertoys_settings.exe"));
   HANDLE restricted_token;
   TCHAR executable_args[MAX_PATH * 3];
   // Generate unique names for the pipes, if getting a UUID is possible
