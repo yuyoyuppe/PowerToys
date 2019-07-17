@@ -88,7 +88,7 @@ void send_message_to_webview(const std::wstring& msg) {
     // webview_control.InvokeScriptAsync can't be made from 
     PCOPYDATASTRUCT copy_data_message = new COPYDATASTRUCT();
     const wchar_t* orig_msg = msg.c_str();
-    DWORD orig_len = wcslen(orig_msg);
+    DWORD orig_len = (DWORD)wcslen(orig_msg);
     wchar_t* copy_msg = new wchar_t[orig_len + 1];
     wcscpy_s(copy_msg, orig_len + 1, orig_msg);
     copy_data_message->dwData = SEND_TO_WEBVIEW_MSG;

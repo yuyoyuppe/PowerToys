@@ -3,13 +3,14 @@
 #include <filesystem>
 #include <fstream>
 
-std::wstring PowerToysSettings::get_global_powertoys_save_folder_location() {
+std::wstring PowerToysSettings::get_root_save_folder_location() {
   PWSTR local_app_path;
   std::wstring result(L"");
-  if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &local_app_path))) {
-    result=std::wstring(local_app_path);
-    CoTaskMemFree(local_app_path);
-  }
+
+  winrt::check_hresult(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &local_app_path));
+  result=std::wstring(local_app_path);
+  CoTaskMemFree(local_app_path);
+
   result += L"\\Microsoft\\PowerToys";
   std::filesystem::path save_path(result);
   if (!std::filesystem::exists(save_path)) {
@@ -19,7 +20,7 @@ std::wstring PowerToysSettings::get_global_powertoys_save_folder_location() {
 }
 
 std::wstring PowerToysSettings::get_powertoy_save_folder_location(const std::wstring& powertoy_name) {
-  std::wstring result = get_global_powertoys_save_folder_location();
+  std::wstring result = get_root_save_folder_location();
   result += L"\\";
   result += powertoy_name;
   std::filesystem::path save_path(result);
@@ -36,7 +37,7 @@ std::wstring PowerToysSettings::get_powertoy_save_file_location(const std::wstri
 }
 
 std::wstring PowerToysSettings::get_powertoys_general_save_file_location() {
-  std::wstring result = get_global_powertoys_save_folder_location();
+  std::wstring result = get_root_save_folder_location();
   result += L"\\settings.json";
   return result;
 }

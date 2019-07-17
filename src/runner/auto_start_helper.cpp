@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "auto_start_helper.h"
 
-//#define SECURITY_WIN32
-//#include <Security.h>
-//#pragma comment(lib, "Secur32.lib")
 #include <Lmcons.h>
 
 #include <comdef.h>

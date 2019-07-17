@@ -6,7 +6,7 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::II
   winrt::Windows::Storage::StorageFolder folder = winrt::Windows::Storage::StorageFolder::GetFolderFromPathAsync(winrt::param::hstring(base_path)).get();
 
   std::wstring myuri = uri.Path().c_str();
-  myuri.erase(0, 1); // Removes the first bar from the URI
+  myuri.erase(0, 1); // Removes the first slash from the URI
 
   std::replace(myuri.begin(), myuri.end(), '/', '\\');
   winrt::Windows::Storage::StorageFile file = nullptr;

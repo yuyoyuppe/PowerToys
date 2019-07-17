@@ -3,7 +3,7 @@
 #include <Shlobj.h>
 #include <cpprest/json.h>
 namespace PowerToysSettings {
-  std::wstring get_global_powertoys_save_folder_location();
+  std::wstring get_root_save_folder_location();
   std::wstring get_powertoy_save_folder_location(const std::wstring& powertoy_name);
   std::wstring get_powertoy_save_file_location(const std::wstring& powertoy_name);
   std::wstring get_powertoys_general_save_file_location();
