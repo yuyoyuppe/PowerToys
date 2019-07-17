@@ -60,8 +60,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         modules().emplace(module.get_name(), std::move(module));
       } catch (...) { }
     } 
-    // Start our events providers
-    start_lowlevel_keyboard_hook();
      // Start initial powertoys
     start_initial_powertoys();
 

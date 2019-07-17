@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "lowlevel_keyboard_event.h"
-#include "powertoy_module.h"
+#include "powertoys_events.h"
 
 namespace {
   HHOOK hook_handle = nullptr;
@@ -10,7 +10,7 @@ namespace {
     if (nCode == HC_ACTION) {
       event.lParam = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
       event.wParam = wParam;
-      auto supress = powertoys_events().signal_event(L"ll_keyboard", reinterpret_cast<intptr_t>(&event));
+      auto supress = powertoys_events().signal_event(ll_keyboard, reinterpret_cast<intptr_t>(&event));
       return supress;
     } else {
       return CallNextHookEx(hook_handle_copy, nCode, wParam, lParam);

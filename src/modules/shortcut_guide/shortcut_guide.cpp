@@ -15,7 +15,7 @@ const wchar_t * OverlayWindow::get_name() {
 }
 
 const wchar_t ** OverlayWindow::get_events() {
-  static const wchar_t* events[2] = { L"ll_keyboard", 0 };
+  static const wchar_t* events[2] = { ll_keyboard, 0 };
   return events;
 }
 
@@ -86,7 +86,7 @@ bool OverlayWindow::is_enabled() {
 }
 
 intptr_t OverlayWindow::signal_event(const wchar_t * name, intptr_t data) {
-  if (_enabled && wcscmp(name, L"ll_keyboard") == 0) {
+  if (_enabled && wcscmp(name, ll_keyboard) == 0) {
     auto& event = *(reinterpret_cast<LowlevelKeyboardEvent*>(data));
     if (event.wParam == WM_KEYDOWN ||
         event.wParam == WM_SYSKEYDOWN ||

@@ -27,6 +27,12 @@
     <ClCompile Include="general_settings.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="powertoys_events.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="win_hook_event.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -54,6 +60,12 @@
     </ClInclude>
     <ClInclude Include="general_settings.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="powertoys_events.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="win_hook_event.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

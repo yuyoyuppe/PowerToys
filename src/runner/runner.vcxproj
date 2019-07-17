@@ -97,24 +97,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="powertoys_events.cpp" />
     <ClCompile Include="powertoy_module.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="settings_window.cpp" />
     <ClCompile Include="trace.cpp" />
     <ClCompile Include="tray_icon.cpp" />
     <ClCompile Include="unhandled_exception_handler.cpp" />
+    <ClCompile Include="win_hook_event.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auto_start_helper.h" />
     <ClInclude Include="general_settings.h" />
     <ClInclude Include="lowlevel_keyboard_event.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="powertoys_events.h" />
     <ClInclude Include="powertoy_module.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="settings_window.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="tray_icon.h" />
     <ClInclude Include="unhandled_exception_handler.h" />
+    <ClInclude Include="win_hook_event.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="runner.rc" />

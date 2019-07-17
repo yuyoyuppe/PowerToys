@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <interface/powertoy_module_interface.h>
 #include <interface/lowlevel_keyboard_event_data.h>
+#include <interface/win_hook_event_data.h>
 #include "trace.h"
 #include <cpprest/json.h>
 #include <common/settings_objects.h>
@@ -45,8 +46,9 @@ public:
   // list.
   // Right now there is only lowlevel keyboard hook event
   virtual const wchar_t** get_events() override {
-    static const wchar_t* events[2] = { L"ll_keyboard",
-                                        nullptr };
+    static const wchar_t* events[] = { ll_keyboard,
+                                       win_hook_event,
+                                       nullptr };
     return events;
   }
   // Return JSON with the configuration options.
@@ -155,10 +157,14 @@ public:
 
   // Handle incoming event, data is event-specific
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data)  override {
-    if (wcscmp(name, L"ll_keyboard") == 0) {
+    if (wcscmp(name, ll_keyboard) == 0) {
       auto& event = *(reinterpret_cast<LowlevelKeyboardEvent*>(data));
       // Return 1 if the keypress is to be suppressed (not forwarded to Windows),
       // otherwise return 0.
+      return 0;
+    } else if (wcscmp(name, win_hook_event) == 0) {
+      auto& event = *(reinterpret_cast<WinHookEvent*>(data));
+      // Return value is ignored
       return 0;
     }
     return 0;

@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 
-/* 
+/*
   ll_keyboard - Lowlevel Keyboard Hook
 
   The PowerToys runner installs low-level keyboard hook using
@@ -21,7 +21,7 @@
   Example usage, that makes Windows ignore the L key:
 
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data) override {
-    if (wcscmp(name, L"ll_keyboard") == 0) {
+    if (wcscmp(name, ll_keyboard) == 0) {
       auto& event = *(reinterpret_cast<LowlevelKeyboardEvent*>(data));
       // The L key has vkCode of 0x4C
       if (event.wParam ==  WM_KEYDOWN && event.lParam->vkCode == 0x4C) {
@@ -34,6 +34,10 @@
     }
   }
 */
+
+namespace {
+  const wchar_t* ll_keyboard = L"ll_keyboard";
+}
 
 struct LowlevelKeyboardEvent {
   KBDLLHOOKSTRUCT* lParam;
