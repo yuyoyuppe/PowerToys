@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack, Text, DefaultButton} from 'office-ui-fabric-react';
+import { Stack, Text, DefaultButton, Label} from 'office-ui-fabric-react';
 import {BoolToggleSettingsControl} from './BoolToggleSettingsControl'
 import { Separator } from 'office-ui-fabric-react/lib/Separator';
 
@@ -54,16 +54,19 @@ export class GeneralSettings extends React.Component <any, any> {
           setting={{display_name: 'Start at login', value: this.state.settings.startup}}
           ref={(input) => {this.startup_reference=input;}}
           />
-        <DefaultButton
-          styles={{
-              root: {
-                backgroundColor: "#FFFFFF",
-                alignSelf: "start"
-              }
-          }}
-          href='https://github.com/microsoft/PowerToys/releases'
-          target='_blank'
-        >Check for updates</DefaultButton>
+        <Stack>
+        <Label>Version 0.1.0</Label>
+          <DefaultButton
+            styles={{
+                root: {
+                  backgroundColor: "#FFFFFF",
+                  alignSelf: "start"
+                }
+            }}
+            href='https://github.com/microsoft/PowerToys/releases'
+            target='_blank'
+          >Check for updates</DefaultButton>
+        </Stack>
         {/* An empty span to always give 30px padding in Edge. */}
         <span/>
       </Stack>

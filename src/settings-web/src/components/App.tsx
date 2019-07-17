@@ -1,5 +1,5 @@
 import React from 'react';
-import {Stack, Text, Nav, CommandButton, PrimaryButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
+import {Stack, Text, Nav, PrimaryButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
 import {GeneralSettings} from './GeneralSettings';
 import {CustomSettingsScreen} from './CustomSettingsScreen';
 import '../css/layout.css';
@@ -57,13 +57,6 @@ export class App extends React.Component <any, any> {
     return (
       <div className='body'>
         <div className='sidebar'>
-          <CommandButton
-            iconProps={{iconName: 'GlobalNavButton'}}
-            text='Settings'
-            styles={{
-              textContainer: {fontSize:18},
-            }}
-            />
           <Nav
             selectedKey= {this.state.selectedmenu}
             onLinkClick = {
@@ -72,6 +65,7 @@ export class App extends React.Component <any, any> {
               }
             }
             styles = {{
+              navItems: { margin : '0'},
               compositeLink: {
                 backgroundColor : '#f3f2f1',
                 color: '#323130',
@@ -90,12 +84,10 @@ export class App extends React.Component <any, any> {
             }}
             groups = {[
               {
-                links: powertoys_links,
-              },
-              {
                 links: [
-                  { name: 'General Settings', key:'general', url:'', icon: 'Settings' },
-                ],
+                  { name: 'General Settings', key:'general', url:'', icon: 'Settings' }
+                ].
+                concat(powertoys_links)
               }
             ]}
           />
