@@ -13,9 +13,10 @@
 
 #include <Shlobj.h>
 
-
-#define ExitOnFailure(x,a,b)   if (FAILED(x)) { goto LExit; }
-#define ExitWithLastError(x,a,b) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; }  goto LExit; }
+// Helper macros from wix.
+// TODO: use "s" and "..." parameters to report errors from these functions.
+#define ExitOnFailure(x,s,...)   if (FAILED(x)) { goto LExit; }
+#define ExitWithLastError(x,s,...) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; }  goto LExit; }
 #define ExitFunction()        { goto LExit; }
 
 

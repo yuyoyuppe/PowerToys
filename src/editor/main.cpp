@@ -50,8 +50,8 @@ void NavigateToLocalhostReactServer() {
   webview_control.Navigate(Uri(hstring(L"http://localhost:8080")));
 }
 #endif
-void NavigateToUri(_In_ LPCWSTR uriAsString) {
-  Uri url = webview_control.BuildLocalStreamUri(hstring(L"settings-html"), hstring(uriAsString));
+void NavigateToUri(_In_ LPCWSTR uri_as_string) {
+  Uri url = webview_control.BuildLocalStreamUri(hstring(L"settings-html"), hstring(uri_as_string));
   webview_control.NavigateToLocalStreamUri(url, local_uri_resolver);
 
 }
@@ -206,20 +206,19 @@ void initialize_win32_webview() {
       webview_control.Settings().IsJavaScriptEnabled(true);
       
       webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
-        /*
-        auto scriptargs = { hstring(L"window.external.notify('test');") };
-        webview_control.InvokeScriptAsync(hstring(L"eval"), scriptargs);
-        */
+        // runs when the content has been loaded.
       });
       webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
+        // content called window.external.notify()
         std::wstring message_sent = args_script_notify.Value().c_str();
         std::thread(send_message_to_powertoys, message_sent).detach();
-        //MessageBox(main_window_handler, message_sent.c_str(), L"Message from WebView", MB_OK);
       });
       resize_web_view();
 #if defined(_DEBUG) && _DEBUG_WITH_LOCALHOST
+      // navigates to localhost:8080
       NavigateToLocalhostReactServer();
 #else
+      // navigates to settings-html/index.html
       NavigateToUri(L"index.html");
 #endif
     });
