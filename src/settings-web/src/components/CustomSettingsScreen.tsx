@@ -76,6 +76,8 @@ export class CustomSettingsScreen extends React.Component <any, any> {
             }
           })
         }
+        {/* An empty span to always give 30px padding in Edge. */}
+        <span/>
       </Stack>
     )
   }

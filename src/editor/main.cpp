@@ -206,6 +206,11 @@ void initialize_win32_webview() {
 
       webview_control.Settings().IsJavaScriptEnabled(true);
       
+      webview_control.NewWindowRequested([=](IWebViewControl sender_requester, WebViewControlNewWindowRequestedEventArgs args ) {
+        // Open the requested link in the default browser registered in the Shell
+        ShellExecute(NULL, L"open", args.Uri().AbsoluteUri().c_str(), NULL, NULL, SW_SHOWNORMAL);
+      });
+
       webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
         // runs when the content has been loaded.
       });
