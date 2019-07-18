@@ -249,7 +249,7 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     }
     break;
   case WM_CREATE:
-    wm_copydata_webview = RegisterWindowMessage(TEXT("TaskbarCreated"));
+    wm_copydata_webview = RegisterWindowMessage(TEXT("PTSettingsCopyDataWebView"));
     break;
   default:
     if (message == wm_copydata_webview) {
