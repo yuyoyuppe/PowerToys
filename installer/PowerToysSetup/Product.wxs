@@ -9,7 +9,7 @@
        Language="1033"
        Version="0.8.0"
        Manufacturer="Microsoft"
-       UpgradeCode="42b84bf7-5fbf-473b-9c8b-049dc16f7708">
+       UpgradeCode="42B84BF7-5FBF-473B-9C8B-049DC16F7708">
 
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Platform="x64" />
 
@@ -176,18 +176,18 @@
 
   <Fragment>
     <DirectoryRef Id="INSTALLFOLDER" FileSource="$(var.BinX64Dir)">
-      <Component Id="powertoys_exe" Guid="a2c66d91-3485-4d00-b04d-91844e6b345b" Win64="yes">
+      <Component Id="powertoys_exe" Guid="A2C66D91-3485-4D00-B04D-91844E6B345B" Win64="yes">
         <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
       </Component>
-      <Component Id="settings_exe" Guid="a5a461a9-7097-4cba-9d39-3dbbb6b7b80c" Win64="yes">
+      <Component Id="settings_exe" Guid="A5A461A9-7097-4CBA-9D39-3DBBB6B7B80C" Win64="yes">
         <File Id="PowerToysSettings.exe" KeyPath="yes" Checksum="yes" />
       </Component>
-      <Component Id="License_rtf" Guid="3e5ae43b-cfb4-449b-a346-94caaff3312e" Win64="yes">
+      <Component Id="License_rtf" Guid="3E5AE43B-CFB4-449B-A346-94CAAFF3312E" Win64="yes">
         <File Source="$(var.RepoDir)\License.rtf" Id="License.rtf" KeyPath="yes" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="SvgsInstallFolder" FileSource="$(var.BinX64Dir)\svgs\">
-      <Component Id="PowerToysSvgs" Guid="7c4d4eed-9338-423d-992c-dce02f3e2d35" Win64="yes">
+      <Component Id="PowerToysSvgs" Guid="7C4D4EED-9338-423D-992C-DCE02F3E2D35" Win64="yes">
         <File Source="$(var.BinX64Dir)\svgs\0.svg" />
         <File Source="$(var.BinX64Dir)\svgs\1.svg" />
         <File Source="$(var.BinX64Dir)\svgs\2.svg" />
@@ -206,26 +206,26 @@
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="ModulesInstallFolder" FileSource="$(var.BinX64Dir)\modules\">
-      <Component Id="Module_MTND" Guid="a983f9d8-e7d6-4b10-a8a9-679cb3465398" Win64="yes">
+      <Component Id="Module_MTND" Guid="A983F9D8-E7D6-4B10-A8A9-679CB3465398" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\maximize_to_new_desktop.dll" KeyPath="yes" />
       </Component>
-      <Component Id="Module_ShortcutGuide" Guid="cbd0ac09-91d3-428e-b2b3-05745adf3473" Win64="yes">
+      <Component Id="Module_ShortcutGuide" Guid="CBD0AC09-91D3-428E-B2B3-05745ADF3473" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\shortcut_guide.dll" KeyPath="yes" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="SettingsHtmlInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\">
-      <Component Id="settings_html" Guid="87881a99-e917-4b0d-b1d8-5c6eb9709f96" Win64="yes">
+      <Component Id="settings_html" Guid="87881A99-E917-4B0D-B1D8-5C6EB9709F96" Win64="yes">
         <File Source="$(var.RepoDir)\src\editor\settings-html\index.html" KeyPath="yes" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="SettingsHtmlDistInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\dist\">
-      <Component Id="settings_js_bundle" Guid="9ef539c1-2f50-421e-b074-c58ed3a9785c" Win64="yes">
+      <Component Id="settings_js_bundle" Guid="9EF539C1-2F50-421E-B074-C58ED3A9785C" Win64="yes">
         <File Source="$(var.RepoDir)\src\editor\settings-html\dist\bundle.js" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
-      <Component Id="ApplicationShortcut" Guid="43184672-485d-4632-a16c-12d5e33b1f11">
+      <Component Id="ApplicationShortcut" Guid="43184672-485D-4632-A16C-12D5E33B1F11">
         <Condition>INSTALLSTARTMENUSHORTCUT</Condition>
         <Shortcut Id="ApplicationStartMenuShortcut"
                   Name="PowerToys"
@@ -246,7 +246,7 @@
   </Fragment>
   <Fragment>
     <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="87321f2b-cc48-4326-881e-9c62cc260dc8">
+      <Component Id="DesktopShortcut" Guid="87321F2B-CC48-4326-881E-9C62CC260DC8">
         <Condition>INSTALLDESKTOPSHORTCUT</Condition>
         <RegistryValue Root="HKCU"
                         Key="Software\[Manufacturer]\[ProductName]"
