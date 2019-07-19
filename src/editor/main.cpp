@@ -332,7 +332,6 @@ int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-  SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
   HRESULT hrInit = CoInitialize(nullptr);
   return start_webview_window(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }

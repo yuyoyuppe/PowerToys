@@ -519,8 +519,7 @@ namespace {
           mousein_signalled = true;
           mouse_window_hwnd = mouse_window;
           mouse_window_rect = *window_rect;
-          auto closest_monitor = get_point_monitor(*mouse_pos);
-          popup_rect = mouse_in_cb(mouse_window, buttons_rect, closest_monitor.rect);
+          popup_rect = mouse_in_cb(mouse_window, buttons_rect, *mouse_pos);
         }
       } else {
         mousein_reset = true;

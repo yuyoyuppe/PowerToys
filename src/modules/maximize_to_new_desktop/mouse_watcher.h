@@ -8,7 +8,7 @@
   Out: Rect of the created popup window, mouse out will be signalled when the
        mouse leaves it.
 */
-typedef std::function<RECT(HWND hwnd, RECT buttons, RECT monitor)> MouseInProc;
+typedef std::function<RECT(HWND hwnd, RECT buttons, POINT mouse_pos)> MouseInProc;
 typedef std::function<void()> MouseOutProc;
 
 

@@ -218,11 +218,13 @@ void D2DWindowManagerPopup::render() {
   // Draw SVG
   float width = hwnd_rect.right - hwnd_rect.left;
   float height = hwnd_rect.bottom - hwnd_rect.top;
-  //Apply 15% padding
-  current_icon->resize((int)(width*0.15f),
-                       (int)(height*0.15f),
-                       (int)(width*0.7f),
-                       (int)(height*0.7f),
+  // Apply padding, 96 DPI screens is 4px (see on_mouse_in() in dllmain.cpp)
+  int padding_x = width * 0.07f;
+  int padding_y = height * 0.15f;
+  current_icon->resize(padding_x,
+                       padding_y,
+                       width - (2 * padding_x),
+                       height - (2 * padding_y),
                        1.0f);
   DWORD icon_color;
   icon_color = WindowsColors::rgb_color(WindowsColors::get_highlight_text_color());

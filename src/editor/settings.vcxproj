@@ -71,6 +71,9 @@
     <PostBuildEvent>
       <Message>Copying web assets</Message>
     </PostBuildEvent>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -100,6 +103,9 @@
     <PostBuildEvent>
       <Message>Copying web assets</Message>
     </PostBuildEvent>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="IAsyncOperationHelper.h" />

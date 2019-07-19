@@ -6,11 +6,13 @@
 #include "trace.h"
 #include <cpprest/json.h>
 #include <common/settings_objects.h>
+#include <ShellScalingApi.h>
+#include <common/monitors.h>
 
 using namespace web;
 
 //Forward declarations
-RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor);
+RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos);
 void on_mouse_out();
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
@@ -117,18 +119,32 @@ private:
 D2DWindowManagerPopup* MTNDPowertoy::maximize_popup = nullptr;
 std::chrono::steady_clock::time_point shown_start_time;
 
-RECT on_mouse_in(HWND hwnd, RECT buttons, RECT monitor) {
-  auto dpi = GetDpiForWindow(hwnd);
-  int width = 120;
-  int height = width / 3;
+RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos) {
+  const int DEFAULT_DPI = 96;
+  // The original svg image size is 35px wide and 13px high, that we
+  // increase by 1.6 times
+  const int svg_icon_width = (int)(35 * 1.6f);
+  const int svg_icon_height = (int)(13 * 1.6f);
+  // Add extra 8px that will be used for the padding
+  int popup_width = svg_icon_width + 8;
+  int popup_height = svg_icon_height + 8;
+
+  HMONITOR monitor_handle = MonitorFromPoint(mouse_pos, MONITOR_DEFAULTTONEAREST);
+  MonitorInfo monitor_info = get_monitor_info(monitor_handle);
+  UINT dpi_x, dpi_y;
+  if (GetDpiForMonitor(monitor_handle, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y) == S_OK) {
+    popup_width = popup_width * dpi_x / DEFAULT_DPI;
+    popup_height = popup_height * dpi_y / DEFAULT_DPI;
+  }
+
   LONG midPoint = (buttons.left + buttons.right) / 2;
   RECT result;
-  result.left = midPoint - width / 2;
+  result.left = midPoint - popup_width / 2;
   result.top = buttons.bottom;
-  result.right = midPoint + width / 2;
-  result.bottom = buttons.bottom + height;
+  result.right = midPoint + popup_width / 2;
+  result.bottom = buttons.bottom + popup_height;
   // Make sure resulting rect is inside monitor.
-  result = keep_rect_inside_rect(result, monitor);
+  result = keep_rect_inside_rect(result, monitor_info.rect);
   MTNDPowertoy::maximize_popup->show(hwnd, result);
   Trace::EventShow();
   shown_start_time = std::chrono::steady_clock::now();

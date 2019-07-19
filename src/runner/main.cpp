@@ -40,7 +40,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   Trace::RegisterProvider();
   winrt::init_apartment();
   start_tray_icon();
-  winrt::check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
   int result;
   try {
     chdir_current_executable();
