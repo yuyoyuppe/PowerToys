@@ -212,6 +212,9 @@
       <Component Id="Module_ShortcutGuide" Guid="CBD0AC09-91D3-428E-B2B3-05745ADF3473" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\shortcut_guide.dll" KeyPath="yes" />
       </Component>
+      <Component Id="Module_FancyZones" Guid="C6B5272E-6ED4-4B80-B0E7-2FF0355D8CF4" Win64="yes">
+        <File Source="$(var.BinX64Dir)\modules\fancyzones.dll" KeyPath="yes" />
+      </Component>
     </DirectoryRef>
     <DirectoryRef Id="SettingsHtmlInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\">
       <Component Id="settings_html" Guid="87881A99-E917-4B0D-B1D8-5C6EB9709F96" Win64="yes">
@@ -272,6 +275,7 @@
       <ComponentRef Id="PowerToysSvgs" />
       <ComponentRef Id="Module_MTND" />
       <ComponentRef Id="Module_ShortcutGuide" />
+      <ComponentRef Id="Module_FancyZones" />
       <ComponentRef Id="ApplicationShortcut" />
       <ComponentRef Id="DesktopShortcut" />
       <ComponentRef Id="settings_exe" />
