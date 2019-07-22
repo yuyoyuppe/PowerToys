@@ -19,6 +19,7 @@ public:
     IFACEMETHODIMP_(void) MoveSizeUpdate(HMONITOR monitor, POINT const& ptScreen) noexcept;
     IFACEMETHODIMP_(void) MoveSizeEnd(HWND window, POINT const& ptScreen) noexcept;
     IFACEMETHODIMP_(void) VirtualDesktopChanged() noexcept;
+    IFACEMETHODIMP_(void) WindowCreated(HWND window) noexcept;
     IFACEMETHODIMP_(bool) OnKeyDown(PKBDLLHOOKSTRUCT info) noexcept;
 
     // IZoneWindowHost
@@ -150,6 +151,14 @@ IFACEMETHODIMP_(void) FancyZones::VirtualDesktopChanged() noexcept
 }
 
 // IFancyZonesCallback
+IFACEMETHODIMP_(void) FancyZones::WindowCreated(HWND window) noexcept
+{
+    // A window just got created
+    // If the "auto zone" setting is enabled, move it into a zone (eg first available, best, etc)
+    MoveWindowIntoZoneByIndex(window, 0);
+}
+
+// IFancyZonesCallback
 IFACEMETHODIMP_(bool) FancyZones::OnKeyDown(PKBDLLHOOKSTRUCT info) noexcept
 {
     // Return true to swallow the keyboard event
@@ -233,7 +242,17 @@ LRESULT FancyZones::WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lpa
     {
         if (wparam == 1)
         {
-            ToggleZoneViewers();
+            DWORD value{};
+            RegistryHelpers::GetValue<DWORD>(nullptr, L"StandaloneEditor", &value, sizeof(value));
+
+            if (value)
+            {
+                ShellExecute(nullptr, nullptr, L"JeffsFancyEditor.exe", nullptr, nullptr, SW_SHOWNORMAL);
+            }
+            else
+            {
+                ToggleZoneViewers();
+            }
         }
     }
     break;

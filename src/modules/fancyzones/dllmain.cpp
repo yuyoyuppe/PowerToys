@@ -127,7 +127,8 @@ public:
 private:
     static bool IsInterestingWindow(HWND window)
     {
-        return WI_IsFlagSet(GetWindowLongPtr(window, GWL_STYLE), WS_MAXIMIZEBOX);
+        auto style = GetWindowLongPtr(window, GWL_STYLE);
+        return WI_IsFlagSet(style, WS_MAXIMIZEBOX) && WI_IsFlagClear(style, WS_CHILD);
     }
 
     intptr_t HandleKeyboardHookEvent(LowlevelKeyboardEvent* data) noexcept;
@@ -184,6 +185,18 @@ void FancyZonesModule::HandleWinHookEvent(WinHookEvent* data) noexcept
         if (data->hwnd == GetDesktopWindow())
         {
             m_app.as<IFancyZonesCallback>()->VirtualDesktopChanged();
+        }
+    }
+    break;
+
+    case EVENT_OBJECT_CREATE:
+    {
+        if (data->idObject == OBJID_WINDOW)
+        {
+            if (IsInterestingWindow(data->hwnd))
+            {
+                m_app.as<IFancyZonesCallback>()->WindowCreated(data->hwnd);
+            }
         }
     }
     break;
