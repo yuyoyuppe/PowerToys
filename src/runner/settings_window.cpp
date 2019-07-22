@@ -197,7 +197,7 @@ void run_settings_window() {
 
 void open_settings_window() {
   if (block_settings_window_start) {
-    MessageBox(NULL, L"There's a Settings Window already running. Close the first instance first.", L"Settings", MB_OK && MB_TOPMOST);
+    MessageBox(NULL, L"There's a PowerToys Settings window already running. Close the first instance first.", L"Settings", MB_OK && MB_TOPMOST);
   } else {
     block_settings_window_start = true;
     std::thread(run_settings_window).detach();

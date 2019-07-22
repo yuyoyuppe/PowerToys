@@ -127,6 +127,11 @@
   <ItemGroup>
     <Image Include="..\runner\svgs\icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.vcxproj">
+      <Project>{74485049-c722-400f-abe5-86ac52d929b3}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

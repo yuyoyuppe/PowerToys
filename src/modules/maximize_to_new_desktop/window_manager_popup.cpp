@@ -100,9 +100,7 @@ void D2DWindowManagerPopup::create_tooltip(HWND window) {
   tool_info.lpszText = maximize_tooltip_message;
   tool_info.hinst = reinterpret_cast<HINSTANCE>(&__ImageBase);
   GetClientRect(hwnd, &tool_info.rect);
-  if(!SendMessage(hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM)&tool_info)) {
-    MessageBox(NULL, L"Couldn't create the ToolTip control.", L"Error", MB_OK);
-  }
+  SendMessage(hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM)&tool_info);
 }
 
 HWND D2DWindowManagerPopup::get_hwnd() {
@@ -216,11 +214,11 @@ void D2DWindowManagerPopup::render() {
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   d2d_dc->FillRectangle(hwnd_rect, brush.get());
   // Draw SVG
-  float width = hwnd_rect.right - hwnd_rect.left;
-  float height = hwnd_rect.bottom - hwnd_rect.top;
+  int width = (int)(hwnd_rect.right - hwnd_rect.left);
+  int height = (int)(hwnd_rect.bottom - hwnd_rect.top);
   // Apply padding, 96 DPI screens is 4px (see on_mouse_in() in dllmain.cpp)
-  int padding_x = width * 0.07f;
-  int padding_y = height * 0.15f;
+  int padding_x = (int)(width * 0.07f);
+  int padding_y = (int)(height * 0.15f);
   current_icon->resize(padding_x,
                        padding_y,
                        width - (2 * padding_x),

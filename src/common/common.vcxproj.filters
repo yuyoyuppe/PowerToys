@@ -93,6 +93,9 @@
     <ClInclude Include="settings_objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dpi_aware.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d2d_svg.cpp">
@@ -145,6 +148,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="settings_objects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dpi_aware.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

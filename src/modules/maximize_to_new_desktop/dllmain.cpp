@@ -8,6 +8,7 @@
 #include <common/settings_objects.h>
 #include <ShellScalingApi.h>
 #include <common/monitors.h>
+#include <common/dpi_aware.h>
 
 using namespace web;
 
@@ -131,11 +132,7 @@ RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos) {
 
   HMONITOR monitor_handle = MonitorFromPoint(mouse_pos, MONITOR_DEFAULTTONEAREST);
   MonitorInfo monitor_info = get_monitor_info(monitor_handle);
-  UINT dpi_x, dpi_y;
-  if (GetDpiForMonitor(monitor_handle, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y) == S_OK) {
-    popup_width = popup_width * dpi_x / DEFAULT_DPI;
-    popup_height = popup_height * dpi_y / DEFAULT_DPI;
-  }
+  DPIAware::Convert(monitor_handle, popup_width, popup_height);
 
   LONG midPoint = (buttons.left + buttons.right) / 2;
   RECT result;

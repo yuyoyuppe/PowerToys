@@ -5,6 +5,7 @@
 #include <common/two_way_pipe_message_ipc.h>
 #include <ShellScalingApi.h>
 #include "resource.h"
+#include <common/dpi_aware.h>
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shcore.lib")
@@ -289,9 +290,12 @@ void register_classes(HINSTANCE hInstance) {
 }
 
 int init_instance(HINSTANCE hInstance, int nCmdShow) {
+  int wind_width = 1024;
+  int wind_height = 700;
+  DPIAware::Convert(NULL, wind_width, wind_height);
   m_hInst = hInstance;
   main_window_handler = CreateWindow(TEXT("PTSettingsClass"), TEXT("PowerToys Settings"), WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, 0, 1024, 700, nullptr, nullptr, hInstance, nullptr);
+    CW_USEDEFAULT, 0, wind_width, wind_height, nullptr, nullptr, hInstance, nullptr);
 
   initialize_win32_webview();
   ShowWindow(main_window_handler, nCmdShow);
