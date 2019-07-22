@@ -144,7 +144,7 @@ intptr_t FancyZonesModule::HandleKeyboardHookEvent(LowlevelKeyboardEvent* data) 
 {
     if (data->wParam == WM_KEYDOWN)
     {
-        m_app.as<IFancyZonesCallback>()->OnKeyDown(data->lParam) ? 1 : 0;
+        return m_app.as<IFancyZonesCallback>()->OnKeyDown(data->lParam) ? 1 : 0;
     }
     return 0;
 }
