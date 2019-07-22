@@ -73,6 +73,11 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
   default:
     if (message == wm_icon_notify) {
       switch(lparam) {
+        case WM_LBUTTONUP:
+        {
+          open_settings_window();
+          break;
+        }
         case WM_RBUTTONUP:
         case WM_CONTEXTMENU:
         {
