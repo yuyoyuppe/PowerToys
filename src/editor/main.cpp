@@ -171,6 +171,12 @@ void send_message_to_powertoys(const std::wstring msg) {
                     "display_name": "This is what a color_picker looks like",
                     "editor_type": "color_picker",
                     "value": "#0450fd"
+                  },
+                  "test custom_action": {
+                    "display_name": "This is what a custom_action looks like",
+                    "editor_type": "custom_action",
+                    "value": "This is to be custom data. It\ncan\nhave\nmany\nlines\nthat\nshould\nmake\nthe\nfield\nbigger.",
+                    "button_text": "Call a Custom Action!"
                   }
                 }
               }

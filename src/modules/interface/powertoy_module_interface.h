@@ -47,6 +47,8 @@ public:
   virtual void free_get_config(const wchar_t*) = 0;
   /* Sets the configuration values. */
   virtual void set_config(const wchar_t* config) = 0;
+  /* Call custom action from settings screen. */
+  virtual void call_custom_action(const wchar_t* action) {};
   /* Enables the PowerToy. */
   virtual void enable() = 0;
   /* Disables the PowerToy, should free as much memory as possible. */

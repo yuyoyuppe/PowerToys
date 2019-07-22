@@ -4,6 +4,7 @@ import {BoolToggleSettingsControl} from './BoolToggleSettingsControl';
 import {StringTextSettingsControl} from './StringTextSettingsControl';
 import {IntSpinnerSettingsControl} from './IntSpinnerSettingsControl';
 import {ColorPickerSettingsControl} from './ColorPickerSettingsControl';
+import {CustomActionSettingsControl} from './CustomActionSettingsControl';
 
 export class CustomSettingsScreen extends React.Component <any, any> {
   references: any;
@@ -31,6 +32,16 @@ export class CustomSettingsScreen extends React.Component <any, any> {
       properties:properties
     };
     return {powertoys: result};
+  }
+
+  private call_custom_action(action_name: any, action_values: any) {
+    let result = {action: {
+      [this.state.settings_key]: {
+        action_name: action_name,
+        value: action_values.value
+      }
+    }};
+    (window as any).output_from_webview(JSON.stringify(result));
   }
 
   public render(): JSX.Element {
@@ -68,6 +79,14 @@ export class CustomSettingsScreen extends React.Component <any, any> {
               case 'color_picker':
                 return <ColorPickerSettingsControl
                   setting = {power_toys_properties[key]}
+                  key={key}
+                  ref={(input) => {this.references[key]=input;}}
+                  />;
+              case 'custom_action':
+                return <CustomActionSettingsControl
+                  setting={power_toys_properties[key]}
+                  action_name={key}
+                  action_callback={(action_name: any, action_values:any) => {this.call_custom_action(action_name, action_values);} }
                   key={key}
                   ref={(input) => {this.references[key]=input;}}
                   />;

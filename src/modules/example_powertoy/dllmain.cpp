@@ -29,6 +29,7 @@ private:
   int test_int_prop = 3;
   std::wstring test_string_prop = L"a string";
   std::wstring test_color_prop = L"#1212FF";
+  int test_custom_action_num_calls = 0;
   
   // Load and save Settings from/to local app data.
   void init_settings();
@@ -95,6 +96,16 @@ public:
       )
     );
 
+    // Add a custom action property. When using this settings type, "call_custom_action" should be overriden as well.
+    _settings.add_property(
+      PowerToysSettings::CustomActionPropertySetting(
+        L"test custom_action", // action name
+        L"This is what a CustomActionPropertySetting looks like", // label above the field
+        L"Press the button to call a custom action in the Example PowerToy", // display values / extended info
+        L"Call a custom action!" // button text
+        )
+    );
+
     // Returns an allocated wchar_t*. free_get_config will get called later to free this value
     *config = _settings.to_allocated_cstring();
 
@@ -103,6 +114,29 @@ public:
   virtual void free_get_config(const wchar_t* config) override {
     PowerToysSettings::Settings::free_allocated_cstring(config);
   };
+
+  // Signal from the settings screen to call a custom action.
+  // This can be used to spawn more complex editors.
+  virtual void call_custom_action(const wchar_t* action) override {
+    try {
+      // Parse the action values, including name.
+      PowerToysSettings::CustomActionObject action_object =
+        PowerToysSettings::CustomActionObject::from_json_string(action);
+
+      if (action_object.get_name() == L"test custom_action") {
+
+        // Custom action code to increase and show a counter.
+        ++this->test_custom_action_num_calls;
+        std::wstring msg(L"I have been called ");
+        msg += std::to_wstring(this->test_custom_action_num_calls);
+        msg += L" time(s).";
+        MessageBox(NULL, msg.c_str(), L"Custom action call.", MB_OK | MB_TOPMOST);
+      }
+    }
+    catch (std::exception ex) {
+      // Improper JSON.
+    }
+  }
 
   // Passes JSON with the configuration settings for the powertoy.
   virtual void set_config(const wchar_t* config) override { 

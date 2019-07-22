@@ -53,6 +53,9 @@ public:
   void set_config(const std::wstring& config) {
     module->set_config(config.c_str());
   }
+  void call_custom_action(const std::wstring& action) {
+    module->call_custom_action(action.c_str());
+  }
   intptr_t signal_event(const std::wstring& signal_event, intptr_t data) {
     return module->signal_event(signal_event.c_str(), data);
   }

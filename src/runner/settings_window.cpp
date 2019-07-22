@@ -37,6 +37,16 @@ json::value get_all_settings() {
   return result;
 }
 
+void dispatch_json_action_to_module(const json::value& powertoys_configs) {
+  for (auto powertoy_element : powertoys_configs.as_object()) {
+    std::wstringstream ws;
+    ws << powertoy_element.second;
+    if (modules().find(powertoy_element.first) != modules().end()) {
+      modules().at(powertoy_element.first).call_custom_action(ws.str());
+    }
+  }
+}
+
 void send_json_config_to_module(const std::wstring& module_key, const std::wstring& settings) {
   if (modules().find(module_key) != modules().end()) {
     modules().at(module_key).set_config(settings);
@@ -74,6 +84,8 @@ void dispatch_received_json(const std::wstring &json_to_parse) {
       if (current_settings_ipc != NULL) {
         current_settings_ipc->send(ws.str());
       }
+    } else if (base_element.first == L"action") {
+      dispatch_json_action_to_module(base_element.second);
     }
   }
   return;

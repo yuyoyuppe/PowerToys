@@ -163,3 +163,24 @@ void PowerToysSettings::IntSpinnerPropertySetting::setSpinnerMax(int max_value) 
 void PowerToysSettings::IntSpinnerPropertySetting::setSpinnerStep(int step) {
   _internal_json.as_object()[L"step"] = web::json::value::number(step);
 }
+
+PowerToysSettings::CustomActionObject::CustomActionObject(web::json::value action_json) {
+  _internal_json = action_json;
+}
+
+PowerToysSettings::CustomActionObject PowerToysSettings::CustomActionObject::from_json_string(const std::wstring & json) {
+  web::json::value parsed_json = web::json::value::parse(json);
+  return PowerToysSettings::CustomActionObject(parsed_json);
+}
+
+std::wstring PowerToysSettings::CustomActionObject::get_name() {
+  return _internal_json[L"action_name"].as_string();
+}
+
+std::wstring PowerToysSettings::CustomActionObject::get_value() {
+  return _internal_json[L"value"].as_string();
+}
+
+web::json::value PowerToysSettings::CustomActionObject::get_json() {
+  return _internal_json;
+}

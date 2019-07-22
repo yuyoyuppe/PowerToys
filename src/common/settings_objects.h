@@ -110,6 +110,23 @@ namespace PowerToysSettings {
     }
   };
 
+  class CustomActionPropertySetting : public BasePropertySetting {
+  public:
+    CustomActionPropertySetting(
+      const std::wstring& name,
+      const std::wstring& display_name,
+      const std::wstring& value,
+      const std::wstring& button_text
+    ) : BasePropertySetting (
+      name,
+      display_name,
+      L"custom_action",
+      web::json::value::string(value)
+    ) {
+      _internal_json.as_object()[L"button_text"] = web::json::value::string(button_text);
+    }
+  };
+
   class PowerToyValues {
   public:
     PowerToyValues(const std::wstring& powertoy_name);
@@ -188,4 +205,18 @@ namespace PowerToysSettings {
     ) {
     }
   };
+
+  class CustomActionObject {
+  public:
+    static CustomActionObject from_json_string(const std::wstring& json);
+    std::wstring get_name();
+    std::wstring get_value();
+    web::json::value get_json();
+  protected:
+    CustomActionObject(
+      web::json::value value
+    );
+    web::json::value _internal_json;
+  };
+
 }
