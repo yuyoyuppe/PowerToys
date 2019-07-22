@@ -47,7 +47,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // For now only load known DLLs
     std::unordered_set<std::wstring> known_dlls = {
       L"shortcut_guide.dll",
-      L"maximize_to_new_desktop.dll" 
+      L"maximize_to_new_desktop.dll",
+      L"fancyzones.dll" 
     };
     for (auto& file : std::filesystem::directory_iterator(TEXT("modules/"))) {
       if (file.path().extension() != L".dll")

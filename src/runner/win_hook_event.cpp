@@ -27,7 +27,7 @@ static void CALLBACK win_hook_event_proc(HWINEVENTHOOK winEventHook,
   dispatch_cv.notify_one();
 }
 
-static bool running = true;
+static bool running = false;
 static std::thread dispatch_thread;
 static void dispatch_thread_proc() {
   std::unique_lock lock(mutex);
