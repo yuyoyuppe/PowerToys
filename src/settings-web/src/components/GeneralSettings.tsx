@@ -36,7 +36,7 @@ export class GeneralSettings extends React.Component <any, any> {
   public render(): JSX.Element {
     let power_toys_enabled = this.state.settings.enabled;
     return (
-      <Stack tokens={{childrenGap:30}}>
+      <Stack tokens={{childrenGap:20}}>
         <Text variant='xLarge'>Available PowerToys</Text>
         { Object.keys(power_toys_enabled).map(
           (key) => {

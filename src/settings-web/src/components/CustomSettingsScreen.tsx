@@ -36,7 +36,7 @@ export class CustomSettingsScreen extends React.Component <any, any> {
   public render(): JSX.Element {
     let power_toys_properties = this.state.powertoy.properties;
     return (
-      <Stack tokens={{childrenGap:30}}>
+      <Stack tokens={{childrenGap:20}}>
         {
           Object.keys(power_toys_properties).
           sort(function(a, b) {

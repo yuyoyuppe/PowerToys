@@ -118,9 +118,9 @@ export class App extends React.Component <any, any> {
             <ScrollablePane
             styles= {{
               contentContainer: {
-                paddingTop: '30px',
-                paddingLeft: '30px',
-                paddingRight: '30px'
+                paddingTop: '16px',
+                paddingLeft: '16px',
+                paddingRight: '16px'
                 // padding bottom will be applied by an empty span in the contents, for edge compatibility.
               }
             }}
