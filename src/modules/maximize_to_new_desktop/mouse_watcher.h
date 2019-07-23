@@ -14,3 +14,4 @@ typedef std::function<void()> MouseOutProc;
 
 void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_in, MouseOutProc on_mouse_out, HWND popup);
 void stop_mouse_watcher();
+void update_mousein_wait(int ms_delay);

@@ -57,6 +57,17 @@ public:
         should_close_desktop_after_restoring_last_window
       )
     );
+
+    PowerToysSettings::IntSpinnerPropertySetting delay_property(
+      L"hover delay",
+      L"How long to wait hovering the maximize button before showing the popup (ms)",
+      popup_delay_setting
+    );
+    delay_property.setSpinnerMax(10000);
+    delay_property.setSpinnerMin(100);
+    delay_property.setSpinnerStep(100);
+    _settings.add_property(delay_property);
+
     *config = _settings.to_allocated_cstring();
     return true;
   }
@@ -75,6 +86,12 @@ public:
           maximize_popup->set_delete_after_restore(should_close_desktop_after_restoring_last_window);
         }
       }
+      if (_values.is_int_value(L"hover delay")) {
+        popup_delay_setting = _values.get_int_value(L"hover delay");
+        if (_enabled) {
+          update_mousein_wait(popup_delay_setting);
+        }
+      }
     }
     catch (std::exception ex) {
       // Improper JSON.
@@ -87,7 +104,7 @@ public:
     if (!_enabled) {
       maximize_popup = new D2DWindowManagerPopup();
       maximize_popup->set_delete_after_restore(should_close_desktop_after_restoring_last_window);
-      start_mouse_watcher(400, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
+      start_mouse_watcher(popup_delay_setting, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
     }
     _enabled = true;
   }
@@ -113,6 +130,7 @@ public:
 
 private:
   bool should_close_desktop_after_restoring_last_window = true;
+  int popup_delay_setting = 400;
   void init_settings();
   void save_settings();
 };
@@ -165,6 +183,12 @@ void MTNDPowertoy::save_settings() {
         should_close_desktop_after_restoring_last_window
       )
     );
+    values.add_property_value(
+      PowerToysSettings::IntSettingsValue(
+        L"hover delay",
+        popup_delay_setting
+      )
+    );
     values.save_to_settings_file();
   }
   catch (std::exception ex) {
@@ -178,6 +202,9 @@ void MTNDPowertoy::init_settings() {
       PowerToysSettings::PowerToyValues::load_from_settings_file(get_name());
     if (settings.is_bool_value(L"close desktop on restore")) {
       should_close_desktop_after_restoring_last_window = settings.get_bool_value(L"close desktop on restore");
+    }
+    if (settings.is_int_value(L"hover delay")) {
+      popup_delay_setting = settings.get_int_value(L"hover delay");
     }
   }
   catch (std::exception ex) {

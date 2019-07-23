@@ -541,6 +541,10 @@ void start_mouse_watcher(int ms_delay, int probe_ms_delay, MouseInProc on_mouse_
   }
 }
 
+void update_mousein_wait(int ms_delay) {
+  mousein_wait = std::chrono::milliseconds(ms_delay);
+}
+
 void stop_mouse_watcher() {
   terminate_mouse_thread_proc = true;
   if (mouse_initialized) {
