@@ -75,6 +75,9 @@ namespace PowerToysSettings {
       web::json::value::number(value)
     ) {
     }
+    void setSpinnerMin(int min_value);
+    void setSpinnerMax(int max_value);
+    void setSpinnerStep(int step);
   };
 
   class StringTextPropertySetting : public BasePropertySetting {

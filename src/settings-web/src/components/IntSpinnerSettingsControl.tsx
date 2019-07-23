@@ -25,6 +25,12 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
   public render(): JSX.Element {
     return (
       <SpinButton
+        styles= {{
+          spinButtonWrapperTopBottom: {
+            maxWidth:'250px',
+            alignSelf: 'start'
+          },
+        }}
         value={this.state.property_values.value}
         onValidate={(value: string) => {
           if(value.trim().length === 0 || isNaN(+value)) {
@@ -71,9 +77,9 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
           return value;
         }}
         precision={0}
-        step={1}
-        min={0}
-        max={999999999}
+        step={this.state.property_values.step || 1}
+        min={this.state.property_values.min || 0}
+        max={this.state.property_values.max || 999999999}
         label={this.state.property_values.display_name}
         labelPosition={Position.top}
         componentRef= {(input) => {this.spinbuttonref=input;}}

@@ -151,3 +151,15 @@ std::wstring PowerToysSettings::BaseSettingsValue::get_name() {
 web::json::value PowerToysSettings::BaseSettingsValue::get_json() {
   return _internal_json;
 }
+
+void PowerToysSettings::IntSpinnerPropertySetting::setSpinnerMin(int min_value) {
+  _internal_json.as_object()[L"min"] = web::json::value::number(min_value);
+}
+
+void PowerToysSettings::IntSpinnerPropertySetting::setSpinnerMax(int max_value) {
+  _internal_json.as_object()[L"max"] = web::json::value::number(max_value);
+}
+
+void PowerToysSettings::IntSpinnerPropertySetting::setSpinnerStep(int step) {
+  _internal_json.as_object()[L"step"] = web::json::value::number(step);
+}

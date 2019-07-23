@@ -24,13 +24,17 @@ bool OverlayWindow::get_config(const wchar_t** config) {
     get_name(),
     L"Shows a help overlay with Windows shortcuts when the Windows key is pressed."
   );
-  _settings.add_property(
-    PowerToysSettings::IntSpinnerPropertySetting(
-      L"press time",
-      L"How long to press the Windows key before showing the Shortcut Guide (ms)",
-      current_delay_setting
-    )
+
+  PowerToysSettings::IntSpinnerPropertySetting delay_property(
+    L"press time",
+    L"How long to press the Windows key before showing the Shortcut Guide (ms)",
+    current_delay_setting
   );
+  delay_property.setSpinnerMax(10000);
+  delay_property.setSpinnerMin(100);
+  delay_property.setSpinnerStep(100);
+  _settings.add_property(delay_property);
+
   *config = _settings.to_allocated_cstring();
   return true;
 }
