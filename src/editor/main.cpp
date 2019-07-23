@@ -243,8 +243,6 @@ void initialize_win32_webview() {
   }
 }
 
-
-
 LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
   case WM_DESTROY:
@@ -257,6 +255,25 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     break;
   case WM_CREATE:
     wm_copydata_webview = RegisterWindowMessage(TEXT("PTSettingsCopyDataWebView"));
+    break;
+  case WM_DPICHANGED:
+    {
+      // Resize the window using the suggested rect
+      RECT* const prcNewWindow = (RECT*)lParam;
+      SetWindowPos(hWnd,
+        NULL,
+        prcNewWindow->left,
+        prcNewWindow->top,
+        prcNewWindow->right - prcNewWindow->left,
+        prcNewWindow->bottom - prcNewWindow->top,
+        SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+    break;
+  case WM_NCCREATE:
+    {
+      // Enable auto-resizing the title bar
+      EnableNonClientDpiScaling(hWnd);
+    }
     break;
   default:
     if (message == wm_copydata_webview) {
@@ -345,4 +362,3 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   HRESULT hrInit = CoInitialize(nullptr);
   return start_webview_window(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
-
