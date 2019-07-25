@@ -122,6 +122,7 @@ void send_message_to_powertoys(const std::wstring msg) {
                 "version": "1.0",
                 "name": "Move To New Desktop",
                 "description": "Adds popup that Maximizes a Window to a new Desktop.",
+                "icon_key": "pt-maximize-new-desktop",
                 "properties": {
                   "close desktop on restore" : {
                     "display_name": "Remove a virtual desktop when the last window is restored",
@@ -139,6 +140,7 @@ void send_message_to_powertoys(const std::wstring msg) {
                 "version": "1.0",
                 "name": "Shortcut Guide",
                 "description": "Shows a help overlay with Windows shortcuts when the Windows key is pressed.",
+                "icon_key": "pt-shortcut-guide",
                 "properties": {
                   "press time" : {
                     "display_name": "How long to press the Windows key before showing the Shortcut Guide (ms)",

@@ -44,7 +44,9 @@ void PowerToysSettings::Settings::free_allocated_cstring(const wchar_t * allocat
   delete[] allocated_cstring;
 }
 
-
+void PowerToysSettings::Settings::set_icon_key(const std::wstring & icon_key) {
+  _internal_json.as_object()[L"icon_key"] = web::json::value::string(icon_key);
+}
 
 PowerToysSettings::BasePropertySetting::BasePropertySetting(const std::wstring& name, const std::wstring& display_name, const std::wstring& editor_type, web::json::value value) {
   _name = name;

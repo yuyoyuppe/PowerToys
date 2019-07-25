@@ -3,9 +3,10 @@ import {Stack, Text, Nav, PrimaryButton, ScrollablePane, INavLink, Spinner, Spin
 import {GeneralSettings} from './GeneralSettings';
 import {CustomSettingsScreen} from './CustomSettingsScreen';
 import '../css/layout.css';
-import '../icons/css/fabric-icons-inline.css';
-import {initializeIcons} from '../icons/src';
-initializeIcons('src/icons/fonts/');
+import {setup_powertoys_icons} from '../setup_icons';
+
+// Register fabric UI icons and powertoys logos as icons.
+setup_powertoys_icons();
 
 export class App extends React.Component <any, any> {
   settingsscreenref:any;
@@ -43,7 +44,7 @@ export class App extends React.Component <any, any> {
           name: powertoys_dict[powertoy_key].name,
           key: powertoy_key,
           url:'',
-          icon:'CircleRing'
+          icon: powertoys_dict[powertoy_key].icon_key || 'CircleRing'
         });
       }
     }
@@ -78,6 +79,16 @@ export class App extends React.Component <any, any> {
                   '&:hover button.ms-Nav-link' : {
                     backgroundColor: '#e1dfdd',
                     color: '#323130'
+                  },
+                  'i.ms-Button-icon' : {
+                    color: '#201F1E',
+                    fontWeight: 'normal'
+                  },
+                  '&:hover i.ms-Button-icon' : {
+                    color: '#201F1E',
+                  },
+                  '&:active i.ms-Button-icon' : {
+                    color: '#201F1E',
                   },
                 },
               },

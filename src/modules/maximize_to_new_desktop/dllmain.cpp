@@ -50,6 +50,9 @@ public:
       get_name(),
       L"Adds popup that Maximizes a Window to a new Desktop."
     );
+
+    _settings.set_icon_key(L"pt-maximize-new-desktop");
+
     _settings.add_property(
       PowerToysSettings::BoolTogglePropertySetting(
         L"close desktop on restore",

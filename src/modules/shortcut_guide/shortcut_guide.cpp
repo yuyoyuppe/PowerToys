@@ -25,6 +25,8 @@ bool OverlayWindow::get_config(const wchar_t** config) {
     L"Shows a help overlay with Windows shortcuts when the Windows key is pressed."
   );
 
+  _settings.set_icon_key(L"pt-shortcut-guide");
+
   PowerToysSettings::IntSpinnerPropertySetting delay_property(
     L"press time",
     L"How long to press the Windows key before showing the Shortcut Guide (ms)",

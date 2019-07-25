@@ -25,6 +25,9 @@ namespace PowerToysSettings {
     wchar_t* to_allocated_cstring();
     static void free_allocated_cstring(const wchar_t* allocated_cstring);
 
+    // Add additional general information to the PowerToy settings.
+    void set_icon_key(const std::wstring& icon_key);
+
   private:
     web::json::value _internal_json;
     std::wstring _name;
