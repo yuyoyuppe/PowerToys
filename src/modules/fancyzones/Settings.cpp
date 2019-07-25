@@ -53,6 +53,8 @@ IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PCWSTR* config) noexce
 {
     PowerToysSettings::Settings settings(m_name, L"Helps organize your windows.");
 
+    settings.set_icon_key(L"pt-fancy-zones");
+
     for (auto const& setting : m_configBools)
     {
         wchar_t description[256];
