@@ -12,6 +12,6 @@ jobs:
   pool: { vmImage: vs2017-win2016 }
 
   steps:
-  - template: build-console-steps.yml
+  - template: build-powertoys-steps.yml
     parameters:
       additionalBuildArguments: ${{ parameters.additionalBuildArguments }}

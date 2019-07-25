@@ -19,6 +19,6 @@ pr:
 name: 0.0.$(Date:yyMM).$(Date:dd)$(Rev:rr)
 
 jobs:
-  - template: ./templates/build-console-ci.yml
+  - template: ./templates/build-powertoys-ci.yml
     parameters:
       platform: x64
