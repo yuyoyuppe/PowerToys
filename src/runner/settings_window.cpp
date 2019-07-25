@@ -102,52 +102,19 @@ void receive_json_send_to_main_thread(const std::wstring &msg) {
   dispatch_run_on_main_ui_thread(dispatch_received_json_callback, copy);
 }
 
-HANDLE create_medium_integrity_token() {
-  HANDLE restricted_token_handle;
-  SAFER_LEVEL_HANDLE level_handle = NULL;
-  DWORD sid_size = SECURITY_MAX_SID_SIZE;
-  BYTE medium_sid[SECURITY_MAX_SID_SIZE];
-  if (!SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER, SAFER_LEVEL_OPEN, &level_handle, NULL)) {
-    show_last_error_message(TEXT("Can't create a safer level token"), GetLastError());
-    return NULL;
-  }
-  if (!SaferComputeTokenFromLevel(level_handle, NULL, &restricted_token_handle, 0, NULL)) {
-    SaferCloseLevel(level_handle);
-    show_last_error_message(TEXT("Can't create the restricted token"), GetLastError());
-    return NULL;
-  }
-  SaferCloseLevel(level_handle);
-
-  if (!CreateWellKnownSid(WinMediumLabelSid, nullptr, medium_sid, &sid_size)) {
-    CloseHandle(restricted_token_handle);
-    show_last_error_message(TEXT("Can't create a SID for medium integrity"), GetLastError());
-    return NULL;
-  }
-
-  TOKEN_MANDATORY_LABEL integrity_level = { 0 };
-  integrity_level.Label.Attributes = SE_GROUP_INTEGRITY;
-  integrity_level.Label.Sid = reinterpret_cast<PSID>(medium_sid);
-
-  if (!SetTokenInformation(restricted_token_handle, TokenIntegrityLevel, &integrity_level, sizeof(integrity_level))) {
-    CloseHandle(restricted_token_handle);
-    show_last_error_message(TEXT("Can't set the token integrity level to medium"), GetLastError());
-    return NULL;
-  }
-
-  return restricted_token_handle;
-}
-
-bool block_settings_window_start = false;
+bool settings_window_is_running = false;
 
 void run_settings_window() {
-  block_settings_window_start = true;
   STARTUPINFO startup_info = { sizeof(startup_info) };
   PROCESS_INFORMATION process_info = { 0 };
+  HANDLE process = NULL;
+  HANDLE hToken = NULL;
+  STARTUPINFOEX siex = { 0 };
+  PPROC_THREAD_ATTRIBUTE_LIST pptal = NULL;
   TCHAR executable_path[MAX_PATH];
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
   wcscat_s(executable_path, TEXT("\\PowerToysSettings.exe"));
-  HANDLE restricted_token;
   TCHAR executable_args[MAX_PATH * 3];
   // Generate unique names for the pipes, if getting a UUID is possible
   std::wstring powertoys_pipe_name(TEXT("\\\\.\\pipe\\powertoys_runner_"));
@@ -170,48 +137,104 @@ void run_settings_window() {
   wcscat_s(executable_args, TEXT(" "));
   wcscat_s(executable_args, settings_pipe_name.c_str());
 
-  // TODO: Check integrity level before creating the token.
+  // Run the Settings process with non-elevated privileges
 
-  // Create a restricted token. The WebView created by the settings can't run as administrator.
-  restricted_token = create_medium_integrity_token();
+  HWND hwnd = GetShellWindow();
+  if (!hwnd) {
+    goto LExit;
+  }
+  DWORD pid;
+  GetWindowThreadProcessId(hwnd, &pid);
 
-  if (!restricted_token) {
-    // Couldn't get the restricted token to spawn the new process.
-    block_settings_window_start = false;
-    return;
+  process = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+  if (!process) {
+    goto LExit;
   }
 
-  if (!CreateProcessAsUser(restricted_token, executable_path, executable_args, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, &startup_info, &process_info)) {
-    show_last_error_message(TEXT("Can't open Settings Window"), GetLastError());
-    block_settings_window_start = false;
-    return;
+  SIZE_T size;
+  InitializeProcThreadAttributeList(nullptr, 1, 0, &size);
+  pptal = (PPROC_THREAD_ATTRIBUTE_LIST)new char[size];
+  if (!pptal) {
+    goto LExit;
   }
 
+  if (!InitializeProcThreadAttributeList(pptal, 1, 0, &size)) {
+    goto LExit;
+  }
+
+  if (!UpdateProcThreadAttribute(pptal,
+      0,
+      PROC_THREAD_ATTRIBUTE_PARENT_PROCESS,
+      &process,
+      sizeof(process),
+      nullptr,
+      nullptr)) {
+    goto LExit;
+  }
+  
+  siex.lpAttributeList = pptal;
+  siex.StartupInfo.cb = sizeof(siex);
+
+  if (!CreateProcessW(executable_path,
+      executable_args,
+      nullptr,
+      nullptr,
+      FALSE,
+      EXTENDED_STARTUPINFO_PRESENT,
+      nullptr,
+      nullptr,
+      &siex.StartupInfo,
+      &process_info)) {
+    goto LExit;
+  }
+
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+    goto LExit;
+  }
   current_settings_ipc = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
-  current_settings_ipc->start(restricted_token);
+  current_settings_ipc->start(hToken);
 
-  ResumeThread(process_info.hThread);
-  CloseHandle(process_info.hThread);
-
+  WaitForSingleObject(process_info.hProcess, INFINITE);
   if (WaitForSingleObject(process_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
     show_last_error_message(TEXT("Couldn't wait on the Settings Window to close."), GetLastError());
   }
 
-  current_settings_ipc->end();
-  delete current_settings_ipc;
-  current_settings_ipc = NULL;
+LExit:
 
-  CloseHandle(restricted_token);
+  if (process_info.hProcess) {
+    CloseHandle(process_info.hProcess);
+  }
 
-  CloseHandle(process_info.hProcess);
-  block_settings_window_start = false;
+  if (process_info.hThread) {
+    CloseHandle(process_info.hThread);
+  }
+
+  if (pptal) {
+    delete[](char*)pptal;
+  }
+
+  if (process) {
+    CloseHandle(process);
+  }
+
+  if (current_settings_ipc) {
+    current_settings_ipc->end();
+    delete current_settings_ipc;
+    current_settings_ipc = NULL;
+  }
+
+  if (hToken) {
+    CloseHandle(hToken);
+  }
+
+  settings_window_is_running = false;
 }
 
 void open_settings_window() {
-  if (block_settings_window_start) {
+  if (settings_window_is_running) {
     MessageBox(NULL, L"There's a PowerToys Settings window already running. Close the first instance first.", L"Settings", MB_OK && MB_TOPMOST);
   } else {
-    block_settings_window_start = true;
+    settings_window_is_running = true;
     std::thread(run_settings_window).detach();
   }
 }
