@@ -55,7 +55,7 @@ export class GeneralSettings extends React.Component <any, any> {
           ref={(input) => {this.startup_reference=input;}}
           />
         <Stack>
-        <Label>Version 0.8.0</Label>
+        <Label>Version 0.9.0</Label>
           <DefaultButton
             styles={{
                 root: {
