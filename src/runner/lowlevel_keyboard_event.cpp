@@ -10,11 +10,11 @@ namespace {
     if (nCode == HC_ACTION) {
       event.lParam = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
       event.wParam = wParam;
-      auto supress = powertoys_events().signal_event(ll_keyboard, reinterpret_cast<intptr_t>(&event));
-      return supress;
-    } else {
-      return CallNextHookEx(hook_handle_copy, nCode, wParam, lParam);
+      if (powertoys_events().signal_event(ll_keyboard, reinterpret_cast<intptr_t>(&event)) != 0) {
+        return 1;
+      }
     }
+    return CallNextHookEx(hook_handle_copy, nCode, wParam, lParam);
   }
 }
 
