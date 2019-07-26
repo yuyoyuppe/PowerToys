@@ -30,6 +30,12 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
             maxWidth:'250px',
             alignSelf: 'start'
           },
+          input: {
+            // The input area of the SpinButton overlaps the border, causing
+            // graphical issues depending on the Display scaling settings.
+            // Removing background color fixes the graphical issues.
+            backgroundColor: 'transparent',
+          },
         }}
         value={this.state.property_values.value}
         onValidate={(value: string) => {
