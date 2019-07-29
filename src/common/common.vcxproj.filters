@@ -51,36 +51,6 @@
     <ClInclude Include="Telemetry\TraceLoggingDefines.h">
       <Filter>Header Files\Telemetry</Filter>
     </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\details\basic_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\details\cpprest_compat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\json.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\details\SafeInt3.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\version.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\details\web_utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\asyncrt_utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\base_uri.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\uri.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpprestsdk\include\cpprest\uri_builder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="two_way_pipe_message_ipc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -124,24 +94,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\json\json.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\json\json_parsing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\json\json_serialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\utilities\web_utilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\utilities\base64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpprestsdk\src\utilities\asyncrt_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="settings_helpers.cpp">

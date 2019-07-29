@@ -4,13 +4,10 @@
 #include "window_manager_popup.h"
 #include "mouse_watcher.h"
 #include "trace.h"
-#include <cpprest/json.h>
 #include <common/settings_objects.h>
 #include <ShellScalingApi.h>
 #include <common/monitors.h>
 #include <common/dpi_aware.h>
-
-using namespace web;
 
 //Forward declarations
 RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos);

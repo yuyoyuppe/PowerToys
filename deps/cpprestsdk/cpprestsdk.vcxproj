@@ -12,11 +12,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{74485049-C722-400F-ABE5-86AC52D929B3}</ProjectGuid>
+    <ProjectGuid>{4E577735-DFAB-41AF-8A6E-B6E8872A2928}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>common</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <ProjectName>common</ProjectName>
+    <ProjectName>cpprestsdk</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -61,7 +61,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>inc;telemetry;..\..\deps\cpprestsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,7 +81,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>inc;telemetry;..\..\deps\cpprestsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,46 +91,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="animation.h" />
-    <ClInclude Include="async_message_queue.h" />
-    <ClInclude Include="d2d_svg.h" />
-    <ClInclude Include="d2d_text.h" />
-    <ClInclude Include="d2d_window.h" />
-    <ClInclude Include="dpi_aware.h" />
-    <ClInclude Include="monitors.h" />
+    <ClInclude Include="include\cpprest\asyncrt_utils.h" />
+    <ClInclude Include="include\cpprest\base_uri.h" />
+    <ClInclude Include="include\cpprest\details\basic_types.h" />
+    <ClInclude Include="include\cpprest\details\cpprest_compat.h" />
+    <ClInclude Include="include\cpprest\details\SafeInt3.hpp" />
+    <ClInclude Include="include\cpprest\details\web_utilities.h" />
+    <ClInclude Include="include\cpprest\json.h" />
+    <ClInclude Include="include\cpprest\uri.h" />
+    <ClInclude Include="include\cpprest\uri_builder.h" />
+    <ClInclude Include="include\cpprest\version.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="settings_helpers.h" />
-    <ClInclude Include="settings_objects.h" />
-    <ClInclude Include="start_visible.h" />
-    <ClInclude Include="tasklist_positions.h" />
-    <ClInclude Include="common.h" />
-    <ClInclude Include="Telemetry\ProjectTelemetry.h" />
-    <ClInclude Include="Telemetry\TraceLoggingDefines.h" />
-    <ClInclude Include="two_way_pipe_message_ipc.h" />
-    <ClInclude Include="windows_colors.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="animation.cpp" />
-    <ClCompile Include="d2d_svg.cpp" />
-    <ClCompile Include="d2d_text.cpp" />
-    <ClCompile Include="d2d_window.cpp" />
-    <ClCompile Include="dpi_aware.cpp" />
-    <ClCompile Include="monitors.cpp" />
+    <ClCompile Include="src\json\json.cpp" />
+    <ClCompile Include="src\json\json_parsing.cpp" />
+    <ClCompile Include="src\json\json_serialization.cpp" />
+    <ClCompile Include="src\utilities\asyncrt_utils.cpp" />
+    <ClCompile Include="src\utilities\base64.cpp" />
+    <ClCompile Include="src\utilities\web_utilities.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="settings_helpers.cpp" />
-    <ClCompile Include="settings_objects.cpp" />
-    <ClCompile Include="start_visible.cpp" />
-    <ClCompile Include="tasklist_positions.cpp" />
-    <ClCompile Include="common.cpp" />
-    <ClCompile Include="windows_colors.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\deps\cpprestsdk\cpprestsdk.vcxproj">
-      <Project>{4e577735-dfab-41af-8a6e-b6e8872a2928}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
