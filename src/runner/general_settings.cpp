@@ -7,7 +7,7 @@
 using namespace web;
 
 web::json::value load_general_settings() {
-  return PowerToysSettings::load_general_settings_json();
+  return PTSettingsHelper::load_general_settings();
 }
 
 web::json::value get_general_settings() {
@@ -53,7 +53,7 @@ void apply_general_settings(const json::value& general_configs) {
     }
   }
   json::value save_settings = get_general_settings();
-  PowerToysSettings::save_general_settings_json(save_settings);
+  PTSettingsHelper::save_general_settings(save_settings);
 }
 
 void start_initial_powertoys() {
