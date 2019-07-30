@@ -9,6 +9,8 @@
 #include <common/monitors.h>
 #include <common/dpi_aware.h>
 
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
 //Forward declarations
 RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos);
 void on_mouse_out();
@@ -49,19 +51,23 @@ public:
     );
 
     _settings.set_icon_key(L"pt-maximize-new-desktop");
-
+    
+    HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+    wchar_t description[256];
+    LoadString(hinstance, closeDesktopOnRestoreLastWindow.resourceId, description, ARRAYSIZE(description));
     _settings.add_property(
       PowerToysSettings::BoolTogglePropertySetting(
-        L"close desktop on restore",
-        L"Remove a virtual desktop when the last window is restored",
-        should_close_desktop_after_restoring_last_window
+        closeDesktopOnRestoreLastWindow.name,
+        description,
+        closeDesktopOnRestoreLastWindow.value
       )
     );
 
+    LoadString(hinstance, popupDelay.resourceId, description, ARRAYSIZE(description));
     PowerToysSettings::IntSpinnerPropertySetting delay_property(
-      L"hover delay",
-      L"How long to wait hovering the maximize button before showing the popup (ms)",
-      popup_delay_setting
+      popupDelay.name,
+      description,
+      popupDelay.value
     );
     delay_property.setSpinnerMax(10000);
     delay_property.setSpinnerMin(100);
@@ -80,16 +86,16 @@ public:
     try {
       PowerToysSettings::PowerToyValues _values =
         PowerToysSettings::PowerToyValues::from_json_string(config);
-      if (_values.is_bool_value(L"close desktop on restore")) {
-        should_close_desktop_after_restoring_last_window = _values.get_bool_value(L"close desktop on restore");
+      if (_values.is_bool_value(closeDesktopOnRestoreLastWindow.name)) {
+        closeDesktopOnRestoreLastWindow.value = _values.get_bool_value(closeDesktopOnRestoreLastWindow.name);
         if (maximize_popup != nullptr) {
-          maximize_popup->set_delete_after_restore(should_close_desktop_after_restoring_last_window);
+          maximize_popup->set_delete_after_restore(closeDesktopOnRestoreLastWindow.value);
         }
       }
-      if (_values.is_int_value(L"hover delay")) {
-        popup_delay_setting = _values.get_int_value(L"hover delay");
+      if (_values.is_int_value(popupDelay.name)) {
+        popupDelay.value = _values.get_int_value(popupDelay.name);
         if (_enabled) {
-          update_mousein_wait(popup_delay_setting);
+          update_mousein_wait(popupDelay.value);
         }
       }
     }
@@ -103,8 +109,8 @@ public:
   virtual void enable() override {
     if (!_enabled) {
       maximize_popup = new D2DWindowManagerPopup();
-      maximize_popup->set_delete_after_restore(should_close_desktop_after_restoring_last_window);
-      start_mouse_watcher(popup_delay_setting, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
+      maximize_popup->set_delete_after_restore(closeDesktopOnRestoreLastWindow.value);
+      start_mouse_watcher(popupDelay.value, 100, on_mouse_in, on_mouse_out, maximize_popup->get_hwnd());
     }
     _enabled = true;
   }
@@ -129,10 +135,21 @@ public:
   static D2DWindowManagerPopup* maximize_popup;
 
 private:
-  bool should_close_desktop_after_restoring_last_window = true;
-  int popup_delay_setting = 400;
   void init_settings();
   void save_settings();
+
+  // Settings used by this module
+  struct CloseDesktopOnRestoreLastWindow {
+    PCWSTR name = L"close_desktop_on_restore";
+    BOOL value = TRUE;
+    int resourceId = IDS_SETTING_DESCRIPTION_CLOSE_ON_RESTORE;
+  } closeDesktopOnRestoreLastWindow;
+
+  struct PopupDelay {
+    PCWSTR name = L"popup_delay";
+    int value = 400; // ms
+    int resourceId = IDS_SETTING_DESCRIPTION_HOVER_DELAY;
+  } popupDelay;
 };
 
 D2DWindowManagerPopup* MTNDPowertoy::maximize_popup = nullptr;
@@ -179,14 +196,14 @@ void MTNDPowertoy::save_settings() {
     );
     values.add_property_value(
       PowerToysSettings::BoolSettingsValue(
-        L"close desktop on restore",
-        should_close_desktop_after_restoring_last_window
+        closeDesktopOnRestoreLastWindow.name,
+        closeDesktopOnRestoreLastWindow.value
       )
     );
     values.add_property_value(
       PowerToysSettings::IntSettingsValue(
-        L"hover delay",
-        popup_delay_setting
+        popupDelay.name,
+        popupDelay.value
       )
     );
     values.save_to_settings_file();
@@ -200,11 +217,11 @@ void MTNDPowertoy::init_settings() {
   try {
     PowerToysSettings::PowerToyValues settings =
       PowerToysSettings::PowerToyValues::load_from_settings_file(get_name());
-    if (settings.is_bool_value(L"close desktop on restore")) {
-      should_close_desktop_after_restoring_last_window = settings.get_bool_value(L"close desktop on restore");
+    if (settings.is_bool_value(closeDesktopOnRestoreLastWindow.name)) {
+      closeDesktopOnRestoreLastWindow.value = settings.get_bool_value(closeDesktopOnRestoreLastWindow.name);
     }
-    if (settings.is_int_value(L"hover delay")) {
-      popup_delay_setting = settings.get_int_value(L"hover delay");
+    if (settings.is_int_value(popupDelay.name)) {
+      popupDelay.value = settings.get_int_value(popupDelay.name);
     }
   }
   catch (std::exception ex) {

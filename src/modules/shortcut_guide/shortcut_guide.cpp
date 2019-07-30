@@ -4,6 +4,8 @@
 #include "trace.h"
 #include <common/settings_objects.h>
 
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
 OverlayWindow* instance = nullptr;
 
 OverlayWindow::OverlayWindow() {
@@ -27,10 +29,13 @@ bool OverlayWindow::get_config(const wchar_t** config) {
 
   _settings.set_icon_key(L"pt-shortcut-guide");
 
+  HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+  wchar_t description[256];
+  LoadString(hinstance, pressTime.resourceId, description, ARRAYSIZE(description));
   PowerToysSettings::IntSpinnerPropertySetting delay_property(
-    L"press time",
-    L"How long to press the Windows key before showing the Shortcut Guide (ms)",
-    current_delay_setting
+    pressTime.name,
+    description,
+    pressTime.value
   );
   delay_property.setSpinnerMax(10000);
   delay_property.setSpinnerMin(100);
@@ -49,9 +54,9 @@ void OverlayWindow::set_config(const wchar_t * config) {
   try {
     PowerToysSettings::PowerToyValues _values =
       PowerToysSettings::PowerToyValues::from_json_string(config);
-    if (_values.is_int_value(L"press time")) {
-      int press_delay_time = _values.get_int_value(L"press time");
-      current_delay_setting = press_delay_time;
+    if (_values.is_int_value(pressTime.name)) {
+      int press_delay_time = _values.get_int_value(pressTime.name);
+      pressTime.value = press_delay_time;
       if (target_state) {
         target_state->set_delay(press_delay_time);
       }
@@ -66,7 +71,7 @@ void OverlayWindow::set_config(const wchar_t * config) {
 void OverlayWindow::enable() {
   if (!_enabled) {
     winkey_popup = new D2DOverlayWindow();
-    target_state = new TargetState(current_delay_setting);
+    target_state = new TargetState(pressTime.value);
     winkey_popup->initialize();
     desktop = GetDesktopWindow();
     shell = GetShellWindow();
@@ -144,8 +149,8 @@ void OverlayWindow::init_settings() {
   try {
     PowerToysSettings::PowerToyValues settings =
       PowerToysSettings::PowerToyValues::load_from_settings_file(get_name());
-    if (settings.is_int_value(L"press time")) {
-      current_delay_setting = settings.get_int_value(L"press time");
+    if (settings.is_int_value(pressTime.name)) {
+      pressTime.value = settings.get_int_value(pressTime.name);
     }
   }
   catch (std::exception ex) {
@@ -160,8 +165,8 @@ void OverlayWindow::save_settings() {
     );
     values.add_property_value(
       PowerToysSettings::IntSettingsValue(
-        L"press time",
-        current_delay_setting
+        pressTime.name,
+        pressTime.value
       )
     );
     values.save_to_settings_file();

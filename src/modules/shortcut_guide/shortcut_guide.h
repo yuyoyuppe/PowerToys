@@ -34,7 +34,12 @@ private:
   HWND active_window;
   bool _enabled = false;
 
-  int current_delay_setting = 900;
   void init_settings();
   void save_settings();
+
+  struct PressTime {
+    PCWSTR name = L"press_time";
+    int value = 900; // ms
+    int resourceId = IDS_SETTING_DESCRIPTION_PRESS_TIME;
+  } pressTime;
 };
