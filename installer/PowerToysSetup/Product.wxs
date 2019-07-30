@@ -24,6 +24,7 @@
     </Condition>
 
     <Icon Id="powertoys.ico" SourceFile="$(var.BinX64Dir)\svgs\icon.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="powertoys.ico" />
     <Feature Id="ProductFeature" Title="PowerToys" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
