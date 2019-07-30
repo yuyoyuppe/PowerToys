@@ -6,16 +6,23 @@ import { Separator } from 'office-ui-fabric-react/lib/Separator';
 export class GeneralSettings extends React.Component <any, any> {
   references: any = {};
   startup_reference: any;
+  parent_on_change: Function;
   constructor(props: any) {
     super(props);
     this.references={};
     this.startup_reference=null;
+    this.parent_on_change = props.on_change;
     this.state = {
       settings_key: props.settings_key,
       settings: props.settings,
     }
   }
-
+  shouldComponentUpdate(nextProps:any, nextState:any)
+  {
+    // This component and its children manage their state.
+    // React only to state changes when forceUpdate is called by the App component.
+    return false;
+  }
   componentWillReceiveProps(props: any) {
     this.setState({ settings: props.settings })
   }
@@ -44,6 +51,7 @@ export class GeneralSettings extends React.Component <any, any> {
             return <BoolToggleSettingsControl
               setting={{display_name: key, value: enabled_value}}
               key={key}
+              on_change={this.parent_on_change}
               ref={(input) => {this.references[key]=input;}}
             />;
           })
@@ -52,6 +60,7 @@ export class GeneralSettings extends React.Component <any, any> {
         <Text variant='xLarge'>General</Text>
         <BoolToggleSettingsControl
           setting={{display_name: 'Start at login', value: this.state.settings.startup}}
+          on_change={this.parent_on_change}
           ref={(input) => {this.startup_reference=input;}}
           />
         <Stack>

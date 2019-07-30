@@ -1,5 +1,5 @@
 import React from 'react';
-import {Stack, Text, Nav, PrimaryButton, ScrollablePane, INavLink, Spinner, SpinnerSize} from 'office-ui-fabric-react';
+import {Stack, Text, Nav, DefaultButton, PrimaryButton, ScrollablePane, INavLink, Spinner, SpinnerSize, Dialog, DialogType, DialogFooter} from 'office-ui-fabric-react';
 import {GeneralSettings} from './GeneralSettings';
 import {CustomSettingsScreen} from './CustomSettingsScreen';
 import '../css/layout.css';
@@ -9,12 +9,16 @@ import {setup_powertoys_icons} from '../setup_icons';
 setup_powertoys_icons();
 
 export class App extends React.Component <any, any> {
-  settingsscreenref:any;
+  settings_screen_ref:any;
   constructor(props: any) {
     super(props);
-    this.settingsscreenref = null;
+    this.settings_screen_ref = null;
     this.state = {
-      selectedmenu : 'general',
+      data_changed : false,
+      saving : false,
+      selected_menu : 'general',
+      target_selected_menu : '',
+      show_save_discard_dialog: false,
       settings: {}
     }
   }
@@ -28,12 +32,54 @@ export class App extends React.Component <any, any> {
   }
 
   public receive_config_msg(config: any):void {
-    let current_selected_menu = this.state.selectedmenu;
+    let current_selected_menu = this.state.selected_menu;
     if(!config.hasOwnProperty('powertoys') || !config.powertoys.hasOwnProperty(current_selected_menu)) {
       current_selected_menu='general';
     }
-    this.setState({settings: config, selectedmenu: current_selected_menu});
+    this.setState({
+      settings: config,
+      selected_menu: current_selected_menu,
+      data_changed: false,
+      saving: false,
+      show_save_discard_dialog: false
+    });
+    if(this.settings_screen_ref) {
+      this.settings_screen_ref.forceUpdate();
+    }
   }
+
+  private on_setting_change = (): void => {
+    this.setState({data_changed: true});
+  }
+
+  private show_save_discard_dialog = (target_selected_menu: string): void => {
+    this.setState({
+      target_selected_menu: target_selected_menu,
+      show_save_discard_dialog: true
+    });
+  }
+
+  private save_clicked = (): void => {
+    // output_from_webview should be declared in index.html
+    this.setState({saving : true});
+    (window as any).output_from_webview(JSON.stringify(this.settings_screen_ref.get_data()));
+  };
+
+  private close_save_discard_dialog = (): void => {
+    this.setState({ show_save_discard_dialog: false });
+  };
+  private save_save_discard_dialog = (): void => {
+    this.setState({ show_save_discard_dialog: false });
+    this.save_clicked();
+  };
+  private discard_save_discard_dialog = (): void => {
+    this.setState({
+      show_save_discard_dialog: false,
+      selected_menu: this.state.target_selected_menu,
+      data_changed: false,
+      saving: false
+    });
+  };
 
   public render(): JSX.Element {
     const powertoys_dict = this.state.settings.powertoys;
@@ -49,20 +95,23 @@ export class App extends React.Component <any, any> {
       }
     }
 
-    const saveClicked = (): void => {
-      // output_from_webview should be declared in index.html
-      (window as any).output_from_webview(JSON.stringify(this.settingsscreenref.get_data()));
-    };
-
-
     return (
       <div className='body'>
         <div className='sidebar'>
           <Nav
-            selectedKey= {this.state.selectedmenu}
+            selectedKey= {this.state.selected_menu}
             onLinkClick = {
               (ev?: React.MouseEvent<HTMLElement,MouseEvent>, item?: INavLink) => {
-                this.setState({selectedmenu : ((item && item.key)||null) });
+                let item_menu_key: string|null = ((item && item.key)||null);
+                if(item_menu_key && item_menu_key!=this.state.selected_menu) {
+                  if(this.state.data_changed) {
+                    // There are data changes. Don't change screen until the user confirms.
+                    ev&&ev.preventDefault();
+                    this.show_save_discard_dialog(item_menu_key);
+                  } else {
+                    this.setState({selected_menu : item_menu_key});
+                  }
+                }
               }
             }
             styles = {{
@@ -110,8 +159,8 @@ export class App extends React.Component <any, any> {
                 variant='xxLarge'
                 styles= {{ root: { display:'block', whiteSpace:'no-wrap', overflow:'hidden', textOverflow:'ellipsis' }}}
               >
-                { this.state.selectedmenu!='general' ?
-                  powertoys_dict[this.state.selectedmenu].name + " Settings" :
+                { this.state.selected_menu!='general' ?
+                  powertoys_dict[this.state.selected_menu].name + " Settings" :
                   "PowerToys General Settings"
                 }
               </Text>
@@ -119,9 +168,17 @@ export class App extends React.Component <any, any> {
             <div className='editorheadbuttons'>
               <Stack horizontal={true} tokens={{childrenGap:16}}>
                 <PrimaryButton
-                  text='Save'
-                  onClick={saveClicked}
-                  />
+                  styles={{
+                    root: {
+                      minWidth: '100px'
+                    }
+                  }}
+                  disabled = { (!this.state.data_changed) || this.state.saving}
+                  text= {this.state.saving?'Saving':'Save'}
+                  onClick={this.save_clicked}
+                  >
+                    {this.state.saving ? <Spinner size={SpinnerSize.small}/> : <span/>}
+                  </PrimaryButton>
               </Stack>
             </div>
           </div>
@@ -138,21 +195,23 @@ export class App extends React.Component <any, any> {
             >
             {
               (() => {
-                if(this.state.selectedmenu === 'general' && this.state.settings.hasOwnProperty('general')) {
+                if(this.state.selected_menu === 'general' && this.state.settings.hasOwnProperty('general')) {
                   return <GeneralSettings
                     key="general"
                     settings_key="general"
                     settings={this.state.settings.general}
-                    ref={(input:any) => {this.settingsscreenref = input;}}
+                    on_change={this.on_setting_change}
+                    ref={(input:any) => {this.settings_screen_ref = input;}}
                   />
-                } else if( this.state.settings.hasOwnProperty('powertoys') && this.state.selectedmenu in this.state.settings.powertoys) {
+                } else if( this.state.settings.hasOwnProperty('powertoys') && this.state.selected_menu in this.state.settings.powertoys) {
                   return <CustomSettingsScreen
-                    key={this.state.selectedmenu}
-                    settings_key={this.state.selectedmenu}
-                    powertoy={this.state.settings.powertoys[this.state.selectedmenu]}
-                    ref={(input:any) => {this.settingsscreenref = input;}}
-                    /> 
-                } else { 
+                    key={this.state.selected_menu}
+                    settings_key={this.state.selected_menu}
+                    powertoy={this.state.settings.powertoys[this.state.selected_menu]}
+                    on_change={this.on_setting_change}
+                    ref={(input:any) => {this.settings_screen_ref = input;}}
+                    />
+                } else {
                   return <Spinner size={SpinnerSize.large} label="Loading the Settings..." labelPosition="top" />
                 }
               })()
@@ -160,6 +219,25 @@ export class App extends React.Component <any, any> {
             </ScrollablePane>
           </div>
         </div>
+        <Dialog
+          hidden={!this.state.show_save_discard_dialog}
+          onDismiss={this.close_save_discard_dialog}
+          dialogContentProps={{
+            type: DialogType.normal,
+            title: 'Changes not saved',
+            subText: 'Would you like to save or discard your changes?'
+          }}
+          modalProps={{
+            isBlocking: true,
+            styles: { main: { maxWidth: 450 } }
+          }}
+        >
+          <DialogFooter>
+            <PrimaryButton onClick={this.save_save_discard_dialog} text="Save" />
+            <PrimaryButton onClick={this.discard_save_discard_dialog} text="Discard" />
+            <DefaultButton onClick={this.close_save_discard_dialog} text="Cancel" />
+          </DialogFooter>
+        </Dialog>
       </div>
     );
   }

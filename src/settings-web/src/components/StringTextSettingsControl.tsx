@@ -33,6 +33,7 @@ export class StringTextSettingsControl extends BaseSettingsControl {
                 }
               })
             );
+            this.parent_on_change();
           }
         }
         value={this.state.property_values.value}

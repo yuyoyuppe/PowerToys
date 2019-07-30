@@ -52,6 +52,7 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
               value: parseInt(value)
             }
           }));
+          this.parent_on_change();
           return value;
         }}
         onIncrement={(value: string) => {
@@ -66,6 +67,7 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
               value: parseInt(value)
             }
           }));
+          this.parent_on_change();
           return value;
         }}
         onDecrement={(value: string) => {
@@ -80,6 +82,7 @@ export class IntSpinnerSettingsControl extends BaseSettingsControl {
               value: parseInt(value)
             }
           }));
+          this.parent_on_change();
           return value;
         }}
         precision={0}

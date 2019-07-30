@@ -34,6 +34,7 @@ export class BoolToggleSettingsControl extends BaseSettingsControl {
                 }
               })
             );
+            this.parent_on_change();
           }
         }
         checked={this.state.property_values.value}

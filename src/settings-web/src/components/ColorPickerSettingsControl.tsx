@@ -33,6 +33,10 @@ export class ColorPickerSettingsControl extends BaseSettingsControl {
           color={current_color===undefined?"#000000":current_color}
           componentRef= {(input) => {this.colorpickerref=input;}}
           alphaSliderHidden = {true}
+          onChange = { () => {
+              this.parent_on_change();
+            }
+          }
         />
       </Stack>
     );

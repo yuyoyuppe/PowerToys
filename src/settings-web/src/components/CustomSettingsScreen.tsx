@@ -8,14 +8,22 @@ import {CustomActionSettingsControl} from './CustomActionSettingsControl';
 
 export class CustomSettingsScreen extends React.Component <any, any> {
   references: any;
+  parent_on_change: Function;
 
   constructor(props: any) {
     super(props);
     this.references={};
+    this.parent_on_change = props.on_change;
     this.state = {
       settings_key: props.settings_key,
       powertoy: props.powertoy,
     }
+  }
+  shouldComponentUpdate(nextProps:any, nextState:any)
+  {
+    // This component and its children manage their state.
+    // React only to state changes when forceUpdate is called by the App component.
+    return false;
   }
   componentWillReceiveProps(props: any) {
     this.setState({ powertoy: props.powertoy })
@@ -62,24 +70,28 @@ export class CustomSettingsScreen extends React.Component <any, any> {
                 return <BoolToggleSettingsControl
                   setting={power_toys_properties[key]}
                   key={key}
+                  on_change={this.parent_on_change}
                   ref={(input) => {this.references[key]=input;}}
                   />;
               case 'string_text':
                 return <StringTextSettingsControl
                   setting = {power_toys_properties[key]}
                   key={key}
+                  on_change={this.parent_on_change}
                   ref={(input) => {this.references[key]=input;}}
                   />;
               case 'int_spinner':
                 return <IntSpinnerSettingsControl
                   setting = {power_toys_properties[key]}
                   key={key}
+                  on_change={this.parent_on_change}
                   ref={(input) => {this.references[key]=input;}}
                   />;
               case 'color_picker':
                 return <ColorPickerSettingsControl
                   setting = {power_toys_properties[key]}
                   key={key}
+                  on_change={this.parent_on_change}
                   ref={(input) => {this.references[key]=input;}}
                   />;
               case 'custom_action':
