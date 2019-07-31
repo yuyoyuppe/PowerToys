@@ -323,7 +323,7 @@ namespace {
     if (FAILED(hr) || bounded_rect_prop.vt != (VT_R8 | VT_ARRAY)) {
       return {};
     }
-    RECT result = { 0 };    
+    RECT result = { 0 };
     DOUBLE coord_value;
     LONG pos;
     pos = 0;
@@ -376,30 +376,17 @@ namespace {
     return found;
   }
 
-  winrt::com_ptr<IUIAutomationElement>  find_element_ui_automation_strategy(IUIAutomationElement* hwnd_UI_element, IUIAutomationCondition* condition) {
-    winrt::com_ptr<IUIAutomationElement> found;
-    hwnd_UI_element->FindFirst(TreeScope_Descendants, condition, found.put());
-    return found;
-  }
-
   HWND ui_automation_strategy_last_hwnd = nullptr;
   winrt::com_ptr<IUIAutomationElement> ui_automation_strategy_element_found;
+  // A strategy to find the maximize button using UIAutomation.
   RECT use_ui_automation_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
-    // A strategy to find the maximize button using UIAutomation.
-    /*RECT result = { 0 };
-    
-    HRESULT hr;
-    
-    */
-
     winrt::com_ptr<IUIAutomationElement> hwnd_UI_element;
     if (ui_automation_strategy_last_hwnd != hwnd) {
-      ui_automation_strategy_last_hwnd = hwnd;
       // We haven't searched this window for the maximize button recently. Query it.
       // This is an expensive operation for some Windows and may block them.
-      if (ui_automation_strategy_element_found) {
-        ui_automation_strategy_element_found = nullptr;
-      }
+      ui_automation_strategy_last_hwnd = hwnd;
+      ui_automation_strategy_element_found = nullptr;
+
       auto hr = ui_automation->ElementFromHandle(hwnd, hwnd_UI_element.put());
       if (hr != S_OK || hwnd_UI_element == NULL) {
         return {};
@@ -435,14 +422,14 @@ namespace {
       }
       auto chrono_duration = std::chrono::high_resolution_clock::now() - start_time;
       double seconds_duration = std::chrono::duration<double>(chrono_duration).count();
-      if(!ui_automation_strategy_element_found) {
+      if (!ui_automation_strategy_element_found) {
         //Nothing useful found. Can't keep doing this for this Window.
         cache_elem.window_ui_element = hwnd_UI_element;
-        cache_elem.seconds_last_ui_automation_find_duration=seconds_duration;
+        cache_elem.seconds_last_ui_automation_find_duration = seconds_duration;
         custom_ui_automation_cache.insert_or_assign(hwnd, cache_elem);
       } else {
         cache_elem.window_ui_element = hwnd_UI_element;
-        cache_elem.seconds_last_ui_automation_find_duration=0;
+        cache_elem.seconds_last_ui_automation_find_duration = 0;
         custom_ui_automation_cache.insert_or_assign(hwnd, cache_elem);
       }
     }
