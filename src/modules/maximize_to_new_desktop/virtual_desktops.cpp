@@ -154,27 +154,27 @@ namespace {
   }
 
   IVirtualDesktopManagerInternal* get_manager_internal() {
-    auto provider = get_service_provider();
-    static winrt::com_ptr<IVirtualDesktopManagerInternal> manager;
-    if (!manager) {
-      winrt::check_hresult(provider->QueryService(CLSID_VirtualDesktopAPI_Unknown, __uuidof(manager), manager.put_void()));
+    static winrt::com_ptr<IVirtualDesktopManagerInternal> managerInternal;
+    if (!managerInternal) {
+      auto provider = get_service_provider();
+      winrt::check_hresult(provider->QueryService(CLSID_VirtualDesktopAPI_Unknown, __uuidof(managerInternal), managerInternal.put_void()));
     }
-    return manager.get();
+    return managerInternal.get();
   }
 
   IVirtualDesktopManager* get_manager() {
-    auto provider = get_service_provider();
     static winrt::com_ptr<IVirtualDesktopManager> manager;
     if (!manager) {
+      auto provider = get_service_provider();
       winrt::check_hresult(provider->QueryService(__uuidof(manager), manager.put()));
     }
     return manager.get();
   }
 
   IApplicationViewCollection* get_application_view_collection() {
-    auto provider = get_service_provider();
     static winrt::com_ptr<IApplicationViewCollection> collection;
     if (!collection) {
+      auto provider = get_service_provider();
       auto result = provider->QueryService(CLSID_IApplicationViewCollection_1809, CLSID_IApplicationViewCollection_1809, collection.put_void());
       // Windows 1803 had different GUID for that interface
       if (result < 0) {
@@ -235,6 +235,7 @@ winrt::com_ptr<IVirtualDesktop> get_desktop_at_index(UINT index) {
 
 // TODO: Add a synchronized map instead, after testing this technique.
 std::map<HWND, WINDOWPLACEMENT> moved_window_original_positions;
+const int CHECK_DESKTOP_DELAY = 100;
 
 BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID) {
   if (!hwnd) {
@@ -265,37 +266,11 @@ void get_current_desktop_id(GUID *pId) {
 void switch_to_desktop(GUID id) {
   auto manager_internal = get_manager_internal();
   winrt::com_ptr<IVirtualDesktop> desktop;
-  if (manager_internal->FindDesktop(&id, desktop.put()) == S_OK) {
-    winrt::check_hresult(manager_internal->SwitchDesktop(desktop.get()));
-  }
-}
-
-const int MOVE_WINDOW_DELAY = 50;
-const int CHECK_DESKTOP_DELAY = 100;
-ANIMATIONINFO g_original_animation_settings;
-
-void disable_animation() {
-  g_original_animation_settings.cbSize = sizeof(g_original_animation_settings);
-  ::SystemParametersInfo(SPI_GETANIMATION, sizeof(g_original_animation_settings), &g_original_animation_settings, 0);
-
-  ANIMATIONINFO no_animation = { sizeof(no_animation), 0 };
-  ::SystemParametersInfo(SPI_SETANIMATION, sizeof(no_animation), &no_animation, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
-}
-
-void restore_animation() {
-  ::SystemParametersInfo(SPI_SETANIMATION, sizeof(g_original_animation_settings), &g_original_animation_settings, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+  winrt::check_hresult(manager_internal->FindDesktop(&id, desktop.put()));
+  winrt::check_hresult(manager_internal->SwitchDesktop(desktop.get()));
 }
 
 void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_desktop_id, GUID primary_desktop_id, bool close_desktop_if_last_window) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(MOVE_WINDOW_DELAY));
-
-  // Restore the window to the original position.
-  if (auto it = moved_window_original_positions.find(hwnd); it != moved_window_original_positions.end()) {
-    auto& original_placement = it->second;
-    SetWindowPlacement(hwnd, &original_placement);
-    moved_window_original_positions.erase(it);
-  }
-
   // Wait for the automatic desktop switch to occur before checking the
   // current desktop id.
   std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_DESKTOP_DELAY));
@@ -308,20 +283,22 @@ void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_deskto
     switch_to_desktop(primary_desktop_id);
   }
 
-  auto manager_internal = get_manager_internal();
-  winrt::com_ptr<IVirtualDesktop> primary_desktop = nullptr;
-  winrt::com_ptr<IVirtualDesktop> old_desktop = nullptr;
-  if (close_desktop_if_last_window && manager_internal->FindDesktop(&primary_desktop_id, primary_desktop.put()) == S_OK &&
-    manager_internal->FindDesktop(&old_desktop_id, old_desktop.put()) == S_OK) {
-    // Check if the moved window was the last window present in this desktop.
-    if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
-      manager_internal->RemoveDesktop(old_desktop.get(), primary_desktop.get());
-      Trace::EventDesktopClosed();
+  if (close_desktop_if_last_window) {
+    // Check if the target window was the last window present in this desktop.
+    auto manager_internal = get_manager_internal();
+    winrt::com_ptr<IVirtualDesktop> primary_desktop = nullptr;
+    winrt::com_ptr<IVirtualDesktop> old_desktop = nullptr;
+    if (manager_internal->FindDesktop(&primary_desktop_id, primary_desktop.put()) == S_OK &&
+        manager_internal->FindDesktop(&old_desktop_id, old_desktop.put()) == S_OK) {
+      if (EnumWindows(check_if_window_in_virtual_desktop, reinterpret_cast<LPARAM>(&old_desktop_id)) != FALSE) {
+        manager_internal->RemoveDesktop(old_desktop.get(), primary_desktop.get());
+        Trace::EventDesktopClosed();
+      }
     }
   }
 }
 
-void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window) {
+void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window, HWND popupWindow) {
   auto manager_internal = get_manager_internal();
   auto manager = get_manager();
 
@@ -339,59 +316,76 @@ void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window
   GUID primary_desktop_id;
   winrt::check_hresult(objDestkop->GetID(&primary_desktop_id));
 
-  disable_animation();
-  ShowWindow(hwnd, SW_MINIMIZE);
-  restore_animation();
+  // If the target window is the foreground window, set the focus to the popup window
+  // so the target window loses focus and the desktop switch will show the animation.
+  if (GetForegroundWindow() == hwnd) {
+    SetForegroundWindow(popupWindow);
+  }
 
   auto collection_view = get_application_view_collection();
-  winrt::com_ptr <IApplicationView> view;
-  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
-  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
+  IApplicationView *view;
+  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, &view));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view, objDestkop.get()));
+
+  // Restore the window to the original position.
+  if (auto it = moved_window_original_positions.find(hwnd); it != moved_window_original_positions.end()) {
+    auto& original_placement = it->second;
+    SetWindowPlacement(hwnd, &original_placement);
+    moved_window_original_positions.erase(it);
+  }
+
+  // In order to trigger the desktop switch animation, minimize and maximize the target window.
+  ShowWindow(hwnd, SW_MINIMIZE);
+  ShowWindow(hwnd, SW_NORMAL);
 
   std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktop_id, close_desktop_if_last_window).detach();
   Trace::ActionRestore();
 }
 
-void switch_to_window_desktop_after_delay(HWND hwnd, GUID new_desktop_id) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(MOVE_WINDOW_DELAY));
-  ShowWindow(hwnd, SW_MAXIMIZE);
-  BOOL sfw_result = SetForegroundWindow(hwnd);
-
-  // Wait for the automatic desktop switch to occur before checking the
-  // current desktop id.
+void switch_to_desktop_fallback(HWND hwnd, GUID new_desktop_id) {
+  // Wait for the automatic desktop switch to complete.
   std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_DESKTOP_DELAY));
+
   GUID current_desktop_id = { 0 };
   get_current_desktop_id(&current_desktop_id);
-
-  if (!sfw_result || !IsEqualGUID(current_desktop_id, new_desktop_id)) {
+  if (!IsEqualGUID(current_desktop_id, new_desktop_id)) {
     // This is a fallback manual switch to the new desktop (without animation)
     // in case something went wrong and the switch didn't occur automatically.
     switch_to_desktop(new_desktop_id);
   }
 };
 
-void move_window_to_new_desktop(HWND hwnd) {
+void move_window_to_new_desktop(HWND hwnd, HWND popupWindow) {
+  // Create a new virtual desktop.
   auto manager_internal = get_manager_internal();
-  auto manager = get_manager();
-  winrt::com_ptr<IVirtualDesktop> new_desktop;
-  winrt::check_hresult(manager_internal->CreateDesktopW(new_desktop.put()));
+  IVirtualDesktop *new_desktop;
+  winrt::check_hresult(manager_internal->CreateDesktopW(&new_desktop));
   GUID id;
   winrt::check_hresult(new_desktop->GetID(&id));
 
+  // Save the target window original placement.
   WINDOWPLACEMENT original_placement;
   original_placement.length = sizeof(WINDOWPLACEMENT);
   if (GetWindowPlacement(hwnd, &original_placement)) {
     moved_window_original_positions[hwnd] = original_placement;
   }
 
-  disable_animation();
-  ShowWindow(hwnd, SW_MINIMIZE);
-  restore_animation();
+  // If the target window is the foreground window, set the focus to the popup window
+  // so the target window loses focus and the desktop switch will show the animation.
+  if (GetForegroundWindow() == hwnd) {
+    SetForegroundWindow(popupWindow);
+  }
 
-  winrt::com_ptr <IApplicationView> view;
-  auto collection_view = get_application_view_collection();
-  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
-  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), new_desktop.get()));
-  std::thread(switch_to_window_desktop_after_delay, hwnd, id).detach();
+  // Move the target window to the new desktop.
+  IApplicationView *view;
+  auto appViewCollection = get_application_view_collection();
+  winrt::check_hresult(appViewCollection->GetViewForHwnd(hwnd, &view));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view, new_desktop));
+
+  // In order to trigger the desktop switch animation, minimize and maximize the target window.
+  ShowWindow(hwnd, SW_MINIMIZE);
+  ShowWindow(hwnd, SW_MAXIMIZE);
+
+  std::thread(switch_to_desktop_fallback, hwnd, id).detach();
   Trace::ActionMaximize();
 }
