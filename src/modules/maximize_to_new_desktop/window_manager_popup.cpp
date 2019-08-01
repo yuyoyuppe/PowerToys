@@ -259,10 +259,15 @@ LRESULT __stdcall D2DWindowManagerPopup::d2d_window_proc(HWND window, UINT messa
     return DefWindowProc(window, message, wparam, lparam);
   case WM_LBUTTONUP:
     _this = this_from_hwnd(window);
-    if (_this->target_window_on_primary_desktop) {
-      move_window_to_new_desktop(_this->target_window, window);
-    } else {
-      move_window_to_primary_desktop(_this->target_window, _this->delete_after_restore, window);
+    try {
+      if (_this->target_window_on_primary_desktop) {
+        move_window_to_new_desktop(_this->target_window, window);
+      } else {
+        move_window_to_primary_desktop(_this->target_window, _this->delete_after_restore, window);
+      }
+    } catch (...)
+    {
+      // TODO: decide what to show to the user
     }
     // Hide the popup after the desktop switch, since the move uses the popup
     // to move the focus of the target window

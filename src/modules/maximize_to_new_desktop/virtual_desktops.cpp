@@ -186,51 +186,59 @@ namespace {
   }
 }
 
-int get_desktop_index(GUID id) {
-  auto manager_internal = get_manager_internal();
+int get_desktop_index(GUID id) noexcept {
   int index = -1;
-  u_int count;
-  winrt::check_hresult(manager_internal->GetCount(&count));
-  winrt::com_ptr<IObjectArray> desktops;
-  manager_internal->GetDesktops(desktops.put());
-  for (int i = 0; i < (int)count; i++) {
-    winrt::com_ptr<IVirtualDesktop> objdesktop;
-    desktops.get()->GetAt(i, __uuidof(IVirtualDesktop), objdesktop.put_void());
-    GUID compare_id;
-    winrt::check_hresult(objdesktop->GetID(&compare_id));
-    if (IsEqualGUID(id, compare_id)) {
-      index = i;
-      break;
+  try {
+    auto manager_internal = get_manager_internal();
+    u_int count;
+    winrt::check_hresult(manager_internal->GetCount(&count));
+    winrt::com_ptr<IObjectArray> desktops;
+    winrt::check_hresult(manager_internal->GetDesktops(desktops.put()));
+    for (u_int i = 0; i < count; i++) {
+      winrt::com_ptr<IVirtualDesktop> desktop;
+      if (desktops.get()->GetAt(i, __uuidof(IVirtualDesktop), desktop.put_void()) != S_OK) {
+        continue;
+      }
+      GUID compare_id;
+      if (desktop->GetID(&compare_id) != S_OK) {
+        continue;
+      }
+      if (IsEqualGUID(id, compare_id)) {
+        index = i;
+        break;
+      }
     }
-  }
-  //TODO: Verify releases needed with IObjectArray and winrt::com_ptr
+  } catch (...) {}
+
   return index;
 }
 
-int get_desktop_index_for_window(HWND hwnd) {
-  auto manager = get_manager();
-  GUID desktop_id;
-  if (manager->GetWindowDesktopId(hwnd, &desktop_id) == S_OK) {
+int get_desktop_index_for_window(HWND hwnd) noexcept {
+  try {
+    auto manager = get_manager();
+    GUID desktop_id;
+    winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &desktop_id));
     return get_desktop_index(desktop_id);
-  } else {
-    // Unable to get the desktop id for the window.
+  } catch (...) {
     return -1;
   }
 }
 
-winrt::com_ptr<IVirtualDesktop> get_desktop_at_index(UINT index) {
-  auto manager_internal = get_manager_internal();
-  UINT count;
-  winrt::check_hresult(manager_internal->GetCount(&count));
-  if (index >= count) {
-    return nullptr;
+HRESULT get_desktop_at_index(UINT index, IVirtualDesktop** desktop) noexcept {
+  try {
+    auto manager_internal = get_manager_internal();
+    UINT count;
+    winrt::check_hresult(manager_internal->GetCount(&count));
+    if (index >= count) {
+      return E_INVALIDARG;
+    }
+
+    winrt::com_ptr<IObjectArray> desktops;
+    winrt::check_hresult(manager_internal->GetDesktops(desktops.put()));
+    return desktops.get()->GetAt(index, __uuidof(IVirtualDesktop), (void**)desktop);
+  } catch (...) {
+    return E_FAIL;
   }
-  winrt::com_ptr<IObjectArray> desktops;
-  manager_internal->GetDesktops(desktops.put());
-  winrt::com_ptr<IVirtualDesktop> objdesktop;
-  desktops.get()->GetAt(index, __uuidof(IVirtualDesktop), objdesktop.put_void());
-  //TODO: Verify releases needed with IObjectArray and winrt::com_ptr
-  return objdesktop;
 }
 
 // TODO: Add a synchronized map instead, after testing this technique.
@@ -254,18 +262,26 @@ BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID) {
   return TRUE;
 }
 
-void get_current_desktop_id(GUID *pId) {
+HRESULT get_current_desktop_id(GUID *pId) noexcept {
   winrt::com_ptr<IVirtualDesktop> current_desktop;
-  auto manager_internal = get_manager_internal();
-  winrt::check_hresult(manager_internal->GetCurrentDesktop(current_desktop.put()));
-  current_desktop->GetID(pId);
+  try {
+    auto manager_internal = get_manager_internal();
+    winrt::check_hresult(manager_internal->GetCurrentDesktop(current_desktop.put()));
+    return current_desktop->GetID(pId);
+  } catch (...) {
+    return E_FAIL;
+  }
 }
 
-void switch_to_desktop(GUID id) {
-  auto manager_internal = get_manager_internal();
-  winrt::com_ptr<IVirtualDesktop> desktop;
-  winrt::check_hresult(manager_internal->FindDesktop(&id, desktop.put()));
-  winrt::check_hresult(manager_internal->SwitchDesktop(desktop.get()));
+HRESULT switch_to_desktop(GUID id) noexcept {
+  try {
+    auto manager_internal = get_manager_internal();
+    winrt::com_ptr<IVirtualDesktop> desktop;
+    winrt::check_hresult(manager_internal->FindDesktop(&id, desktop.put()));
+    return manager_internal->SwitchDesktop(desktop.get());
+  } catch (...) {
+    return E_FAIL;
+  }
 }
 
 void switch_to_primary_desktop_and_delete_after_delay(HWND hwnd, GUID old_desktop_id, GUID primary_desktop_id, bool close_desktop_if_last_window) {
@@ -303,16 +319,12 @@ void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window
   GUID current_desktopId;
   winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &current_desktopId));
 
-  winrt::com_ptr<IVirtualDesktop> objDestkop;
+  winrt::com_ptr<IVirtualDesktop> primaryDesktop;
   const UINT PRIMARY_DESKTOP_INDEX = 0;
-  objDestkop = get_desktop_at_index(PRIMARY_DESKTOP_INDEX);
-  if (objDestkop == nullptr) {
-    MessageBox(NULL, L"PowerToys failed to get the primary desktop object.", L"Error", MB_OK | MB_ICONERROR);
-    return;
-  }
+  winrt::check_hresult(get_desktop_at_index(PRIMARY_DESKTOP_INDEX, primaryDesktop.put()));
 
   GUID primary_desktop_id;
-  winrt::check_hresult(objDestkop->GetID(&primary_desktop_id));
+  winrt::check_hresult(primaryDesktop->GetID(&primary_desktop_id));
 
   // If the target window is the foreground window, set the focus to the popup window
   // so the target window loses focus and the desktop switch will show the animation.
@@ -323,7 +335,7 @@ void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window
   auto collection_view = get_application_view_collection();
   winrt::com_ptr <IApplicationView> view;
   winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
-  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), primaryDesktop.get()));
 
   // Restore the window to the original position.
   if (auto it = moved_window_original_positions.find(hwnd); it != moved_window_original_positions.end()) {
