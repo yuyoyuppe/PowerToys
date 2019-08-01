@@ -315,12 +315,28 @@ void register_classes(HINSTANCE hInstance) {
 }
 
 int init_instance(HINSTANCE hInstance, int nCmdShow) {
+  m_hInst = hInstance;
+
+  RECT desktopRect;
+  const HWND hDesktop = GetDesktopWindow();
+  GetWindowRect(hDesktop, &desktopRect);
+
   int wind_width = 1024;
   int wind_height = 700;
   DPIAware::Convert(NULL, wind_width, wind_height);
-  m_hInst = hInstance;
-  main_window_handler = CreateWindow(TEXT("PTSettingsClass"), TEXT("PowerToys Settings"), WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, 0, wind_width, wind_height, nullptr, nullptr, hInstance, nullptr);
+  
+  main_window_handler = CreateWindow(
+    TEXT("PTSettingsClass"),
+    TEXT("PowerToys Settings"),
+    WS_OVERLAPPEDWINDOW,
+    (desktopRect.right - wind_width)/2,
+    (desktopRect.bottom - wind_height)/2,
+    wind_width,
+    wind_height,
+    nullptr,
+    nullptr,
+    hInstance,
+    nullptr);
 
   initialize_win32_webview();
   ShowWindow(main_window_handler, nCmdShow);
