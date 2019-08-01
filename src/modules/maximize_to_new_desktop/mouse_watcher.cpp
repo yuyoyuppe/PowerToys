@@ -3,7 +3,14 @@
 #include "virtual_desktops.h"
 #include <common/monitors.h>
 #include <common/common.h>
+#include <common/dpi_aware.h>
+#include <ShellScalingApi.h>
 #include <uiautomation.h>
+
+#ifdef _DEBUG
+#define _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON 0
+// Define as 1 For debug purposes, to draw the detected maximize button area on screen.
+#endif
 
 namespace {
   using stdclock = std::chrono::system_clock;
@@ -71,18 +78,47 @@ namespace {
     RECT result = { 0 };
     DwmGetWindowAttribute(hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &result, sizeof(RECT));
 
+    auto context = GetWindowDpiAwarenessContext(hwnd);
+    auto awareness = GetAwarenessFromDpiAwarenessContext(context);
+
     if (result.bottom == result.top || result.left == result.right) {
+      // 0 area rectangle is not useful.
       return result;
     }
 
-    result.right += window_rect->left;
-    result.left += window_rect->left;
-    result.bottom += window_rect->top;
-    result.top += window_rect->top;
+    // DWMWA_CAPTION_BUTTON_BOUNDS consistently returns an approppriate sized bounds, but misplaced for windows
+    // that don't share the monitor's DPI value. Check for equality between window and monitor DPIs.
+    bool is_window_dpi_consistent = true;
+    UINT window_dpi = GetDpiForWindow(hwnd);
+    UINT dpi_x, dpi_y;
+    if (DPIAware::GetScreenDPIForWindow(hwnd, dpi_x, dpi_y) == S_OK) {
+      is_window_dpi_consistent = (dpi_x == window_dpi);
+    }
 
-    long width = result.right - result.left;
-    result.left += width / 3;
-    result.right -= width / 3;
+    if (is_window_dpi_consistent) {
+      // Trust the value returned by DWMWA_CAPTION_BUTTON_BOUNDS
+      // Translate in relation to the window position.
+      result.right += window_rect->left;
+      result.left += window_rect->left;
+      result.bottom += window_rect->top;
+      result.top += window_rect->top;
+    } else {
+      // Trust only the dimensions returned by DWMWA_CAPTION_BUTTON_BOUND
+      // Place in relation to the window's top right corner.
+      long width = result.right - result.left;
+      long height = result.bottom - result.top;
+      result.right = window_rect->right;
+      result.left = window_rect->right - width;
+      result.top = window_rect->top;
+      result.bottom = window_rect->top + height;
+    }
+
+    {
+      // Use only the middle button, which is likely the maximize button.
+      long width = result.right - result.left;
+      result.left += width / 3;
+      result.right -= width / 3;
+    }
 
     // If the calculated maximize button area is outside the bounds, don't accept these results.
     if (result.left > window_rect->right ||
@@ -92,16 +128,23 @@ namespace {
       RECT zero = {0};
       return zero;
     }
+
     return result;
   }
 
   RECT use_top_right_zone_strategy(HWND hwnd, std::optional<RECT>& window_rect) {
     RECT result = { 0 };
 
-    auto dpi = GetDpiForWindow(hwnd);
-    int buttons_width = 170 * dpi / 120;
-    int horizontal_padding = 20 * dpi / 120;
-    int buttons_height = 50 * dpi / 120;
+    // Use a generous area in the top right corner of the window for the maximize button location.
+    // This is a last resort strategy so that every window can use MTND.
+
+    int buttons_width = 140;
+    int buttons_height = 30;
+    auto monitor_handle = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    if (monitor_handle != nullptr) {
+      DPIAware::Convert(monitor_handle, buttons_width, buttons_height);
+    }
+    int horizontal_padding = buttons_width/5 ; //20% padding
     result.left = window_rect->right - buttons_width + horizontal_padding;
     result.top = window_rect->top;
     result.right = window_rect->right - horizontal_padding;
@@ -437,6 +480,26 @@ namespace {
     if (ui_automation_strategy_element_found) {
       result = get_bounding_rectangle_from_hwnd_UI_element(ui_automation_strategy_element_found.get());
       if (result.left != result.right && result.bottom != result.top) {
+        int result_height = result.bottom - result.top;
+        if (result.top - window_rect->top > result_height) {
+          // Cut-off strategy: if the button found has space for another same-sized button on top of it,
+          // it's likely that ui_automation is giving wrong data. Discard the result.
+          return { 0 };
+        }
+        {
+          // Cut-off strategy: Check if the button is not bigger than twice the dpi expected caption area.
+          // This avoids accepting results from UIAutomation where the control is stretched too high.
+          UINT dpi_x, dpi_y;
+          if (DPIAware::GetScreenDPIForWindow(hwnd, dpi_x, dpi_y)==S_OK) {
+            int expected_caption_height = 0;
+            if ((expected_caption_height = GetSystemMetricsForDpi(SM_CYCAPTION, dpi_y)) != 0) {
+              if (result_height > expected_caption_height * 2) {
+                return { 0 };
+              }
+            }
+          }
+        }
+
         // Adjust top to the top of the Window. UIAutomation seems to detect the lower half of the button sometimes.
         result.top = window_rect->top;
       }
@@ -487,17 +550,46 @@ namespace {
         continue;
       }
 
+#if defined(_DEBUG) && _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON
+      COLORREF selectedpen;
+#endif
+      buttons_rect = {0};
       buttons_rect = use_ui_automation_strategy(mouse_window, window_rect);
+#if defined(_DEBUG) && _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON
+      // Maximized buttons detected with ui_automation_strategy will be drawn in red.
+      selectedpen = RGB(255, 0, 0);
+#endif
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         buttons_rect = use_dwmwa_caption_strategy(mouse_window, window_rect);
+#if defined(_DEBUG) && _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON
+        // Maximized buttons detected with dwmwa_caption_strategy will be drawn in green.
+        selectedpen = RGB(0, 255, 0);
+#endif
       }
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         buttons_rect = use_top_right_zone_strategy(mouse_window, window_rect);
+#if defined(_DEBUG) && _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON
+        // Maximized buttons detected with top_right_zone_strategy will be drawn in magenta.
+        selectedpen = RGB(255, 0, 255);
+#endif
       }
       if (buttons_rect.left == buttons_rect.right || buttons_rect.bottom == buttons_rect.top) {
         continue;
       }
+#if defined(_DEBUG) && _DEBUG_DRAW_DETECTED_MAXIMIZE_BUTTON
+      if (buttons_rect.left != buttons_rect.right && buttons_rect.bottom != buttons_rect.left) {
+        HDC screenDC = ::GetDC(0);
+        HPEN hpenOld = static_cast<HPEN>(SelectObject(screenDC, GetStockObject(DC_PEN)));
+        HBRUSH hbrushOld = static_cast<HBRUSH>(SelectObject(screenDC, GetStockObject(NULL_BRUSH)));
+        SetDCPenColor(screenDC, selectedpen);
 
+        ::Rectangle(screenDC, buttons_rect.left, buttons_rect.top, buttons_rect.right, buttons_rect.bottom);
+        ::Rectangle(screenDC, window_rect->left, window_rect->top, window_rect->right, window_rect->bottom);
+        SelectObject(screenDC, hpenOld);
+        SelectObject(screenDC, hbrushOld);
+        ::ReleaseDC(0, screenDC);
+      }
+#endif
       if (mouse_in_rect(*mouse_pos, buttons_rect)) {
         if (mousein_reset) {
           mousein_reset = false;
