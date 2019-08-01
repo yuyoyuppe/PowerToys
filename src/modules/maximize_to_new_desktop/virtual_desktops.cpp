@@ -255,12 +255,10 @@ BOOL CALLBACK check_if_window_in_virtual_desktop(HWND hwnd, LPARAM ptrGUID) {
 }
 
 void get_current_desktop_id(GUID *pId) {
-  IVirtualDesktop* current_desktop = nullptr;
+  winrt::com_ptr<IVirtualDesktop> current_desktop;
   auto manager_internal = get_manager_internal();
-  manager_internal->GetCurrentDesktop(&current_desktop);
-  if (current_desktop != nullptr) {
-    current_desktop->GetID(pId);
-  }
+  winrt::check_hresult(manager_internal->GetCurrentDesktop(current_desktop.put()));
+  current_desktop->GetID(pId);
 }
 
 void switch_to_desktop(GUID id) {
@@ -323,9 +321,9 @@ void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window
   }
 
   auto collection_view = get_application_view_collection();
-  IApplicationView *view;
-  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, &view));
-  winrt::check_hresult(manager_internal->MoveViewToDesktop(view, objDestkop.get()));
+  winrt::com_ptr <IApplicationView> view;
+  winrt::check_hresult(collection_view->GetViewForHwnd(hwnd, view.put()));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), objDestkop.get()));
 
   // Restore the window to the original position.
   if (auto it = moved_window_original_positions.find(hwnd); it != moved_window_original_positions.end()) {
@@ -358,8 +356,8 @@ void switch_to_desktop_fallback(HWND hwnd, GUID new_desktop_id) {
 void move_window_to_new_desktop(HWND hwnd, HWND popupWindow) {
   // Create a new virtual desktop.
   auto manager_internal = get_manager_internal();
-  IVirtualDesktop *new_desktop;
-  winrt::check_hresult(manager_internal->CreateDesktopW(&new_desktop));
+  winrt::com_ptr<IVirtualDesktop> new_desktop;
+  winrt::check_hresult(manager_internal->CreateDesktopW(new_desktop.put()));
   GUID id;
   winrt::check_hresult(new_desktop->GetID(&id));
 
@@ -377,10 +375,10 @@ void move_window_to_new_desktop(HWND hwnd, HWND popupWindow) {
   }
 
   // Move the target window to the new desktop.
-  IApplicationView *view;
+  winrt::com_ptr <IApplicationView> view;
   auto appViewCollection = get_application_view_collection();
-  winrt::check_hresult(appViewCollection->GetViewForHwnd(hwnd, &view));
-  winrt::check_hresult(manager_internal->MoveViewToDesktop(view, new_desktop));
+  winrt::check_hresult(appViewCollection->GetViewForHwnd(hwnd, view.put()));
+  winrt::check_hresult(manager_internal->MoveViewToDesktop(view.get(), new_desktop.get()));
 
   // In order to trigger the desktop switch animation, minimize and maximize the target window.
   ShowWindow(hwnd, SW_MINIMIZE);
