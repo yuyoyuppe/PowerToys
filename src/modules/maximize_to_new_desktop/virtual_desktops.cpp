@@ -217,11 +217,11 @@ int get_desktop_index_for_window(HWND hwnd) noexcept {
   try {
     auto manager = get_manager();
     GUID desktop_id;
-    winrt::check_hresult(manager->GetWindowDesktopId(hwnd, &desktop_id));
-    return get_desktop_index(desktop_id);
-  } catch (...) {
-    return -1;
-  }
+    if (manager->GetWindowDesktopId(hwnd, &desktop_id) == S_OK) {
+      return get_desktop_index(desktop_id);
+    }
+  } catch (...) {}
+  return -1;
 }
 
 HRESULT get_desktop_at_index(UINT index, IVirtualDesktop** desktop) noexcept {
