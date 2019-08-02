@@ -6,6 +6,8 @@ namespace PowerToysSettings {
 
   class Settings;
   class BasePropertySetting;
+
+  class PowerToyValues;
   class BaseSettingsValue;
 
   class Settings {
@@ -17,8 +19,6 @@ namespace PowerToysSettings {
 
     void add_property(PowerToysSettings::BasePropertySetting _setting);
 
-    std::wstring get_name();
-    web::json::value get_json();
     std::wstring to_string();
 
     // Helper functions to get allocated strings out of the DLLs
@@ -30,7 +30,6 @@ namespace PowerToysSettings {
 
   private:
     web::json::value _internal_json;
-    std::wstring _name;
     int curr_priority = 0; // For keeping order when adding elements.
   };
 

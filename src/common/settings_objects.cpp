@@ -5,7 +5,6 @@
 namespace PowerToysSettings {
 
   Settings::Settings(const std::wstring& powertoy_name, const std::wstring& description) {
-    _name = powertoy_name;
     _internal_json = web::json::value::object();
     _internal_json.as_object()[L"version"] = web::json::value::string(L"1.0");
     _internal_json.as_object()[L"name"] = web::json::value::string(powertoy_name);
@@ -19,26 +18,15 @@ namespace PowerToysSettings {
     _internal_json.as_object()[L"properties"].as_object()[_setting.get_name()] = property_json;
   }
 
-  std::wstring Settings::get_name() {
-    return _name;
-  }
-
-  web::json::value Settings::get_json() {
-    return _internal_json;
-  }
-
   std::wstring Settings::to_string() {
     return _internal_json.serialize();
   }
 
   wchar_t* Settings::to_allocated_cstring() {
-    std::wstringstream ss;
-    ss << to_string();
-    std::wstring w_str = ss.str();
-    const wchar_t* result_wstr = w_str.c_str();
-    size_t result_len = wcslen(result_wstr) + 1;
+    std::wstring w_str = to_string();
+    size_t result_len = w_str.length() + 1;
     wchar_t *result = new wchar_t[result_len];
-    wcscpy_s(result, result_len, result_wstr);
+    wcscpy_s(result, result_len, w_str.c_str());
     return result;
   }
 
