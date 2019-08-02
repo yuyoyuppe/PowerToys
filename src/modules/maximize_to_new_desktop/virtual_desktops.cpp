@@ -346,7 +346,7 @@ void move_window_to_primary_desktop(HWND hwnd, bool close_desktop_if_last_window
 
   // In order to trigger the desktop switch animation, minimize and maximize the target window.
   ShowWindow(hwnd, SW_MINIMIZE);
-  ShowWindow(hwnd, SW_NORMAL);
+  ShowWindow(hwnd, SW_RESTORE);
 
   std::thread(switch_to_primary_desktop_and_delete_after_delay, hwnd, current_desktopId, primary_desktop_id, close_desktop_if_last_window).detach();
   Trace::ActionRestore();
