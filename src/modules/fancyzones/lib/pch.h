@@ -6,9 +6,7 @@
 #include <winrt/base.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <common/common.h>
 #include <dwmapi.h>
-#include <ProjectTelemetry.h>
 #include <shlwapi.h>
 #include <shellapi.h>
 #include <strsafe.h>
@@ -17,8 +15,8 @@
 #include <windows.foundation.h>
 
 #include "Settings.h"
-#include "ZoneWindow.h"
 #include "FancyZones.h"
+#include "ZoneWindow.h"
 #include "ZoneSet.h"
 #include "Zone.h"
 #include "util.h"

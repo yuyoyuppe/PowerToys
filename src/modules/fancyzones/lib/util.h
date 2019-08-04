@@ -111,3 +111,25 @@ inline void FrameRectARGB(wil::unique_hdc& hdc, const RECT &rc, BYTE bAlpha, COL
         FillRectARGB(hdc, &(sides[i]), bAlpha, clr, false);
     }
 }
+
+inline void ParseDeviceId(PCWSTR deviceId, PWSTR parsedId, size_t size)
+{
+    // We're interested in the unique part between the first and last #'s
+    // Example input: \\?\DISPLAY#DELA026#5&10a58c63&0&UID16777488#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}
+    // Example output: DELA026#5&10a58c63&0&UID16777488 
+    wchar_t buffer[256];
+    StringCchCopy(buffer, 256, deviceId);
+
+    PWSTR pszStart = wcschr(buffer, L'#');
+    PWSTR pszEnd = wcsrchr(buffer, L'#');
+    if (pszStart && pszEnd && (pszStart != pszEnd))
+    {
+        pszStart++; // skip past the first #
+        *pszEnd = '\0';
+        StringCchCopy(parsedId, size, pszStart);
+    }
+    else
+    {
+        StringCchCopy(parsedId, size, L"FallbackDevice");
+    }
+}

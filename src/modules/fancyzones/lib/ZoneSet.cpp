@@ -171,9 +171,12 @@ IFACEMETHODIMP_(void) ZoneSet::MoveWindowIntoZoneByIndex(HWND window, HWND windo
         index = 0;
     }
 
-    if (auto zone = m_zones.at(index))
+    if (index < m_zones.size())
     {
-        zone->AddWindowToZone(window, windowZone, false);
+        if (auto zone = m_zones.at(index))
+        {
+            zone->AddWindowToZone(window, windowZone, false);
+        }
     }
 }
 
