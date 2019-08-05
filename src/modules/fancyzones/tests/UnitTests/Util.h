@@ -18,19 +18,19 @@ namespace Mocks
 {
     static HWND Window()
     {
-        static UINT s_nextWindow = 0;
+        static UINT_PTR s_nextWindow = 0;
         return reinterpret_cast<HWND>(++s_nextWindow);
     }
 
     static HMONITOR Monitor()
     {
-        static UINT s_nextMonitor = 0;
+        static UINT_PTR s_nextMonitor = 0;
         return reinterpret_cast<HMONITOR>(++s_nextMonitor);
     }
 
     static HINSTANCE Instance()
     {
-        static UINT s_nextInstance = 0;
+        static UINT_PTR s_nextInstance = 0;
         return reinterpret_cast<HINSTANCE>(++s_nextInstance);
     }
 
