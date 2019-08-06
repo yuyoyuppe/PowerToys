@@ -22,6 +22,7 @@ public:
     IFACEMETHODIMP RemoveZone(winrt::com_ptr<IZone> zone) noexcept;
     IFACEMETHODIMP_(winrt::com_ptr<IZone>) ZoneFromPoint(POINT pt) noexcept;
     IFACEMETHODIMP_(winrt::com_ptr<IZone>) ZoneFromWindow(HWND window) noexcept;
+    IFACEMETHODIMP_(int) GetZoneIndexFromWindow(HWND window) noexcept;
     IFACEMETHODIMP_(std::vector<winrt::com_ptr<IZone>>) GetZones() noexcept { return m_zones; }
     IFACEMETHODIMP_(ZoneSetLayout) GetLayout() noexcept { return m_config.layout; }
     IFACEMETHODIMP_(int) GetInnerPadding() noexcept { return m_config.paddingInner; }
@@ -162,6 +163,22 @@ IFACEMETHODIMP_(void) ZoneSet::MoveZoneToBack(winrt::com_ptr<IZone> zone) noexce
     {
         std::rotate(iter, iter + 1, m_zones.end());
     }
+}
+
+IFACEMETHODIMP_(int) ZoneSet::GetZoneIndexFromWindow(HWND window) noexcept
+{
+    int zoneIndex = 0;
+    for (auto iter = m_zones.begin(); iter != m_zones.end(); iter++, zoneIndex++)
+    {
+        if (winrt::com_ptr<IZone> zone = iter->try_as<IZone>())
+        {
+            if (zone->ContainsWindow(window))
+            {
+                return zoneIndex;
+            }
+        }
+    }
+    return -1;
 }
 
 IFACEMETHODIMP_(void) ZoneSet::MoveWindowIntoZoneByIndex(HWND window, HWND windowZone, int index) noexcept

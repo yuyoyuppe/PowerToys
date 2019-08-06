@@ -13,9 +13,12 @@ interface __declspec(uuid("{7F017528-8110-4FB3-BE41-F472969C2560}")) IZoneWindow
     IFACEMETHOD_(void, MoveWindowIntoZoneByIndex)(HWND window, int index) = 0;
     IFACEMETHOD_(void, MoveWindowIntoZoneByDirection)(HWND window, DWORD vkCode) = 0;
     IFACEMETHOD_(void, CycleActiveZoneSet)(DWORD vkCode) = 0;
+    IFACEMETHOD_(void, SaveWindowProcessToZoneIndex)(HWND window) = 0;
     IFACEMETHOD_(std::wstring, DeviceId)() = 0;
     IFACEMETHOD_(std::wstring, UniqueId)() = 0;
 };
 
 winrt::com_ptr<IZoneWindow> MakeZoneWindow(IZoneWindowHost* host, HINSTANCE hinstance, HMONITOR monitor,
     PCWSTR deviceId, PCWSTR virtualDesktopId, bool flashZones) noexcept;
+
+DWORD GetProcessPath(HWND window, LPWSTR processPath, DWORD processPathMaxSize) noexcept;

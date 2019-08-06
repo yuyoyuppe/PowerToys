@@ -18,6 +18,7 @@ public:
     IFACEMETHODIMP_(void) CycleActiveZoneSet(DWORD vkCode) noexcept;
     IFACEMETHODIMP_(std::wstring) DeviceId() noexcept { return { m_deviceId.get() }; }
     IFACEMETHODIMP_(std::wstring) UniqueId() noexcept { return { m_uniqueId }; }
+    IFACEMETHODIMP_(void) SaveWindowProcessToZoneIndex(HWND window) noexcept;
 
 protected:
     static LRESULT CALLBACK s_WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) noexcept;
@@ -257,6 +258,8 @@ IFACEMETHODIMP ZoneWindow::MoveSizeEnd(HWND window, POINT const& ptScreen) noexc
         POINT ptClient = ptScreen;
         MapWindowPoints(nullptr, m_window.get(), &ptClient, 1);
         m_activeZoneSet->MoveSizeEnd(window, m_window.get(), ptClient);
+
+        SaveWindowProcessToZoneIndex(window);
     }
 
     HideZoneWindow();
@@ -1256,6 +1259,20 @@ int ZoneWindow::GetSwitchButtonIndexFromPoint(POINT ptClient) noexcept
     return ((switchButtonIndex > 0) && (switchButtonIndex < 10)) ? switchButtonIndex : -1;
 }
 
+IFACEMETHODIMP_(void) ZoneWindow::SaveWindowProcessToZoneIndex(HWND window) noexcept
+{
+    wchar_t windowProcessPath[MAX_PATH] = { 0 };
+    DWORD processPathSize = GetProcessPath(window, windowProcessPath, static_cast<DWORD>(MAX_PATH));
+    if (processPathSize > 0)
+    {
+        DWORD zoneIndex = static_cast<DWORD>(m_activeZoneSet->GetZoneIndexFromWindow(window));
+        if (zoneIndex != -1)
+        {
+            RegistryHelpers::SaveAppLastZone(windowProcessPath, zoneIndex);
+        }
+    }
+}
+
 typedef BOOL(WINAPI *GetDpiForMonitorInternalFunc)(HMONITOR, UINT, UINT*, UINT*);
 UINT ZoneWindow::GetDpiForMonitor() noexcept
 {
@@ -1298,4 +1315,23 @@ winrt::com_ptr<IZoneWindow> MakeZoneWindow(IZoneWindowHost* host, HINSTANCE hins
     PCWSTR deviceId, PCWSTR virtualDesktopId, bool flashZones) noexcept
 {
     return winrt::make_self<ZoneWindow>(host, hinstance, monitor, deviceId, virtualDesktopId, flashZones);
+}
+
+DWORD GetProcessPath(HWND window, LPWSTR processPath, DWORD processPathMaxSize) noexcept
+{
+    DWORD procId = 0;
+    GetWindowThreadProcessId(window, &procId);
+
+    DWORD numCopiedChars = 0;
+    HANDLE windowProcessHandler = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, TRUE, procId);
+    if (windowProcessHandler != nullptr && windowProcessHandler != INVALID_HANDLE_VALUE)
+    {
+        // numCopiedChars first holds the size of processPath[], will then hold amount of characters returned by QueryFullProcessImageNameW
+        // if QueryFullProcessImageNameW fails, numCopiedChars will be zero.
+        numCopiedChars = processPathMaxSize; 
+        QueryFullProcessImageNameW(windowProcessHandler, 0, processPath, &numCopiedChars);
+        CloseHandle(windowProcessHandler);
+    }
+
+    return numCopiedChars;
 }

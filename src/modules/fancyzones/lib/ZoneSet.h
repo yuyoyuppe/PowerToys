@@ -17,6 +17,7 @@ interface __declspec(uuid("{E4839EB7-669D-49CF-84A9-71A2DFD851A3}")) IZoneSet : 
     IFACEMETHOD(RemoveZone)(winrt::com_ptr<IZone> zone) = 0;
     IFACEMETHOD_(winrt::com_ptr<IZone>, ZoneFromPoint)(POINT pt) = 0;
     IFACEMETHOD_(winrt::com_ptr<IZone>, ZoneFromWindow)(HWND window) = 0;
+    IFACEMETHOD_(int, GetZoneIndexFromWindow)(HWND window) = 0;
     IFACEMETHOD_(std::vector<winrt::com_ptr<IZone>>, GetZones)() = 0;
     IFACEMETHOD_(ZoneSetLayout, GetLayout)() = 0;
     IFACEMETHOD_(int, GetInnerPadding)() = 0;

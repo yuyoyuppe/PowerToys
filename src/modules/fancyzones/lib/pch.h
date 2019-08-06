@@ -13,6 +13,7 @@
 #include <wil\resource.h>
 #include <wil\result.h>
 #include <windows.foundation.h>
+#include <psapi.h>
 
 #include "Settings.h"
 #include "FancyZones.h"

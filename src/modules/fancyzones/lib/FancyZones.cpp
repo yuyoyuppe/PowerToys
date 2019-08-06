@@ -153,9 +153,20 @@ IFACEMETHODIMP_(void) FancyZones::VirtualDesktopChanged() noexcept
 // IFancyZonesCallback
 IFACEMETHODIMP_(void) FancyZones::WindowCreated(HWND window) noexcept
 {
-    // A window just got created
-    // If the "auto zone" setting is enabled, move it into a zone (eg first available, best, etc)
-    MoveWindowIntoZoneByIndex(window, 0);
+    if (m_settings->GetSettings().appLastZone_moveWindows)
+    {
+        wchar_t windowModuleFullPath[MAX_PATH] = { 0 };
+        DWORD modulePathSize = GetProcessPath(window, windowModuleFullPath, (DWORD)MAX_PATH);
+        if (modulePathSize > 0) 
+        {
+            INT zoneIndex = -1;
+            LRESULT res = RegistryHelpers::GetAppLastZone(windowModuleFullPath, &zoneIndex);
+            if (res == ERROR_SUCCESS && zoneIndex != -1)
+            {
+                MoveWindowIntoZoneByIndex(window, zoneIndex);
+            }
+        }
+    }
 }
 
 // IFancyZonesCallback

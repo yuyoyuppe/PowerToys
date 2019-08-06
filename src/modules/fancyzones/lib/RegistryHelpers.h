@@ -3,6 +3,7 @@
 namespace RegistryHelpers
 {
     static PCWSTR REG_SETTINGS = L"Software\\SuperFancyZones";
+    static PCWSTR APP_ZONE_HISTORY_SUBKEY = L"AppZoneHistory";
 
     inline PCWSTR GetKey(_In_opt_ PCWSTR monitorId, PWSTR key, size_t keyLength)
     {
@@ -39,6 +40,33 @@ namespace RegistryHelpers
             return hkey;
         }
         return nullptr;
+    }
+
+    inline LSTATUS GetAppLastZone(PCWSTR appPath, _Out_ PINT iZoneIndex)
+    {
+        *iZoneIndex = -1; 
+
+        wchar_t keyPath[256]{};
+        StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY);
+
+        DWORD zoneIndex;
+        DWORD dataType = REG_DWORD;
+        DWORD dataSize = sizeof(DWORD);
+        LSTATUS res = SHRegGetUSValueW(keyPath, appPath, &dataType, &zoneIndex, &dataSize, FALSE, nullptr, 0);
+        if (res == ERROR_SUCCESS)
+        { 
+            *iZoneIndex = (INT)zoneIndex;
+        }
+
+        return res;
+    }
+
+    inline void SaveAppLastZone(PCWSTR appPath, DWORD zoneIndex)
+    {
+        wchar_t keyPath[256]{};
+        StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY);
+
+        SHRegSetUSValueW(keyPath, appPath, REG_DWORD, &zoneIndex, sizeof(zoneIndex), SHREGSET_FORCE_HKCU);
     }
 
     template<typename t>

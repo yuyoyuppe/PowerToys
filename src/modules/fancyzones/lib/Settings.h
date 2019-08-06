@@ -11,6 +11,7 @@ struct Settings
     bool virtualDesktopChange_flashZones = true;
     bool zoneSetChange_moveWindows = false;
     bool overrideSnapHotkeys = true;
+    bool appLastZone_moveWindows = false;
     std::wstring zoneHightlightColor = L"#0078D7";
 };
 
