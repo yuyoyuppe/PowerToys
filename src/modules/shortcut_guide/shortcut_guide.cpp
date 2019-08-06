@@ -42,6 +42,17 @@ bool OverlayWindow::get_config(wchar_t* buffer, int *buffer_size) {
   delay_property.setSpinnerStep(100);
   settings.add_property(delay_property);
 
+  LoadString(hinstance, overlayOpacity.resourceId, description, ARRAYSIZE(description));
+  PowerToysSettings::IntSpinnerPropertySetting overlay_opacity_property(
+    overlayOpacity.name,
+    description,
+    overlayOpacity.value
+  );
+  overlay_opacity_property.setSpinnerMax(100);
+  overlay_opacity_property.setSpinnerMin(0);
+  overlay_opacity_property.setSpinnerStep(1);
+  settings.add_property(overlay_opacity_property);
+
   return settings.serialize_to_buffer(buffer, buffer_size);
 }
 
@@ -56,6 +67,13 @@ void OverlayWindow::set_config(const wchar_t * config) {
         target_state->set_delay(press_delay_time);
       }
     }
+    if (_values.is_int_value(overlayOpacity.name)) {
+      int overlay_opacity = _values.get_int_value(overlayOpacity.name);
+      overlayOpacity.value = overlay_opacity;
+      if (winkey_popup) {
+        winkey_popup->apply_overlay_opacity(((float)overlayOpacity.value) / 100.0f);
+      }
+    }
   }
   catch (std::exception ex) {
     // Improper JSON.
@@ -66,6 +84,7 @@ void OverlayWindow::set_config(const wchar_t * config) {
 void OverlayWindow::enable() {
   if (!_enabled) {
     winkey_popup = new D2DOverlayWindow();
+    winkey_popup->apply_overlay_opacity(((float)overlayOpacity.value)/100.0f);
     target_state = new TargetState(pressTime.value);
     winkey_popup->initialize();
     desktop = GetDesktopWindow();
@@ -147,6 +166,9 @@ void OverlayWindow::init_settings() {
     if (settings.is_int_value(pressTime.name)) {
       pressTime.value = settings.get_int_value(pressTime.name);
     }
+    if (settings.is_int_value(overlayOpacity.name)) {
+      overlayOpacity.value = settings.get_int_value(overlayOpacity.name);
+    }
   }
   catch (std::exception ex) {
     // Error while loading from the settings file. Just let default values stay as they are.
@@ -162,6 +184,12 @@ void OverlayWindow::save_settings() {
       PowerToysSettings::IntSettingsValue(
         pressTime.name,
         pressTime.value
+      )
+    );
+    values.add_property_value(
+      PowerToysSettings::IntSettingsValue(
+        overlayOpacity.name,
+        overlayOpacity.value
       )
     );
     values.save_to_settings_file();

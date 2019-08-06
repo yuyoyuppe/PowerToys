@@ -41,4 +41,10 @@ private:
     int value = 900; // ms
     int resourceId = IDS_SETTING_DESCRIPTION_PRESS_TIME;
   } pressTime;
+
+  struct OverlayOpacity {
+    PCWSTR name = L"overlay_opacity";
+    int value = 90; // percent
+    int resourceId = IDS_SETTING_DESCRIPTION_OVERLAY_OPACITY;
+  } overlayOpacity;
 };

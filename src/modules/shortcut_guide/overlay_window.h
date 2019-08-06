@@ -44,6 +44,8 @@ public:
   void show(HWND active_window);
   void animate(int vk_code);
   ~D2DOverlayWindow();
+  void apply_overlay_opacity(float opacity);
+
 private:
   void animate(int vk_code, int offset);
   bool show_thumbnail(const RECT& rect_and_scale, double alpha);
@@ -53,6 +55,7 @@ private:
   virtual void render(ID2D1DeviceContext5* d2d_dc) override;
   virtual void on_show() override;
   virtual void on_hide() override;
+  float get_overlay_opacity();
 
   bool visible = false;
   bool running = true;
@@ -75,4 +78,5 @@ private:
   D2DSVG no_active;
   std::vector<D2DSVG> arrows;
   std::chrono::steady_clock::time_point shown_start_time;
+  float overlay_opacity = 0.9f;
 };

@@ -345,6 +345,20 @@ D2DOverlayWindow::~D2DOverlayWindow() {
   tasklist_thread.join();
 }
 
+void D2DOverlayWindow::apply_overlay_opacity(float opacity) {
+  if (opacity <= 0.0f) {
+    opacity = 0.0f;
+  }
+  if (opacity >= 1.0f) {
+    opacity = 1.0f;
+  }
+  overlay_opacity = opacity;
+}
+
+float D2DOverlayWindow::get_overlay_opacity() {
+  return overlay_opacity;
+}
+
 void D2DOverlayWindow::init() {
   colors.update();
   landscape.load(L"svgs\\overlay.svg", d2d_dc.get())
@@ -490,7 +504,8 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   }
   // Draw background
   winrt::com_ptr<ID2D1SolidColorBrush> brush;
-  D2D1_COLOR_F brushColor = colors.light_mode ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.8f) : D2D1::ColorF(0, 0, 0, 0.8f);
+  float brush_opacity = get_overlay_opacity();
+  D2D1_COLOR_F brushColor = colors.light_mode ? D2D1::ColorF(1.0f, 1.0f, 1.0f, brush_opacity) : D2D1::ColorF(0, 0, 0, brush_opacity);
   winrt::check_hresult(d2d_dc->CreateSolidColorBrush(brushColor, brush.put()));
   D2D1_RECT_F background_rect = {};
   background_rect.bottom = (float)window_height;
