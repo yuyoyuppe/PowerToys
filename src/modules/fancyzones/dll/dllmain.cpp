@@ -45,17 +45,10 @@ public:
 
     // Return JSON with the configuration options.
     // These are the settings shown on the settings page along with their current values.
-    virtual bool get_config(_Out_ PCWSTR* config) override
+    virtual bool get_config(_Out_ PWSTR buffer, _Out_ int *buffer_size) override
     {
-        // Returns an allocated wchar_t*. free_get_config will get called later to free this value
-        return m_settings->GetConfig(config);
+        return m_settings->GetConfig(buffer, buffer_size);
     }
-
-    // Frees the string we allocated in get_config.
-    virtual void free_get_config(PCWSTR config) override
-    {
-        PowerToysSettings::Settings::free_allocated_cstring(config);
-    };
 
     // Passes JSON with the configuration settings for the powertoy.
     // This is called when the user hits Save on the settings page.

@@ -21,13 +21,13 @@ const wchar_t ** OverlayWindow::get_events() {
   return events;
 }
 
-bool OverlayWindow::get_config(const wchar_t** config) {
-  PowerToysSettings::Settings _settings(
+bool OverlayWindow::get_config(wchar_t* buffer, int *buffer_size) {
+  PowerToysSettings::Settings settings(
     get_name(),
     L"Shows a help overlay with Windows shortcuts when the Windows key is pressed."
   );
 
-  _settings.set_icon_key(L"pt-shortcut-guide");
+  settings.set_icon_key(L"pt-shortcut-guide");
 
   HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   wchar_t description[256];
@@ -40,15 +40,10 @@ bool OverlayWindow::get_config(const wchar_t** config) {
   delay_property.setSpinnerMax(10000);
   delay_property.setSpinnerMin(100);
   delay_property.setSpinnerStep(100);
-  _settings.add_property(delay_property);
+  settings.add_property(delay_property);
 
-  *config = _settings.to_allocated_cstring();
-  return true;
+  return settings.serialize_to_buffer(buffer, buffer_size);
 }
-
-void OverlayWindow::free_get_config(const wchar_t* config) {
-  PowerToysSettings::Settings::free_allocated_cstring(config);
-};
 
 void OverlayWindow::set_config(const wchar_t * config) {
   try {

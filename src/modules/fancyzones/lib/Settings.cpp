@@ -11,7 +11,7 @@ public:
         LoadSettings(name, true /*fromFile*/);
     }
 
-    IFACEMETHODIMP_(bool) GetConfig(_Out_ PCWSTR* config) noexcept;
+    IFACEMETHODIMP_(bool) GetConfig(_Out_ PWSTR buffer, _Out_ int *buffer_sizeg) noexcept;
     IFACEMETHODIMP_(void) SetConfig(PCWSTR config) noexcept;
     IFACEMETHODIMP_(Settings) GetSettings() noexcept { return m_settings; }
 
@@ -49,7 +49,7 @@ private:
 
 };
 
-IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PCWSTR* config) noexcept
+IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PWSTR buffer, _Out_ int *buffer_size) noexcept
 {
     PowerToysSettings::Settings settings(m_name, L"Helps organize your windows.");
 
@@ -69,9 +69,7 @@ IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PCWSTR* config) noexce
         settings.add_property(PowerToysSettings::ColorPickerPropertySetting(setting.name, description, *setting.value));
     }
 
-    *config = settings.to_allocated_cstring();
-
-    return true;
+    return settings.serialize_to_buffer(buffer, buffer_size);
 }
 
 IFACEMETHODIMP_(void) FancyZonesSettings::SetConfig(PCWSTR config) noexcept try

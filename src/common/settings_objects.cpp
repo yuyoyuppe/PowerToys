@@ -18,20 +18,17 @@ namespace PowerToysSettings {
     _internal_json.as_object()[L"properties"].as_object()[_setting.get_name()] = property_json;
   }
 
-  std::wstring Settings::to_string() {
-    return _internal_json.serialize();
-  }
+  bool Settings::serialize_to_buffer(wchar_t* buffer, int *buffer_size) {
+    std::wstring result = _internal_json.serialize();
+    int result_len = (int)result.length();
 
-  wchar_t* Settings::to_allocated_cstring() {
-    std::wstring w_str = to_string();
-    size_t result_len = w_str.length() + 1;
-    wchar_t *result = new wchar_t[result_len];
-    wcscpy_s(result, result_len, w_str.c_str());
-    return result;
-  }
-
-  void Settings::free_allocated_cstring(const wchar_t * allocated_cstring) {
-    delete[] allocated_cstring;
+    if (buffer == nullptr || *buffer_size < result_len) {
+      *buffer_size = result_len + 1;
+      return false;
+    } else {
+      wcscpy_s(buffer, *buffer_size, result.c_str());
+      return true;
+    }
   }
 
   void Settings::set_icon_key(const std::wstring & icon_key) {

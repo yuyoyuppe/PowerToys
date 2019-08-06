@@ -38,13 +38,12 @@ public:
      to any event.
   */
   virtual const wchar_t** get_events() = 0;
-  /* Fills a wchar_t* with the available configuration settings. 
+  /* Fills a buffer with the available configuration settings.
+   * If 'buffer' is a null ptr or the buffer size is not large enough
+   * sets the required buffer size in 'buffer_size' and return false.
    * Returns true if successful.
-   * The wchar_t* returned must be freed through free_get_config after use.
    */
-  virtual bool get_config(const wchar_t**) = 0;
-  /* Frees a wchar_t* returned by get_config. */
-  virtual void free_get_config(const wchar_t*) = 0;
+  virtual bool get_config(wchar_t* buffer, int *buffer_size) = 0;
   /* Sets the configuration values. */
   virtual void set_config(const wchar_t* config) = 0;
   /* Call custom action from settings screen. */

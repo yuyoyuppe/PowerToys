@@ -44,10 +44,14 @@ public:
     return name;
   }
   const std::wstring get_config() const {
-    const wchar_t* config_wstr = NULL;
-    module->get_config(&config_wstr);
-    std::wstring result(config_wstr);
-    module->free_get_config(config_wstr);
+    std::wstring result;
+    int size = 0;
+    module->get_config(nullptr, &size);
+    wchar_t *buffer = new wchar_t[size];
+    if (module->get_config(buffer, &size)) {
+      result.assign(buffer);
+    }
+    delete[] buffer;
     return result;
   }
   void set_config(const std::wstring& config) {

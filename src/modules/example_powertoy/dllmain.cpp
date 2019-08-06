@@ -52,21 +52,21 @@ public:
     return events;
   }
   // Return JSON with the configuration options.
-  virtual bool get_config(const wchar_t** config) override {
+  virtual bool get_config(wchar_t* buffer, int *buffer_size) override {
     // Create a Settings object.
-    PowerToysSettings::Settings _settings(
+    PowerToysSettings::Settings settings(
       get_name(),
       L"Serves as an example powertoy, with example settings."
     );
 
     // Add an overview link to show in the Settings.
-    _settings.set_overview_link(L"https://github.com/microsoft/PowerToys");
+    settings.set_overview_link(L"https://github.com/microsoft/PowerToys");
 
     // Add a video link to show in the Settings.
-    _settings.set_video_link(L"https://www.youtube.com/watch?v=d3LHo2yXKoY&t=21462");
+    settings.set_video_link(L"https://www.youtube.com/watch?v=d3LHo2yXKoY&t=21462");
 
     // Add a bool property with a toggle editor.
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::BoolTogglePropertySetting(
         L"test bool_toggle", // property name
         L"This is what a BoolTogglePropertySetting looks like", // property display text
@@ -75,7 +75,7 @@ public:
     );
 
     // Add an integer property with a spinner editor.
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::IntSpinnerPropertySetting(
         L"test int_spinner", // property name
         L"This is what a IntSpinnerPropertySetting looks like", // property display text
@@ -84,7 +84,7 @@ public:
     );
 
     // Add a string property with a textbox editor.
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::StringTextPropertySetting(
         L"test string_text", // property name
         L"This is what a StringTextPropertySetting looks like", // property display text
@@ -93,7 +93,7 @@ public:
     );
 
     // Add a string property with a color picker editor.
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::ColorPickerPropertySetting(
         L"test color_picker", // property name
         L"This is what a ColorPickerPropertySetting looks like", // property display text
@@ -102,7 +102,7 @@ public:
     );
 
     // Add a custom action property. When using this settings type, "call_custom_action" should be overriden as well.
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::CustomActionPropertySetting(
         L"test custom_action", // action name
         L"This is what a CustomActionPropertySetting looks like", // label above the field
@@ -111,14 +111,8 @@ public:
         )
     );
 
-    // Returns an allocated wchar_t*. free_get_config will get called later to free this value
-    *config = _settings.to_allocated_cstring();
-
-    return true;
-  }
-  virtual void free_get_config(const wchar_t* config) override {
-    PowerToysSettings::Settings::free_allocated_cstring(config);
-  };
+    return settings.serialize_to_buffer(buffer, buffer_size);
+    }
 
   // Signal from the settings screen to call a custom action.
   // This can be used to spawn more complex editors.

@@ -19,11 +19,8 @@ namespace PowerToysSettings {
 
     void add_property(PowerToysSettings::BasePropertySetting _setting);
 
-    std::wstring to_string();
-
-    // Helper functions to get allocated strings out of the DLLs
-    wchar_t* to_allocated_cstring();
-    static void free_allocated_cstring(const wchar_t* allocated_cstring);
+    // Serialize the internal json to the input buffer.
+    bool serialize_to_buffer(wchar_t* buffer, int *buffer_size);
 
     // Add additional general information to the PowerToy settings.
     void set_icon_key(const std::wstring& icon_key);

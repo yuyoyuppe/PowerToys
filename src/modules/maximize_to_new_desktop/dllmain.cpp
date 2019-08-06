@@ -44,18 +44,18 @@ public:
     return nullptr;
   }
 
-  virtual bool get_config(const wchar_t** config) override {
-    PowerToysSettings::Settings _settings(
+  virtual bool get_config(wchar_t* buffer, int *buffer_size) override {
+    PowerToysSettings::Settings settings(
       get_name(),
       L"Adds a popup to maximize a window to a new desktop."
     );
 
-    _settings.set_icon_key(L"pt-maximize-new-desktop");
+    settings.set_icon_key(L"pt-maximize-new-desktop");
     
     HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
     wchar_t description[256];
     LoadString(hinstance, closeDesktopOnRestoreLastWindow.resourceId, description, ARRAYSIZE(description));
-    _settings.add_property(
+    settings.add_property(
       PowerToysSettings::BoolTogglePropertySetting(
         closeDesktopOnRestoreLastWindow.name,
         description,
@@ -72,15 +72,10 @@ public:
     delay_property.setSpinnerMax(10000);
     delay_property.setSpinnerMin(100);
     delay_property.setSpinnerStep(100);
-    _settings.add_property(delay_property);
+    settings.add_property(delay_property);
 
-    *config = _settings.to_allocated_cstring();
-    return true;
+    return settings.serialize_to_buffer(buffer, buffer_size);
   }
-
-  virtual void free_get_config(const wchar_t* config) override {
-    PowerToysSettings::Settings::free_allocated_cstring(config);
-  };
 
   virtual void set_config(const wchar_t* config) override {
     try {
