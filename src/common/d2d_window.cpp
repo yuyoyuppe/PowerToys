@@ -3,46 +3,6 @@
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
-struct WINDOWCOMPOSITIONATTRIBDATA {
-  DWORD Attrib;
-  PVOID pvData;
-  SIZE_T cbData;
-};
-
-struct ACCENT_POLICY {
-  DWORD AccentState;
-  DWORD AccentFlags;
-  DWORD GradientColor;
-  DWORD AnimationId;
-};
-
-typedef BOOL(WINAPI*pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
-
-pfnSetWindowCompositionAttribute SetWindowCompositionAttribute = NULL;
-
-pfnSetWindowCompositionAttribute getSetWindowCompositionAttributeFunPtr() {
-  auto user32 = LoadLibraryA("user32.dll");
-  auto rval =  reinterpret_cast<pfnSetWindowCompositionAttribute>(GetProcAddress(user32, "SetWindowCompositionAttribute"));
-  FreeLibrary(user32);
-  return rval;
-}
-
-void enable_acrylic_window(HWND hwnd) {
-  if(SetWindowCompositionAttribute ==NULL) {
-    SetWindowCompositionAttribute = getSetWindowCompositionAttributeFunPtr();
-  }
-  ACCENT_POLICY accent = {};
-  accent.AccentState = 3; // ACCENT_ENABLE_BLURBEHIND;
-  accent.GradientColor = 0xFFFFFF;
-  accent.AccentFlags = 0; // 2 - Use GradientColor
-  WINDOWCOMPOSITIONATTRIBDATA data;
-  data.Attrib = 19; // WCA_ACCENT_POLICY
-  data.pvData = &accent;
-  data.cbData = sizeof(accent);
-  SetWindowCompositionAttribute(hwnd, &data);
-}
-
-
 D2DWindow::D2DWindow() {
   static const TCHAR* class_name = TEXT("PToyD2DPopup");
   WNDCLASS wc = {};
@@ -117,7 +77,6 @@ void D2DWindow::base_init() {
   winrt::check_hresult(CreateDXGIFactory2(0, __uuidof(dxgi_factory), dxgi_factory.put_void()));
   winrt::check_hresult(d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
   winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d_dc.put()));
-  enable_acrylic_window(hwnd);
   init();
   initialized = true;
 }
