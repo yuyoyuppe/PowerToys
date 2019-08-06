@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack, Text, DefaultButton, Label} from 'office-ui-fabric-react';
+import { Stack, Text, DefaultButton, Label, Link} from 'office-ui-fabric-react';
 import {BoolToggleSettingsControl} from './BoolToggleSettingsControl'
 import { Separator } from 'office-ui-fabric-react/lib/Separator';
 
@@ -41,25 +41,78 @@ export class GeneralSettings extends React.Component <any, any> {
   }
 
   public render(): JSX.Element {
-    let power_toys_enabled = this.state.settings.enabled;
+    let power_toys_enabled = this.state.settings.general.enabled;
     return (
       <Stack tokens={{childrenGap:20}}>
         <Text variant='xLarge'>Available PowerToys</Text>
         { Object.keys(power_toys_enabled).map(
           (key) => {
             let enabled_value=power_toys_enabled[key];
-            return <BoolToggleSettingsControl
-              setting={{display_name: key, value: enabled_value}}
-              key={key}
-              on_change={this.parent_on_change}
-              ref={(input) => {this.references[key]=input;}}
-            />;
+            return <Stack key={key}>
+              <Stack horizontal tokens={{childrenGap:5}}>
+                <Label>{key}</Label>
+                {(
+                  this.state.settings.powertoys &&
+                  this.state.settings.powertoys.hasOwnProperty(key) &&
+                  this.state.settings.powertoys[key].hasOwnProperty('overview_link'))
+                  ?
+                  <Link
+                    styles = {{
+                      root: {
+                        alignSelf:'center'
+                      }
+                    }}
+                    href={this.state.settings.powertoys[key].overview_link}
+                    target='_blank'
+                  >(Overview)</Link>
+                  :
+                  null
+                }
+                {(
+                  this.state.settings.powertoys &&
+                  this.state.settings.powertoys.hasOwnProperty(key) &&
+                  this.state.settings.powertoys[key].hasOwnProperty('video_link'))
+                  ?
+                  <Link
+                    styles = {{
+                      root: {
+                        alignSelf:'center'
+                      }
+                    }}
+                    href={this.state.settings.powertoys[key].video_link}
+                    target='_blank'
+                  >(Video)</Link>
+                  :
+                  null
+                }
+              </Stack>
+              {(
+                this.state.settings.powertoys &&
+                this.state.settings.powertoys.hasOwnProperty(key) &&
+                this.state.settings.powertoys[key].hasOwnProperty('description'))
+                ?
+                <Text
+                  styles = {{
+                    root: {
+                      paddingBottom: '5px'
+                    }
+                  }}
+                >{this.state.settings.powertoys[key].description}</Text>
+                :
+                null
+              }
+              <BoolToggleSettingsControl
+                setting={{value: enabled_value}}
+                on_change={this.parent_on_change}
+                ref={(input) => {this.references[key]=input;}}
+              />
+            </Stack>;
           })
         }
         <Separator />
         <Text variant='xLarge'>General</Text>
         <BoolToggleSettingsControl
-          setting={{display_name: 'Start at login', value: this.state.settings.startup}}
+          setting={{display_name: 'Start at login', value: this.state.settings.general.startup}}
           on_change={this.parent_on_change}
           ref={(input) => {this.startup_reference=input;}}
           />

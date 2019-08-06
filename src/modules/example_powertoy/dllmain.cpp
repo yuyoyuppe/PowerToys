@@ -59,6 +59,12 @@ public:
       L"Serves as an example powertoy, with example settings."
     );
 
+    // Add an overview link to show in the Settings.
+    _settings.set_overview_link(L"https://github.com/microsoft/PowerToys");
+
+    // Add a video link to show in the Settings.
+    _settings.set_video_link(L"https://www.youtube.com/watch?v=d3LHo2yXKoY&t=21462");
+
     // Add a bool property with a toggle editor.
     _settings.add_property(
       PowerToysSettings::BoolTogglePropertySetting(

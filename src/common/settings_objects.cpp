@@ -38,6 +38,14 @@ namespace PowerToysSettings {
     _internal_json.as_object()[L"icon_key"] = web::json::value::string(icon_key);
   }
 
+  void Settings::set_overview_link(const std::wstring & overview_link) {
+    _internal_json.as_object()[L"overview_link"] = web::json::value::string(overview_link);
+  }
+
+  void Settings::set_video_link(const std::wstring & video_link) {
+    _internal_json.as_object()[L"video_link"] = web::json::value::string(video_link);
+  }
+
   BasePropertySetting::BasePropertySetting(const std::wstring& name, const std::wstring& display_name, const std::wstring& editor_type, web::json::value value) {
     _name = name;
     _internal_json = web::json::value::object();

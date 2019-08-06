@@ -47,7 +47,7 @@ public:
   virtual bool get_config(const wchar_t** config) override {
     PowerToysSettings::Settings _settings(
       get_name(),
-      L"Adds popup that Maximizes a Window to a new Desktop."
+      L"Adds a popup to maximize a window to a new desktop."
     );
 
     _settings.set_icon_key(L"pt-maximize-new-desktop");

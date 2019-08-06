@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import {Stack, Text, Link} from 'office-ui-fabric-react';
 import {BoolToggleSettingsControl} from './BoolToggleSettingsControl';
 import {StringTextSettingsControl} from './StringTextSettingsControl';
 import {IntSpinnerSettingsControl} from './IntSpinnerSettingsControl';
@@ -56,6 +56,43 @@ export class CustomSettingsScreen extends React.Component <any, any> {
     let power_toys_properties = this.state.powertoy.properties;
     return (
       <Stack tokens={{childrenGap:20}}>
+        <Stack>
+          <Text variant='large'>{this.state.powertoy.description}</Text>
+          {
+            this.state.powertoy.hasOwnProperty('overview_link')
+            ?
+            <Stack horizontal tokens={{childrenGap:5}}>
+              <Text>- Overview:</Text>
+              <Link
+                styles = {{
+                  root: {
+                    alignSelf:'center'
+                  }
+                }}
+                href={this.state.powertoy.overview_link}
+                target='_blank'
+              >link</Link>
+            </Stack>
+            :
+            null
+          }
+          {
+            this.state.powertoy.hasOwnProperty('video_link')
+            ?
+            <Stack horizontal tokens={{childrenGap:5}}>
+              <Text>- Video demo:</Text>
+              <Link
+                styles = {{
+                  root: {
+                    alignSelf:'center'
+                  }
+                }}
+                href={this.state.powertoy.video_link} target='_blank'>link</Link>
+            </Stack>
+            :
+            null
+          }
+        </Stack>
         {
           Object.keys(power_toys_properties).
           sort(function(a, b) {

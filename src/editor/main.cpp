@@ -153,6 +153,8 @@ void send_message_to_powertoys(const std::wstring msg) {
                 "version": "1.0",
                 "name": "Example PowerToy",
                 "description": "Shows the different controls for the settings.",
+                "overview_link": "https://github.com/microsoft/PowerToys",
+                "video_link": "https://www.youtube.com/watch?v=d3LHo2yXKoY&t=21462",
                 "properties": {
                   "test bool_toggle": {
                     "display_name": "This is what a bool_toggle looks like",

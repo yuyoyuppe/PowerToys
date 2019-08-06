@@ -199,7 +199,7 @@ export class App extends React.Component <any, any> {
                   return <GeneralSettings
                     key="general"
                     settings_key="general"
-                    settings={this.state.settings.general}
+                    settings={this.state.settings}
                     on_change={this.on_setting_change}
                     ref={(input:any) => {this.settings_screen_ref = input;}}
                   />

@@ -27,6 +27,8 @@ namespace PowerToysSettings {
 
     // Add additional general information to the PowerToy settings.
     void set_icon_key(const std::wstring& icon_key);
+    void set_overview_link(const std::wstring& overview_link);
+    void set_video_link(const std::wstring& video_link);
 
   private:
     web::json::value _internal_json;
