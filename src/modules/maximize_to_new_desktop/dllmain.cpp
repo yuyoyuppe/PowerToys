@@ -93,13 +93,12 @@ public:
           update_mousein_wait(popupDelay.value);
         }
       }
+      // Persist settings.
+      _values.save_to_settings_file();
     }
     catch (std::exception ex) {
       // Improper JSON.
     }
-
-    // Persist settings.
-    save_settings();
   }
   virtual void enable() override {
     if (!_enabled) {
@@ -131,17 +130,16 @@ public:
 
 private:
   void init_settings();
-  void save_settings();
 
   // Settings used by this module
   struct CloseDesktopOnRestoreLastWindow {
-    PCWSTR name = L"close_desktop_on_restore";
-    BOOL value = TRUE;
+    const std::wstring name = L"close_desktop_on_restore";
+    bool value = true;
     int resourceId = IDS_SETTING_DESCRIPTION_CLOSE_ON_RESTORE;
   } closeDesktopOnRestoreLastWindow;
 
   struct PopupDelay {
-    PCWSTR name = L"popup_delay";
+    const std::wstring name = L"popup_delay";
     int value = 400; // ms
     int resourceId = IDS_SETTING_DESCRIPTION_HOVER_DELAY;
   } popupDelay;
@@ -182,30 +180,6 @@ void on_mouse_out() {
   MTNDPowertoy::maximize_popup->hide();
   std::chrono::steady_clock::time_point shown_end_time = std::chrono::steady_clock::now();
   Trace::EventHide(std::chrono::duration_cast<std::chrono::milliseconds>(shown_end_time - shown_start_time).count());
-}
-
-void MTNDPowertoy::save_settings() {
-  try {
-    PowerToysSettings::PowerToyValues values(
-      get_name()
-    );
-    values.add_property_value(
-      PowerToysSettings::BoolSettingsValue(
-        closeDesktopOnRestoreLastWindow.name,
-        closeDesktopOnRestoreLastWindow.value
-      )
-    );
-    values.add_property_value(
-      PowerToysSettings::IntSettingsValue(
-        popupDelay.name,
-        popupDelay.value
-      )
-    );
-    values.save_to_settings_file();
-  }
-  catch (std::exception ex) {
-    //Couldn't save the settings.
-  }
 }
 
 void MTNDPowertoy::init_settings() {

@@ -110,12 +110,12 @@ void FancyZonesSettings::SaveSettings() noexcept try
 
     for (auto const& setting : m_configBools)
     {
-        values.add_property_value(PowerToysSettings::BoolSettingsValue(setting.name, *setting.value));
+        values.add_property(setting.name, *setting.value);
     }
 
     for (auto const& setting : m_configStrings)
     {
-        values.add_property_value(PowerToysSettings::StringSettingsValue(setting.name, *setting.value));
+        values.add_property(setting.name, *setting.value);
     }
 
     values.save_to_settings_file();

@@ -34,7 +34,6 @@ private:
   bool _enabled = false;
 
   void init_settings();
-  void save_settings();
 
   struct PressTime {
     PCWSTR name = L"press_time";

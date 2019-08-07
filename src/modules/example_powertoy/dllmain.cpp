@@ -164,13 +164,18 @@ public:
         test_color_prop = _values.get_string_value(L"test color_picker");
       }
 
+      // If you don't need to do any custom processing of the module settings,
+      // to persists the values as they are simply call:
+
+      //_values.save_to_settings_file();
+      
+      // Otherwise call a custom function to process the settings, recreate
+      // a PowerToysSettings::PowerToyValues and then save to disk
+      save_settings();
     }
     catch (std::exception ex) {
       // Improper JSON.
     }
-
-    // Persist the settings.
-    save_settings();
   }
 
   // Enable the powertoy
@@ -257,35 +262,27 @@ void ExamplePowertoy::save_settings() {
     );
 
     // Save the bool property.
-    values.add_property_value(
-      PowerToysSettings::BoolSettingsValue(
-        L"test bool_toggle", // property name
-        test_bool_prop // property value
-      )
+    values.add_property(
+      L"test bool_toggle", // property name
+      test_bool_prop // property value
     );
 
     // Save the int property.
-    values.add_property_value(
-      PowerToysSettings::IntSettingsValue(
-        L"test int_spinner", // property name
-        test_int_prop // property value
-      )
+    values.add_property(
+      L"test int_spinner", // property name
+      test_int_prop // property value
     );
 
     // Save the string property.
-    values.add_property_value(
-      PowerToysSettings::StringSettingsValue(
-        L"test string_text", // property name
-        test_string_prop // property value
-      )
+    values.add_property(
+      L"test string_text", // property name
+      test_string_prop // property value
     );
 
     // Save the color property.
-    values.add_property_value(
-      PowerToysSettings::StringSettingsValue(
-        L"test color_picker", // property name
-        test_color_prop // property value
-      )
+    values.add_property(
+      L"test color_picker", // property name
+      test_color_prop // property value
     );
 
     // Save the PowerToyValues JSON to the power toy settings file.

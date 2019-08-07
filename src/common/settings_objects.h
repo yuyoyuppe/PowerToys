@@ -134,11 +134,8 @@ namespace PowerToysSettings {
     static PowerToyValues from_json_string(const std::wstring& json);
     static PowerToyValues load_from_settings_file(const std::wstring& powertoy_name);
 
-    void add_property_value(PowerToysSettings::BaseSettingsValue _value);
-
-    std::wstring get_name();
-    web::json::value get_json();
-    std::wstring to_string();
+    template <typename T>
+    void add_property(const std::wstring& name, T value);
 
     // Check property value type
     bool is_bool_value(const std::wstring& property_name);
@@ -153,6 +150,8 @@ namespace PowerToysSettings {
     void save_to_settings_file();
 
   private:
+    const std::wstring m_version = L"1.0";
+    void set_version();
     web::json::value _internal_json;
     std::wstring _name;
     PowerToyValues() {}

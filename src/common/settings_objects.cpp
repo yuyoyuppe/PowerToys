@@ -62,7 +62,7 @@ namespace PowerToysSettings {
   PowerToyValues::PowerToyValues(const std::wstring& powertoy_name) {
     _name = powertoy_name;
     _internal_json = web::json::value::object();
-    _internal_json.as_object()[L"version"] = web::json::value::string(L"1.0");
+    set_version();
     _internal_json.as_object()[L"name"] = web::json::value::string(powertoy_name);
     _internal_json.as_object()[L"properties"] = web::json::value::object();
   }
@@ -81,22 +81,26 @@ namespace PowerToysSettings {
     return result;
   }
 
-  void PowerToyValues::add_property_value(BaseSettingsValue _value) {
-    web::json::value property_json = _value.get_json();
-    _internal_json.as_object()[L"properties"].as_object()[_value.get_name()] = property_json;
+  template <typename T>
+  web::json::value add_property_generic(const std::wstring& name, T value) {
+    std::vector<std::pair<std::wstring, web::json::value>> vector = { std::make_pair(L"value", web::json::value(value)) };
+    return web::json::value::object(vector);
   }
 
-  std::wstring PowerToyValues::get_name() {
-    return _name;
-  }
+  template <>
+  void PowerToyValues::add_property(const std::wstring& name, bool value) {
+    _internal_json.as_object()[L"properties"].as_object()[name] = add_property_generic(name, value);
+  };
+  
+  template <>
+  void PowerToyValues::add_property(const std::wstring& name, int value) {
+    _internal_json.as_object()[L"properties"].as_object()[name] = add_property_generic(name, value);
+  };
 
-  web::json::value PowerToyValues::get_json() {
-    return _internal_json;
-  }
-
-  std::wstring PowerToyValues::to_string() {
-    return _internal_json.serialize();
-  }
+  template <>
+  void PowerToyValues::add_property(const std::wstring& name, std::wstring value) {
+    _internal_json.as_object()[L"properties"].as_object()[name] = add_property_generic(name, value);
+  };
 
   bool PowerToyValues::is_bool_value(const std::wstring& property_name) {
     return _internal_json.is_object() &&
@@ -132,7 +136,12 @@ namespace PowerToysSettings {
   }
 
   void PowerToyValues::save_to_settings_file() {
+    set_version();
     PTSettingsHelper::save_module_settings(_name, _internal_json);
+  }
+
+  void PowerToyValues::set_version() {
+    _internal_json.as_object()[L"version"] = web::json::value::string(m_version);
   }
 
   BaseSettingsValue::BaseSettingsValue(const std::wstring & name, web::json::value value) {

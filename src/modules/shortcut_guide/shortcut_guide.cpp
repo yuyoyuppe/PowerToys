@@ -74,11 +74,11 @@ void OverlayWindow::set_config(const wchar_t * config) {
         winkey_popup->apply_overlay_opacity(((float)overlayOpacity.value) / 100.0f);
       }
     }
+    _values.save_to_settings_file();
   }
   catch (std::exception ex) {
     // Improper JSON.
   }
-  save_settings();
 }
 
 void OverlayWindow::enable() {
@@ -172,29 +172,5 @@ void OverlayWindow::init_settings() {
   }
   catch (std::exception ex) {
     // Error while loading from the settings file. Just let default values stay as they are.
-  }
-}
-
-void OverlayWindow::save_settings() {
-  try {
-    PowerToysSettings::PowerToyValues values(
-      get_name()
-    );
-    values.add_property_value(
-      PowerToysSettings::IntSettingsValue(
-        pressTime.name,
-        pressTime.value
-      )
-    );
-    values.add_property_value(
-      PowerToysSettings::IntSettingsValue(
-        overlayOpacity.name,
-        overlayOpacity.value
-      )
-    );
-    values.save_to_settings_file();
-  }
-  catch (std::exception ex) {
-    //Couldn't save the settings.
   }
 }
