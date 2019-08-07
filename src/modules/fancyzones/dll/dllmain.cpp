@@ -3,7 +3,6 @@
 #include <interface/powertoy_module_interface.h>
 #include <interface/lowlevel_keyboard_event_data.h>
 #include <interface/win_hook_event_data.h>
-#include "trace.h"
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -62,6 +61,7 @@ public:
     {
         if (!m_app)
         {
+            Trace::FancyZones::EnableFancyZones(true);
             m_app = MakeFancyZones(reinterpret_cast<HINSTANCE>(&__ImageBase), m_settings.get());
             if (m_app)
             {
@@ -75,6 +75,7 @@ public:
     {
         if (m_app)
         {
+            Trace::FancyZones::EnableFancyZones(false);
             m_app->Destroy();
             m_app = nullptr;
         }
@@ -177,6 +178,7 @@ void FancyZonesModule::HandleWinHookEvent(WinHookEvent* data) noexcept
         // switches virtual desktops.
         if (data->hwnd == GetDesktopWindow())
         {
+            Trace::VirtualDesktopChanged();
             m_app.as<IFancyZonesCallback>()->VirtualDesktopChanged();
         }
     }

@@ -77,6 +77,7 @@ IFACEMETHODIMP_(void) FancyZonesSettings::SetConfig(PCWSTR config) noexcept try
 {
     LoadSettings(config, false /*fromFile*/);
     SaveSettings();
+    Trace::SettingsChanged(m_settings);
 }
 CATCH_LOG();
 

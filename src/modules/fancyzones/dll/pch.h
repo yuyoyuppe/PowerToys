@@ -4,8 +4,11 @@
 #include <Unknwn.h>
 #include <winrt/base.h>
 #include <ProjectTelemetry.h>
+#include <TraceLoggingActivity.h>
 #include <wil\common.h>
 
+
+#include "lib\trace.h"
 #include "lib\FancyZones.h"
 #include "lib\Settings.h"
 

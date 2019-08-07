@@ -7,14 +7,17 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <dwmapi.h>
+#include <ProjectTelemetry.h>
 #include <shlwapi.h>
 #include <shellapi.h>
 #include <strsafe.h>
+#include <TraceLoggingActivity.h>
 #include <wil\resource.h>
 #include <wil\result.h>
 #include <windows.foundation.h>
 #include <psapi.h>
 
+#include "trace.h"
 #include "Settings.h"
 #include "FancyZones.h"
 #include "ZoneWindow.h"

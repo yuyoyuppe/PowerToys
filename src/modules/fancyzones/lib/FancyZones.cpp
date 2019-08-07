@@ -187,18 +187,21 @@ IFACEMETHODIMP_(bool) FancyZones::OnKeyDown(PKBDLLHOOKSTRUCT info) noexcept
         {
             if ((info->vkCode >= '0') && (info->vkCode <= '9'))
             {
+                Trace::FancyZones::OnKeyDown(info->vkCode, win, ctrl, false /* inMoveSize */);
                 CycleActiveZoneSet(info->vkCode);
                 return true;
             }
         }
         else if ((info->vkCode == VK_RIGHT) || (info->vkCode == VK_LEFT))
         {
+            Trace::FancyZones::OnKeyDown(info->vkCode, win, ctrl, false /* inMoveSize */);
             OnSnapHotkey(info->vkCode);
             return true;
         }
     }
     else if (m_inMoveSize && (info->vkCode >= '0') && (info->vkCode <= '9'))
     {
+        Trace::FancyZones::OnKeyDown(info->vkCode, win, false /* control */, true/* inMoveSize */);
         CycleActiveZoneSet(info->vkCode);
         return true;
     }
@@ -215,6 +218,7 @@ IFACEMETHODIMP_(void) FancyZones::ToggleZoneViewers() noexcept
         alreadyVisible = m_editorsVisible;
         m_editorsVisible = !alreadyVisible;
     }
+    Trace::FancyZones::ToggleZoneViewers(!alreadyVisible);
 
     if (!alreadyVisible)
     {

@@ -62,7 +62,7 @@ private:
     winrt::com_ptr<IZone> ZoneFromPoint(POINT pt) noexcept;
     void ChooseDefaultActiveZoneSet() noexcept;
     bool IsOccluded(POINT pt, size_t index) noexcept;
-    void CycleActiveZoneSetInternal(DWORD wparam) noexcept;
+    void CycleActiveZoneSetInternal(DWORD wparam, Trace::ZoneWindow::InputMode mode) noexcept;
     void FlashZones(bool delayed) noexcept;
     int GetSwitchButtonIndexFromPoint(POINT ptClient) noexcept;
     UINT GetDpiForMonitor() noexcept;
@@ -98,7 +98,7 @@ private:
     SIZE m_gridMargins{};
     RECT m_zoneBuilder{};
     RECT m_switchButtonContainerRect{};
-
+    Trace::ZoneWindow::EditorModeActivity m_editorModeActivity;
     static const UINT m_showAnimationDuration = 200;
 };
 
@@ -195,6 +195,11 @@ IFACEMETHODIMP ZoneWindow::HideZoneWindow() noexcept
         return E_FAIL;
     }
 
+    if (m_editorMode)
+    {
+        ExitEditorMode();
+    }
+
     ShowWindow(m_window.get(), SW_HIDE);
     m_keyLast = 0;
     m_windowMoveSize = nullptr;
@@ -261,6 +266,7 @@ IFACEMETHODIMP ZoneWindow::MoveSizeEnd(HWND window, POINT const& ptScreen) noexc
 
         SaveWindowProcessToZoneIndex(window);
     }
+    Trace::ZoneWindow::MoveSizeEnd(m_activeZoneSet);
 
     HideZoneWindow();
     m_windowMoveSize = nullptr;
@@ -291,7 +297,7 @@ IFACEMETHODIMP_(void) ZoneWindow::MoveWindowIntoZoneByDirection(HWND window, DWO
 
 IFACEMETHODIMP_(void) ZoneWindow::CycleActiveZoneSet(DWORD wparam) noexcept
 {
-    CycleActiveZoneSetInternal(wparam);
+    CycleActiveZoneSetInternal(wparam, Trace::ZoneWindow::InputMode::Keyboard);
 
     if (m_windowMoveSize)
     {
@@ -571,7 +577,7 @@ void ZoneWindow::OnLButtonUp(LPARAM lparam) noexcept
                 auto switchButtonIndex = GetSwitchButtonIndexFromPoint(ptClient);
                 if (switchButtonIndex != -1)
                 {
-                    CycleActiveZoneSetInternal('0' + switchButtonIndex);
+                    CycleActiveZoneSetInternal('0' + switchButtonIndex, Trace::ZoneWindow::InputMode::Mouse);
                 }
             }
             else
@@ -1008,6 +1014,7 @@ void ZoneWindow::UpdateGridMargins(int inc) noexcept
 
 void ZoneWindow::EnterEditorMode() noexcept
 {
+    m_editorModeActivity.Start();
     MakeActiveZoneSetCustom();
     m_editorMode = true;
 }
@@ -1019,15 +1026,17 @@ void ZoneWindow::ExitEditorMode() noexcept
     {
         m_activeZoneSet->Save();
     }
+    m_editorModeActivity.Stop(m_activeZoneSet);
 }
 
 void ZoneWindow::OnKeyUp(WPARAM wparam) noexcept
 {
     bool fRedraw = false;
+    Trace::ZoneWindow::KeyUp(wparam, m_editorMode);
 
     if ((wparam >= '0') && (wparam<= '9'))
     {
-        CycleActiveZoneSetInternal(static_cast<DWORD>(wparam));
+        CycleActiveZoneSetInternal(static_cast<DWORD>(wparam), Trace::ZoneWindow::InputMode::Keyboard);
     }
     else
     {
@@ -1200,10 +1209,11 @@ bool ZoneWindow::IsOccluded(POINT pt, size_t index) noexcept
     return false;
 }
 
-void ZoneWindow::CycleActiveZoneSetInternal(DWORD wparam) noexcept
+void ZoneWindow::CycleActiveZoneSetInternal(DWORD wparam, Trace::ZoneWindow::InputMode mode) noexcept
 {
     if (!m_editorMode)
     {
+        Trace::ZoneWindow::CycleActiveZoneSet(m_activeZoneSet, mode);
         if (m_keyLast != wparam)
         {
             m_keyCycle = 0;
