@@ -42,6 +42,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   start_tray_icon();
   int result;
   try {
+
+    // Singletons initialization order needs to be preserved, first events and
+    // then modules to guarantee the reverse destruction order.
+    powertoys_events();
+    modules();
+
     chdir_current_executable();
     // Load Powertyos DLLS
     // For now only load known DLLs
