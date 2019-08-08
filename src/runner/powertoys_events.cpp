@@ -43,7 +43,7 @@ void PowertoysEvents::unregister_receiver(PowertoyModuleIface* module) {
 
 intptr_t PowertoysEvents::signal_event(const std::wstring & event, intptr_t data) {
   intptr_t rvalue = 0;
-  std::unique_lock lock(mutex);
+  std::shared_lock lock(mutex);
   if (auto it = receivers.find(event); it != end(receivers)) {
     for (auto& module : it->second) {
       if (module)

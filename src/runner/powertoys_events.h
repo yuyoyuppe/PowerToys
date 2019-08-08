@@ -8,7 +8,7 @@ public:
   void unregister_receiver(PowertoyModuleIface* module);
   intptr_t signal_event(const std::wstring& event, intptr_t data);
 private:
-  std::recursive_mutex mutex;
+  std::shared_mutex mutex;
   std::unordered_map<std::wstring, std::vector<PowertoyModuleIface*>> receivers;
 };
 
