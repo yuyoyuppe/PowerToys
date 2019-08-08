@@ -17,7 +17,7 @@ public:
   winrt::com_ptr<ID2D1SvgElement> find_element(const std::wstring& id);
   D2D1_RECT_F rescale(D2D1_RECT_F rect);
 protected:
-  float used_scale;
+  float used_scale = 1.0f;
   winrt::com_ptr<ID2D1SvgDocument> svg;
   int svg_width = -1, svg_height = -1;
   D2D1::Matrix3x2F transform;

@@ -26,8 +26,9 @@ public:
   D2D1_RECT_F get_snap_left() const;
   D2D1_RECT_F get_snap_right() const;
 private:
-  D2D1_POINT_2F thumbnail_top_left, thumbnail_bottom_right;
-  RECT thumbnail_scaled_rect;
+  D2D1_POINT_2F thumbnail_top_left = {};
+  D2D1_POINT_2F thumbnail_bottom_right = {};
+  RECT thumbnail_scaled_rect = {};
   winrt::com_ptr<ID2D1SvgElement> window_group;
 };
 

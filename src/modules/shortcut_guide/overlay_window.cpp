@@ -700,9 +700,9 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
   text.set_aligment_left().write(d2d_dc, text_color, use_overlay->get_snap_right(), right);
   // ... and the arrows with numbers
   for (auto&& button : tasklist_buttons) {
-    if ((unsigned)button.keynum - 1 >= arrows.size()) {
+    if ((size_t)(button.keynum) - 1 >= arrows.size()) {
       continue;
     }
-    render_arrow(arrows[button.keynum - 1], button, window_rect, use_overlay->get_scale(), d2d_dc);
+    render_arrow(arrows[(size_t)(button.keynum) - 1], button, window_rect, use_overlay->get_scale(), d2d_dc);
   }
 }
