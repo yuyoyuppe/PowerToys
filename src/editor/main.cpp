@@ -42,8 +42,14 @@ winrt::Windows::Web::UI::Interop::WebViewControlProcess webview_process = nullpt
 winrt::Windows::Web::UI::Interop::WebViewControlProcessOptions webview_process_options = nullptr;
 StreamUriResolverFromFile local_uri_resolver;
 
-// Contais the Windows Message for receiving copied data to send to the webview.
+// Windows message for receiving copied data to send to the webview.
 UINT wm_copydata_webview = 0;
+
+// Windows message to signal that the parent process has terminated.
+UINT wm_parent_terminated = 0;
+
+// mutex for checking if the window has already been created.
+std::mutex m_window_created_mutex;
 
 TwoWayPipeMessageIPC* current_settings_ipc = NULL;
 #ifdef _DEBUG
@@ -259,6 +265,8 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     break;
   case WM_CREATE:
     wm_copydata_webview = RegisterWindowMessage(TEXT("PTSettingsCopyDataWebView"));
+    wm_parent_terminated = RegisterWindowMessage(TEXT("PTSettingsParentTerminated"));
+    m_window_created_mutex.unlock();
     break;
   case WM_DPICHANGED:
     {
@@ -291,6 +299,10 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
       }
       // wnd_proc_static is responsible for freeing memory.
       delete msg;
+    } else {
+      if (message == wm_parent_terminated) {
+        DestroyWindow(hWnd);
+      }
     }
     break;
   }
@@ -347,14 +359,42 @@ int init_instance(HINSTANCE hInstance, int nCmdShow) {
   return TRUE;
 }
 
+void wait_on_parent_process_thread(DWORD pid) {
+  HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, pid);
+  if (process != NULL) {
+    if (WaitForSingleObject(process, INFINITE) == WAIT_OBJECT_0) {
+      // If it's possible to detect when the PowerToys process terminates, message the main window.
+      CloseHandle(process);
+      {
+        // Send a terminated message only after the window has finished initializing.
+        std::unique_lock lock(m_window_created_mutex);
+      }
+      PostMessage(main_window_handler, wm_parent_terminated, 0, 0);
+    } else {
+      CloseHandle(process);
+    }
+  }
+}
+
+void quit_when_parent_terminates(std::wstring parent_pid) {
+  DWORD pid = std::stol(parent_pid);
+  std::thread(wait_on_parent_process_thread,pid).detach();
+}
+
 void read_arguments() {
+  // Expected calling arguments:
+  // [0] - This executable's path.
+  // [1] - PowerToys pipe server.
+  // [2] - Settings pipe server.
+  // [3] - PowerToys process pid.
   LPWSTR *argument_list;
   int n_args;
 
   argument_list = CommandLineToArgvW(GetCommandLineW(), &n_args);
-  if (n_args > 2) {
+  if (n_args > 3) {
     current_settings_ipc = new TwoWayPipeMessageIPC(std::wstring(argument_list[2]), std::wstring(argument_list[1]), send_message_to_webview);
     current_settings_ipc->start(NULL);
+    quit_when_parent_terminates(std::wstring(argument_list[3]));
   } else {
 #ifndef _DEBUG
     MessageBox(NULL, L"This executable isn't supposed to be called as a stand-alone process", L"Error running settings", MB_OK);
@@ -365,6 +405,8 @@ void read_arguments() {
 }
 
 int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  //To be unlocked after the Window has finished being created.
+  m_window_created_mutex.lock();
   read_arguments();
   register_classes(hInstance);
   init_instance(hInstance, nCmdShow);

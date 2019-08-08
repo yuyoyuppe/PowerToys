@@ -129,6 +129,12 @@ void run_settings_window() {
     RpcStringFree((RPC_WSTR*)&uuid_chars);
     uuid_chars = NULL;
   }
+  DWORD powertoys_pid = GetCurrentProcessId();
+  // Arguments for calling the settings executable:
+  // C:\powertoys_path\PowerToysSettings.exe powertoys_pipe settings_pipe powertoys_pid
+  // powertoys_pipe - PowerToys pipe server.
+  // settings_pipe - Settings pipe server.
+  // powertoys_pid - PowerToys process pid.
   wcscpy_s(executable_args, TEXT("\""));
   wcscat_s(executable_args, executable_path);
   wcscat_s(executable_args, TEXT("\""));
@@ -136,6 +142,8 @@ void run_settings_window() {
   wcscat_s(executable_args, powertoys_pipe_name.c_str());
   wcscat_s(executable_args, TEXT(" "));
   wcscat_s(executable_args, settings_pipe_name.c_str());
+  wcscat_s(executable_args, TEXT(" "));
+  wcscat_s(executable_args, std::to_wstring(powertoys_pid).c_str());
 
   // Run the Settings process with non-elevated privileges
 
