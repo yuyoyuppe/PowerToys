@@ -1,5 +1,5 @@
 ### PowerToys Build Status (JANEASYSTEMS)
-[![Build Status](https://dev.azure.com/alexis0133/PowerToys%20staging/_apis/build/status/JaneaSystems.powertoys?branchName=master)](https://dev.azure.com/alexis0133/PowerToys%20staging/_build?definitionId=7)
+[![Build Status](https://dev.azure.com/alexis0133/PowerToys%20staging/_apis/build/status/JaneaSystems.powertoys?branchName=master)](https://dev.azure.com/alexis0133/PowerToys%20staging/_build?definitionId=9)
 
 # Overview
 
