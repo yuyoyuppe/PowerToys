@@ -45,13 +45,19 @@ StreamUriResolverFromFile local_uri_resolver;
 // Windows message for receiving copied data to send to the webview.
 UINT wm_copydata_webview = 0;
 
-// Windows message to signal that the parent process has terminated.
-UINT wm_parent_terminated = 0;
+// Windows message to destroy the window. Used if:
+// - Parent process has terminated.
+// - WebView confirms that the Window can close.
+UINT wm_my_destroy_window = 0;
 
 // mutex for checking if the window has already been created.
 std::mutex m_window_created_mutex;
 
 TwoWayPipeMessageIPC* current_settings_ipc = NULL;
+
+// Set to true if waiting for webview confirmation before closing the Window.
+bool m_waiting_for_close_confirmation = false;
+
 #ifdef _DEBUG
 void NavigateToLocalhostReactServer() {
   // Useful for connecting to instance running in react development server.
@@ -197,6 +203,22 @@ void send_message_to_powertoys(const std::wstring msg) {
   }
 }
 
+void receive_message_from_webview(const std::wstring& msg) {
+  if (msg[0] == '{') {
+    // It's a JSON, send message to PowerToys
+    std::thread(send_message_to_powertoys, msg).detach();
+  } else {
+    // It's not a JSON, check for expected control messages.
+    if (msg == L"exit") {
+      // WebView confirms the settings application can exit.
+      PostMessage(main_window_handler, wm_my_destroy_window, 0, 0);
+    } else if (msg == L"cancel-exit") {
+      // WebView canceled the exit request.
+      m_waiting_for_close_confirmation = false;
+    }
+  }
+}
+
 void initialize_win32_webview() {
   
   // initialize the base_path for the html content relative to the executable.
@@ -234,7 +256,7 @@ void initialize_win32_webview() {
       webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
         // content called window.external.notify()
         std::wstring message_sent = args_script_notify.Value().c_str();
-        std::thread(send_message_to_powertoys, message_sent).detach();
+        receive_message_from_webview(message_sent);
       });
       resize_web_view();
 #if defined(_DEBUG) && _DEBUG_WITH_LOCALHOST
@@ -255,6 +277,21 @@ void initialize_win32_webview() {
 
 LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
+  case WM_CLOSE:
+    if(m_waiting_for_close_confirmation) {
+      // If another WM_CLOSE is received while waiting for webview confirmation,
+      // allow DefWindowProc to be called and destroy the window.
+      break;
+    } else {
+      // Allow user to confirm exit in the WebView in case there's possible data loss.
+      m_waiting_for_close_confirmation = true;
+      if (webview_control != NULL) {
+        webview_control.InvokeScriptAsync(hstring(L"exit_settings_app"), {});
+      } else {
+        break;
+      }
+      return 0;
+    }
   case WM_DESTROY:
     PostQuitMessage(0);
     break;
@@ -265,7 +302,7 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     break;
   case WM_CREATE:
     wm_copydata_webview = RegisterWindowMessage(TEXT("PTSettingsCopyDataWebView"));
-    wm_parent_terminated = RegisterWindowMessage(TEXT("PTSettingsParentTerminated"));
+    wm_my_destroy_window = RegisterWindowMessage(TEXT("PTSettingsParentTerminated"));
     m_window_created_mutex.unlock();
     break;
   case WM_DPICHANGED:
@@ -300,7 +337,7 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
       // wnd_proc_static is responsible for freeing memory.
       delete msg;
     } else {
-      if (message == wm_parent_terminated) {
+      if (message == wm_my_destroy_window) {
         DestroyWindow(hWnd);
       }
     }
@@ -369,7 +406,7 @@ void wait_on_parent_process_thread(DWORD pid) {
         // Send a terminated message only after the window has finished initializing.
         std::unique_lock lock(m_window_created_mutex);
       }
-      PostMessage(main_window_handler, wm_parent_terminated, 0, 0);
+      PostMessage(main_window_handler, wm_my_destroy_window, 0, 0);
     } else {
       CloseHandle(process);
     }

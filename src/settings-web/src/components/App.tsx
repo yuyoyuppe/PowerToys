@@ -19,6 +19,7 @@ export class App extends React.Component <any, any> {
       selected_menu : 'general',
       target_selected_menu : '',
       show_save_discard_dialog: false,
+      user_trying_to_exit: false,
       settings: {}
     }
   }
@@ -48,6 +49,24 @@ export class App extends React.Component <any, any> {
     }
   }
 
+  public receive_exit_request(): void {
+    // Settings application wants to close.
+    // Prompt the user if there are possible unsaved changes.
+    if(this.state.data_changed) {
+      this.show_save_exit_dialog();
+    } else {
+      // Application can exit.
+      this.send_message_to_application('exit');
+    }
+  }
+
+  private show_save_exit_dialog = () : void => {
+    this.setState({
+      show_save_discard_dialog: true,
+      user_trying_to_exit: true
+    });
+  }
+
   private on_setting_change = (): void => {
     this.setState({data_changed: true});
   }
@@ -55,7 +74,8 @@ export class App extends React.Component <any, any> {
   private show_save_discard_dialog = (target_selected_menu: string): void => {
     this.setState({
       target_selected_menu: target_selected_menu,
-      show_save_discard_dialog: true
+      show_save_discard_dialog: true,
+      user_trying_to_exit: false
     });
   }
 
@@ -66,13 +86,22 @@ export class App extends React.Component <any, any> {
   };
 
   private close_save_discard_dialog = (): void => {
+    if (this.state.user_trying_to_exit) {
+      this.send_message_to_application('cancel-exit');
+    }
     this.setState({ show_save_discard_dialog: false });
   };
   private save_save_discard_dialog = (): void => {
+    if (this.state.user_trying_to_exit) {
+      this.send_message_to_application('cancel-exit');
+    }
     this.setState({ show_save_discard_dialog: false });
     this.save_clicked();
   };
   private discard_save_discard_dialog = (): void => {
+    if (this.state.user_trying_to_exit) {
+      this.send_message_to_application('exit');
+    }
     this.setState({
       show_save_discard_dialog: false,
       selected_menu: this.state.target_selected_menu,
@@ -225,16 +254,27 @@ export class App extends React.Component <any, any> {
           dialogContentProps={{
             type: DialogType.normal,
             title: 'Changes not saved',
-            subText: 'Would you like to save or discard your changes?'
+            subText: this.state.user_trying_to_exit ?
+              'Would you like to save your changes or exit the settings?' :
+              'Would you like to save or discard your changes?'
           }}
           modalProps={{
             isBlocking: true,
             styles: { main: { maxWidth: 450 } }
           }}
         >
-          <DialogFooter>
+          <DialogFooter
+            styles={{
+              actionsRight: {
+                textAlign:'center'
+                }
+              }}
+            >
             <PrimaryButton onClick={this.save_save_discard_dialog} text="Save" />
-            <PrimaryButton onClick={this.discard_save_discard_dialog} text="Discard" />
+            <PrimaryButton
+              onClick={this.discard_save_discard_dialog}
+              text={this.state.user_trying_to_exit ? "Exit" : "Discard"}
+              />
             <DefaultButton onClick={this.close_save_discard_dialog} text="Cancel" />
           </DialogFooter>
         </Dialog>

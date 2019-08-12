@@ -15,7 +15,10 @@
           window.react_app_component.receive_config_msg(JSON.parse(arg));
           return "";
         }
-    
+        function exit_settings_app() {
+          window.react_app_component.receive_exit_request();
+          return "";
+        }
         function send_debug_values() {
           let debug_settings_info = {
             general: {
