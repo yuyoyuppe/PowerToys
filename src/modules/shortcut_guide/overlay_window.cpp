@@ -154,7 +154,7 @@ D2D1_RECT_F D2DOverlaySVG::get_snap_right() const {
 }
 
 
-D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_monitor({}) {
+D2DOverlayWindow::D2DOverlayWindow() : animation(0.3), total_screen({}) {
   tasklist_thread = std::thread([&] {
     while (running) {
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -199,29 +199,29 @@ void D2DOverlayWindow::show(HWND active_window) {
       }
     }
   }
-  monitors = get_monitors(true);
+  monitors = MonitorInfo::GetMonitors(true);
   // calculate the rect covering all the screens
-  total_monitor = monitors[0];
+  total_screen = ScreenSize(monitors[0].rect);
   for (auto& monitor : monitors) {
-    total_monitor.rect.left = min(total_monitor.rect.left, monitor.rect.left);
-    total_monitor.rect.top = min(total_monitor.rect.top, monitor.rect.top);
-    total_monitor.rect.right = max(total_monitor.rect.right, monitor.rect.right);
-    total_monitor.rect.bottom = max(total_monitor.rect.bottom, monitor.rect.bottom);
+    total_screen.rect.left = min(total_screen.rect.left, monitor.rect.left);
+    total_screen.rect.top = min(total_screen.rect.top, monitor.rect.top);
+    total_screen.rect.right = max(total_screen.rect.right, monitor.rect.right);
+    total_screen.rect.bottom = max(total_screen.rect.bottom, monitor.rect.bottom);
   }
   // make sure top-right corner of all the monitor rects is (0,0)
-  monitor_dx = -total_monitor.left();
-  monitor_dy = -total_monitor.top();
-  total_monitor.rect.left += monitor_dx;
-  total_monitor.rect.right += monitor_dx;
-  total_monitor.rect.top += monitor_dy;
-  total_monitor.rect.bottom += monitor_dy;
+  monitor_dx = -total_screen.left();
+  monitor_dy = -total_screen.top();
+  total_screen.rect.left += monitor_dx;
+  total_screen.rect.right += monitor_dx;
+  total_screen.rect.top += monitor_dy;
+  total_screen.rect.bottom += monitor_dy;
   tasklist.update();
   if (active_window) {
     // Ignore errors, if this fails we will just not show the thumbnail
     DwmRegisterThumbnail(hwnd, active_window, &thumbnail);
   }
   animation.reset();
-  auto primary_screen = get_primary_monitor();
+  auto primary_screen = MonitorInfo::GetPrimaryMonitor();
   shown_start_time = std::chrono::steady_clock::now();
   lock.unlock();
   D2DWindow::show(primary_screen.left(), primary_screen.top(), primary_screen.width(), primary_screen.height());
@@ -530,7 +530,7 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     minature_shown = false;
   }
   bool render_monitors = true;
-  auto total_monitor_with_screen = total_monitor;
+  auto total_monitor_with_screen = total_screen;
   if (thumb_window) {
     total_monitor_with_screen.rect.left = min(total_monitor_with_screen.rect.left, thumb_window->left + monitor_dx);
     total_monitor_with_screen.rect.top = min(total_monitor_with_screen.rect.top, thumb_window->top + monitor_dy);
@@ -538,12 +538,12 @@ void D2DOverlayWindow::render(ID2D1DeviceContext5* d2d_dc) {
     total_monitor_with_screen.rect.bottom = max(total_monitor_with_screen.rect.bottom, thumb_window->bottom + monitor_dy);
   }
   // Only allow the new rect beeing slight bigger.
-  if (total_monitor_with_screen.width() - total_monitor.width() > (thumb_window->right - thumb_window->left) / 2 ||
-      total_monitor_with_screen.height() - total_monitor.height() > (thumb_window->bottom - thumb_window->top) / 2) {
+  if (total_monitor_with_screen.width() - total_screen.width() > (thumb_window->right - thumb_window->left) / 2 ||
+      total_monitor_with_screen.height() - total_screen.height() > (thumb_window->bottom - thumb_window->top) / 2) {
     render_monitors = false;
   }
   if (window_state == MINIMIZED) {
-    total_monitor_with_screen = total_monitor;
+    total_monitor_with_screen = total_screen;
   }
   auto rect_and_scale = use_overlay->get_thumbnail_rect_and_scale(0, 0, total_monitor_with_screen.width(), total_monitor_with_screen.height(), 1);
   if (minature_shown) {

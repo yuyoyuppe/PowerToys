@@ -63,7 +63,7 @@ private:
   std::vector<AnimateKeys> key_animations;
   std::vector<int> key_pressed;
   std::vector<MonitorInfo> monitors;
-  MonitorInfo total_monitor;
+  ScreenSize total_screen;
   int monitor_dx = 0, monitor_dy = 0;
   D2DText text;
   WindowsColors colors;

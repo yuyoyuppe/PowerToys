@@ -158,9 +158,8 @@ RECT on_mouse_in(HWND hwnd, RECT buttons, POINT mouse_pos) {
   int popup_width = svg_icon_width + 8;
   int popup_height = svg_icon_height + 8;
 
-  HMONITOR monitor_handle = MonitorFromPoint(mouse_pos, MONITOR_DEFAULTTONEAREST);
-  MonitorInfo monitor_info = get_monitor_info(monitor_handle);
-  DPIAware::Convert(monitor_handle, popup_width, popup_height);
+  MonitorInfo monitor_info = MonitorInfo::GetFromPoint(mouse_pos);
+  DPIAware::Convert(monitor_info.handle, popup_width, popup_height);
 
   LONG midPoint = (buttons.left + buttons.right) / 2;
   RECT result;
