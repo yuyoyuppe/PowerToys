@@ -5,6 +5,8 @@
 #include "trace.h"
 #include <common/settings_objects.h>
 
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
@@ -52,12 +54,12 @@ public:
     return events;
   }
   // Return JSON with the configuration options.
-  virtual bool get_config(wchar_t* buffer, int *buffer_size) override {
+  virtual bool get_config(wchar_t* buffer, int* buffer_size) override {
+    HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+
     // Create a Settings object.
-    PowerToysSettings::Settings settings(
-      get_name(),
-      L"Serves as an example powertoy, with example settings."
-    );
+    PowerToysSettings::Settings settings(hinstance, get_name());
+    settings.set_description(L"Serves as an example powertoy, with example settings.");
 
     // Add an overview link to show in the Settings.
     settings.set_overview_link(L"https://github.com/microsoft/PowerToys");
@@ -66,53 +68,46 @@ public:
     settings.set_video_link(L"https://www.youtube.com/watch?v=d3LHo2yXKoY&t=21462");
 
     // Add a bool property with a toggle editor.
-    settings.add_property(
-      PowerToysSettings::BoolTogglePropertySetting(
-        L"test bool_toggle", // property name
-        L"This is what a BoolTogglePropertySetting looks like", // property display text
-        test_bool_prop // property value
-      )
+    settings.add_bool_toogle(
+      L"test_bool_toggle", // property name.
+      L"This is what a BoolToggle property looks like", // description or resource id of the localized string.
+      test_bool_prop // property value.
     );
 
     // Add an integer property with a spinner editor.
-    settings.add_property(
-      PowerToysSettings::IntSpinnerPropertySetting(
-        L"test int_spinner", // property name
-        L"This is what a IntSpinnerPropertySetting looks like", // property display text
-        test_int_prop // property value
-      )
+    settings.add_int_spinner(
+      L"test_int_spinner", // property name
+      L"This is what a IntSpinner property looks like", // description or resource id of the localized string.
+      test_int_prop, // property value.
+      0, // min value.
+      100, // max value.
+      10 // incremental step.
     );
 
     // Add a string property with a textbox editor.
-    settings.add_property(
-      PowerToysSettings::StringTextPropertySetting(
-        L"test string_text", // property name
-        L"This is what a StringTextPropertySetting looks like", // property display text
-        test_string_prop // property value
-      )
+    settings.add_string(
+      L"test_string_text", // property name.
+      L"This is what a String property looks like", // description or resource id of the localized string.
+      test_string_prop // property value.
     );
 
     // Add a string property with a color picker editor.
-    settings.add_property(
-      PowerToysSettings::ColorPickerPropertySetting(
-        L"test color_picker", // property name
-        L"This is what a ColorPickerPropertySetting looks like", // property display text
-        test_color_prop // property value
-      )
+    settings.add_color_picker(
+      L"test_color_picker", // property name.
+      L"This is what a ColorPicker property looks like", // description or resource id of the localized string.
+      test_color_prop // property value.
     );
 
-    // Add a custom action property. When using this settings type, "call_custom_action" should be overriden as well.
-    settings.add_property(
-      PowerToysSettings::CustomActionPropertySetting(
-        L"test custom_action", // action name
-        L"This is what a CustomActionPropertySetting looks like", // label above the field
-        L"Press the button to call a custom action in the Example PowerToy", // display values / extended info
-        L"Call a custom action!" // button text
-        )
+    // Add a custom action property. When using this settings type, the "call_custom_action()" method should be overriden as well.
+    settings.add_custom_action(
+      L"test_custom_action", // action name.
+      L"This is what a CustomAction property looks like", // label above the field.
+      L"Call a custom action", // button text.
+      L"Press the button to call a custom action in the Example PowerToy" // display values / extended info.
     );
 
     return settings.serialize_to_buffer(buffer, buffer_size);
-    }
+  }
 
   // Signal from the settings screen to call a custom action.
   // This can be used to spawn more complex editors.
@@ -122,7 +117,7 @@ public:
       PowerToysSettings::CustomActionObject action_object =
         PowerToysSettings::CustomActionObject::from_json_string(action);
 
-      if (action_object.get_name() == L"test custom_action") {
+      if (action_object.get_name() == L"test_custom_action") {
 
         // Custom action code to increase and show a counter.
         ++this->test_custom_action_num_calls;

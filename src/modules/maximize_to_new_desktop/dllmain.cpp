@@ -44,35 +44,26 @@ public:
     return nullptr;
   }
 
-  virtual bool get_config(wchar_t* buffer, int *buffer_size) override {
-    PowerToysSettings::Settings settings(
-      get_name(),
-      L"Adds a popup to maximize a window to a new desktop."
-    );
-
-    settings.set_icon_key(L"pt-maximize-new-desktop");
-    
+   virtual bool get_config(wchar_t* buffer, int *buffer_size) override {
     HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
-    wchar_t description[256];
-    LoadString(hinstance, closeDesktopOnRestoreLastWindow.resourceId, description, ARRAYSIZE(description));
-    settings.add_property(
-      PowerToysSettings::BoolTogglePropertySetting(
-        closeDesktopOnRestoreLastWindow.name,
-        description,
-        closeDesktopOnRestoreLastWindow.value
-      )
-    );
+    
+    PowerToysSettings::Settings settings(hinstance, get_name());
+    settings.set_description(L"Adds a popup to maximize a window to a new desktop.");
+    settings.set_icon_key(L"pt-maximize-new-desktop");
 
-    LoadString(hinstance, popupDelay.resourceId, description, ARRAYSIZE(description));
-    PowerToysSettings::IntSpinnerPropertySetting delay_property(
+    settings.add_bool_toogle(
+      closeDesktopOnRestoreLastWindow.name,
+      closeDesktopOnRestoreLastWindow.resourceId,
+      closeDesktopOnRestoreLastWindow.value);
+
+    settings.add_int_spinner(
       popupDelay.name,
-      description,
-      popupDelay.value
+      popupDelay.resourceId,
+      popupDelay.value,
+      100,
+      10000,
+      100
     );
-    delay_property.setSpinnerMax(10000);
-    delay_property.setSpinnerMin(100);
-    delay_property.setSpinnerStep(100);
-    settings.add_property(delay_property);
 
     return settings.serialize_to_buffer(buffer, buffer_size);
   }
@@ -100,6 +91,7 @@ public:
       // Improper JSON.
     }
   }
+
   virtual void enable() override {
     if (!_enabled) {
       maximize_popup = new D2DWindowManagerPopup();
@@ -108,6 +100,7 @@ public:
     }
     _enabled = true;
   }
+
   virtual void disable() override {
     if (_enabled) {
       stop_mouse_watcher();
@@ -115,9 +108,11 @@ public:
     }
     _enabled = false;
   }
-  virtual bool is_enabled() override {
+
+    virtual bool is_enabled() override {
     return _enabled;
   }
+
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data)  override {
     return 0;
   }
@@ -126,6 +121,7 @@ public:
     delete this;
     instance = nullptr;
   }
+
   static D2DWindowManagerPopup* maximize_popup;
 
 private:
@@ -135,13 +131,13 @@ private:
   struct CloseDesktopOnRestoreLastWindow {
     const std::wstring name = L"close_desktop_on_restore";
     bool value = true;
-    int resourceId = IDS_SETTING_DESCRIPTION_CLOSE_ON_RESTORE;
+    UINT resourceId = IDS_SETTING_DESCRIPTION_CLOSE_ON_RESTORE;
   } closeDesktopOnRestoreLastWindow;
 
   struct PopupDelay {
     const std::wstring name = L"popup_delay";
     int value = 400; // ms
-    int resourceId = IDS_SETTING_DESCRIPTION_HOVER_DELAY;
+    UINT resourceId = IDS_SETTING_DESCRIPTION_HOVER_DELAY;
   } popupDelay;
 };
 

@@ -4,128 +4,49 @@
 
 namespace PowerToysSettings {
 
-  class Settings;
-  class BasePropertySetting;
-
-  class PowerToyValues;
-  class BaseSettingsValue;
-
   class Settings {
   public:
     Settings(
-      const std::wstring& powertoy_name,
-      const std::wstring& description
+      const HINSTANCE hinstance, // Module handle of the PowerToy DLL 'IMAGE_DOS_HEADER __ImageBase'
+      const std::wstring& powertoy_name
     );
 
-    void add_property(PowerToysSettings::BasePropertySetting _setting);
-
-    // Serialize the internal json to the input buffer.
-    bool serialize_to_buffer(wchar_t* buffer, int *buffer_size);
-
     // Add additional general information to the PowerToy settings.
+    void set_description(UINT resource_id);
+    void set_description(const std::wstring& description);
+
     void set_icon_key(const std::wstring& icon_key);
     void set_overview_link(const std::wstring& overview_link);
     void set_video_link(const std::wstring& video_link);
 
+    // Add properties to the PowerToy settings.
+    void add_bool_toogle(const std::wstring& name, UINT description_resource_id, bool value);
+    void add_bool_toogle(const std::wstring& name, const std::wstring& description, bool value);
+
+    void add_int_spinner(const std::wstring& name, UINT description_resource_id, int value, int min, int max, int step);
+    void add_int_spinner(const std::wstring& name, const std::wstring& description, int value, int min, int max, int step);
+
+    void add_string(const std::wstring& name, UINT description_resource_id, const std::wstring& value);
+    void add_string(const std::wstring& name, const std::wstring& description, const std::wstring& value);
+
+    void add_color_picker(const std::wstring& name, UINT description_resource_id, const std::wstring& value);
+    void add_color_picker(const std::wstring& name, const std::wstring& description, const std::wstring& value);
+
+    void add_custom_action(const std::wstring& name, UINT description_resource_id, UINT button_text_resource_id, UINT ext_description_resource_id);
+    void add_custom_action(const std::wstring& name, UINT description_resource_id, UINT button_text_resource_id, const std::wstring& value);
+    void add_custom_action(const std::wstring& name, const std::wstring& description, const std::wstring& button_text, const std::wstring& value);
+
+    // Serialize the internal json to a string.
+    std::wstring serialize();
+    // Serialize the internal json to the input buffer.
+    bool serialize_to_buffer(wchar_t* buffer, int *buffer_size);
+
   private:
-    web::json::value _internal_json;
-    int curr_priority = 0; // For keeping order when adding elements.
-  };
+    web::json::value m_json;
+    int m_curr_priority = 0; // For keeping order when adding elements.
+    HINSTANCE m_instance;
 
-  class BasePropertySetting {
-  public:
-    BasePropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      const std::wstring& editor_type,
-      web::json::value value
-    );
-
-    std::wstring get_name();
-    web::json::value get_json();
-  protected:
-    web::json::value _internal_json;
-    std::wstring _name;
-  };
-
-  class BoolTogglePropertySetting : public BasePropertySetting {
-  public:
-    BoolTogglePropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      bool value
-    ) : BasePropertySetting(
-      name,
-      display_name,
-      L"bool_toggle",
-      web::json::value::boolean(value)
-    ) {
-    }
-  };
-
-  class IntSpinnerPropertySetting : public BasePropertySetting {
-  public:
-    IntSpinnerPropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      int value
-    ) : BasePropertySetting(
-      name,
-      display_name,
-      L"int_spinner",
-      web::json::value::number(value)
-    ) {
-    }
-    void setSpinnerMin(int min_value);
-    void setSpinnerMax(int max_value);
-    void setSpinnerStep(int step);
-  };
-
-  class StringTextPropertySetting : public BasePropertySetting {
-  public:
-    StringTextPropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      const std::wstring& value
-    ) : BasePropertySetting(
-      name,
-      display_name,
-      L"string_text",
-      web::json::value::string(value)
-    ) {
-    }
-  };
-
-  class ColorPickerPropertySetting : public BasePropertySetting {
-  public:
-    ColorPickerPropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      const std::wstring& value
-    ) : BasePropertySetting(
-      name,
-      display_name,
-      L"color_picker",
-      web::json::value::string(value)
-    ) {
-    }
-  };
-
-  class CustomActionPropertySetting : public BasePropertySetting {
-  public:
-    CustomActionPropertySetting(
-      const std::wstring& name,
-      const std::wstring& display_name,
-      const std::wstring& value,
-      const std::wstring& button_text
-    ) : BasePropertySetting (
-      name,
-      display_name,
-      L"custom_action",
-      web::json::value::string(value)
-    ) {
-      _internal_json.as_object()[L"button_text"] = web::json::value::string(button_text);
-    }
+    std::wstring get_resource(UINT resource_id);
   };
 
   class PowerToyValues {
@@ -147,76 +68,29 @@ namespace PowerToysSettings {
     int get_int_value(const std::wstring& property_name);
     std::wstring get_string_value(const std::wstring& property_name);
 
+    std::wstring serialize();
     void save_to_settings_file();
 
   private:
     const std::wstring m_version = L"1.0";
     void set_version();
-    web::json::value _internal_json;
+    web::json::value m_json;
     std::wstring _name;
     PowerToyValues() {}
   };
 
-  class BaseSettingsValue {
-  public:
-    BaseSettingsValue(
-      const std::wstring& name,
-      web::json::value value
-    );
-    std::wstring get_name();
-    web::json::value get_json();
-  protected:
-    web::json::value _internal_json;
-    std::wstring _name;
-  };
-
-  class BoolSettingsValue : public BaseSettingsValue {
-  public:
-    BoolSettingsValue(
-      const std::wstring& name,
-      bool value
-    ) : BaseSettingsValue(
-      name,
-      web::json::value::boolean(value)
-    ) {
-    }
-  };
-
-  class IntSettingsValue : public BaseSettingsValue {
-  public:
-    IntSettingsValue(
-      const std::wstring& name,
-      int value
-    ) : BaseSettingsValue(
-      name,
-      web::json::value::number(value)
-    ) {
-    }
-  };
-
-  class StringSettingsValue : public BaseSettingsValue {
-  public:
-    StringSettingsValue(
-      const std::wstring& name,
-      std::wstring value
-    ) : BaseSettingsValue(
-      name,
-      web::json::value::string(value)
-    ) {
-    }
-  };
-
   class CustomActionObject {
   public:
-    static CustomActionObject from_json_string(const std::wstring& json);
-    std::wstring get_name();
-    std::wstring get_value();
-    web::json::value get_json();
-  protected:
-    CustomActionObject(
-      web::json::value value
-    );
-    web::json::value _internal_json;
-  };
+    static CustomActionObject from_json_string(const std::wstring& json) {
+      web::json::value parsed_json = web::json::value::parse(json);
+      return CustomActionObject(parsed_json);
+    }
 
+    std::wstring get_name() { return m_json[L"action_name"].as_string(); }
+    std::wstring get_value() { return m_json[L"value"].as_string(); }
+
+  protected:
+    CustomActionObject(web::json::value action_json) : m_json(action_json) {};
+    web::json::value m_json;
+  };
 }

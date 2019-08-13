@@ -52,22 +52,20 @@ private:
 
 IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PWSTR buffer, _Out_ int *buffer_size) noexcept
 {
-    PowerToysSettings::Settings settings(m_name, L"Helps organize your windows.");
+    PowerToysSettings::Settings settings(m_hinstance, m_name);
 
+    // Pass a string literal or a resource id to Settings::set_description().
+    settings.set_description(L"Helps organize your windows.");
     settings.set_icon_key(L"pt-fancy-zones");
 
     for (auto const& setting : m_configBools)
     {
-        wchar_t description[256];
-        LoadString(m_hinstance, setting.resourceId, description, ARRAYSIZE(description));
-        settings.add_property(PowerToysSettings::BoolTogglePropertySetting(setting.name, description, *setting.value));
+        settings.add_bool_toogle(setting.name, setting.resourceId, *setting.value);
     }
 
     for (auto const& setting : m_configStrings)
     {
-        wchar_t description[256];
-        LoadString(m_hinstance, setting.resourceId, description, ARRAYSIZE(description));
-        settings.add_property(PowerToysSettings::ColorPickerPropertySetting(setting.name, description, *setting.value));
+        settings.add_color_picker(setting.name, setting.resourceId, *setting.value);
     }
 
     return settings.serialize_to_buffer(buffer, buffer_size);

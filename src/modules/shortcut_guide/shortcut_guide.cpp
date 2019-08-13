@@ -22,36 +22,29 @@ const wchar_t ** OverlayWindow::get_events() {
 }
 
 bool OverlayWindow::get_config(wchar_t* buffer, int *buffer_size) {
-  PowerToysSettings::Settings settings(
-    get_name(),
-    L"Shows a help overlay with Windows shortcuts when the Windows key is pressed."
-  );
+  HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
 
+  PowerToysSettings::Settings settings(hinstance, get_name());
+  settings.set_description(L"Shows a help overlay with Windows shortcuts when the Windows key is pressed.");
   settings.set_icon_key(L"pt-shortcut-guide");
 
-  HINSTANCE hinstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
-  wchar_t description[256];
-  LoadString(hinstance, pressTime.resourceId, description, ARRAYSIZE(description));
-  PowerToysSettings::IntSpinnerPropertySetting delay_property(
+  settings.add_int_spinner(
     pressTime.name,
-    description,
-    pressTime.value
+    pressTime.resourceId,
+    pressTime.value,
+    100,
+    10000,
+    100
   );
-  delay_property.setSpinnerMax(10000);
-  delay_property.setSpinnerMin(100);
-  delay_property.setSpinnerStep(100);
-  settings.add_property(delay_property);
 
-  LoadString(hinstance, overlayOpacity.resourceId, description, ARRAYSIZE(description));
-  PowerToysSettings::IntSpinnerPropertySetting overlay_opacity_property(
+  settings.add_int_spinner(
     overlayOpacity.name,
-    description,
-    overlayOpacity.value
+    overlayOpacity.resourceId,
+    overlayOpacity.value,
+    0,
+    100,
+    1
   );
-  overlay_opacity_property.setSpinnerMax(100);
-  overlay_opacity_property.setSpinnerMin(0);
-  overlay_opacity_property.setSpinnerStep(1);
-  settings.add_property(overlay_opacity_property);
 
   return settings.serialize_to_buffer(buffer, buffer_size);
 }
