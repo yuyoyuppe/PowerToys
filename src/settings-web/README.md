@@ -27,6 +27,8 @@ Also copy `index.html` to `../editor/settings-html/index.html` if you change it.
 Icons inside `./src/icons/` were generated from the [Office UI Fabric Icons subset generation tool.](https://uifabricicons.azurewebsites.net/)
 
 In case the subset needs to be changed, additional steps are needed to include the icon font in the built `dist/bundle.js`:
-- Copy the inline font data taken from `src/icons/css/fabric-icons-inline.css` and place it in the `fontFace` `src` value in `src/icons/src/fabric-icons.ts`.
+- Copy the inline font data taken from [`src/icons/css/fabric-icons-inline.css`](src/icons/css/fabric-icons-inline.css) and place it in the `fontFace` `src` value in [`src/icons/src/fabric-icons.ts`](src/icons/src/fabric-icons.ts).
 
-A list of the current icons in the subset can be seen in the `icons` object in `src/icons/src/fabric-icons.ts`.
+A list of the current icons in the subset can be seen in the `icons` object in [`src/icons/src/fabric-icons.ts`](src/icons/src/fabric-icons.ts).
+
+SVG icons, including the icons for each PowerToy listed in the Settings, are contained in [`src/svg/`](src/svg/). To add additional SVG icons add them to [`src/svg/`](src/svg/) and register them in [`src/setup_icons.tsx`](src/setup_icons.tsx).
