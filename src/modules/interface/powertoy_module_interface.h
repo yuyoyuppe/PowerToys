@@ -10,15 +10,18 @@
     - load the DLL,
     - call powertoy_create() to create the PowerToy.
 
-  On the received object, the runner will:
-    - call get_name() to get the name of the PowerToy,
-    - call get_config() to get the available configuration settings,
-    - call get_events() to get the list of the events the PowerToy wants to subscribe to,
-    - call enable() to initialize the PowerToy.
+  On the received object, the runner will call:
+    - get_name() to get the name of the PowerToy,
+    - get_events() to get the list of the events the PowerToy wants to subscribe to,
+    - enable() to initialize the PowerToy.
 
-  While running, the runner might call disable()/enable(). It can also call
-  set_config() to set various settings, anywhere between create_powertoy() and
-  destroy().
+  While running, the runner might call the following methods between create_powertoy()
+  and destroy():
+    - disable()/enable()/is_enabled() to change or get the PowerToy's enabled state,
+    - get_config() to get the available configuration settings,
+    - set_config() to set various settings,
+    - call_custom_action() when the user selects clicks a custom action in settings,
+    - signal_event() to send an event the PowerToy registered to.
 
   When terminating, the runner will:
     - call disable(),
@@ -33,6 +36,7 @@ public:
   /* Returns a null-terminated table of the names of the events the PowerToy wants to 
      subscribe to. Available events:
        * ll_keyboard
+       * win_hook_event
 
      A nullptr can be returned to signal that the PowerToy does not want to subscribe
      to any event.
@@ -56,7 +60,8 @@ public:
   virtual bool is_enabled() = 0;
   /* Handle event. Only the events the PowerToy subscribed to will be signaled.
      The data argument and return value meaning are event-specific:
-       * ll_keyboard: see lowlevel_keyboard_evet_data.h.
+       * ll_keyboard: see lowlevel_keyboard_event_data.h.
+       * win_hook_event: see win_hook_event_data.h
   */
   virtual intptr_t signal_event(const wchar_t* name, intptr_t data) = 0;
   /* Destroy the PowerToy and free all memory. */

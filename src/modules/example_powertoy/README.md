@@ -1,14 +1,22 @@
-# Introduction
-General description of the module
+# Example PowerToy
 
-# Usage
-Short description of how to use it and eventually a link to the full help and video tour
+# Introduction
+This PowerToy serves as a sample to show how to implement the [PowerToys interface](/src/modules/interface/) when creating a PowerToy. It also showcases the currently implemented settings.
 
 # Options
-Short description of each module settings
+This module has a setting to serve as an example for each of the currently implemented settings property:
+  - BoolToggle property
+  - IntSpinner property
+  - String property
+  - ColorPicker property
+  - CustomAction property
 
-# Known issues
-Only major incompatibility issues
+![Image of the Options](/doc/images/example_powertoy/settings.png)
 
 # Code organization
-A description of the help the community to contribute to the project
+
+#### [`dllmain.cpp`](./dllmain.cpp)
+Contains DLL boilerplate code and implementation of the [PowerToys interface](/src/modules/interface/).
+
+#### [`trace.cpp`](./trace.cpp)
+Contains code for telemetry.
