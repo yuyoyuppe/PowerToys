@@ -102,7 +102,7 @@ void receive_json_send_to_main_thread(const std::wstring &msg) {
   dispatch_run_on_main_ui_thread(dispatch_received_json_callback, copy);
 }
 
-bool settings_window_is_running = false;
+DWORD g_settings_process_id = 0;
 
 void run_settings_window() {
   STARTUPINFO startup_info = { sizeof(startup_info) };
@@ -119,6 +119,7 @@ void run_settings_window() {
   // Generate unique names for the pipes, if getting a UUID is possible
   std::wstring powertoys_pipe_name(TEXT("\\\\.\\pipe\\powertoys_runner_"));
   std::wstring settings_pipe_name(TEXT("\\\\.\\pipe\\powertoys_settings_"));
+  SIZE_T size = 0;
   UUID temp_uuid;
   UuidCreate(&temp_uuid);
   wchar_t* uuid_chars;
@@ -159,7 +160,6 @@ void run_settings_window() {
     goto LExit;
   }
 
-  SIZE_T size;
   InitializeProcThreadAttributeList(nullptr, 1, 0, &size);
   pptal = (PPROC_THREAD_ATTRIBUTE_LIST)new char[size];
   if (!pptal) {
@@ -179,7 +179,7 @@ void run_settings_window() {
       nullptr)) {
     goto LExit;
   }
-  
+
   siex.lpAttributeList = pptal;
   siex.StartupInfo.cb = sizeof(siex);
 
@@ -201,6 +201,7 @@ void run_settings_window() {
   }
   current_settings_ipc = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
   current_settings_ipc->start(hToken);
+  g_settings_process_id = process_info.dwProcessId;
 
   WaitForSingleObject(process_info.hProcess, INFINITE);
   if (WaitForSingleObject(process_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
@@ -235,14 +236,29 @@ LExit:
     CloseHandle(hToken);
   }
 
-  settings_window_is_running = false;
+  g_settings_process_id = 0;
+}
+
+void bring_settings_to_front() {
+
+  auto callback = [](HWND hwnd, LPARAM data) -> BOOL
+  {
+    DWORD processId;
+    if (GetWindowThreadProcessId(hwnd, &processId) && processId == g_settings_process_id) {
+      SetForegroundWindow(hwnd);
+      return FALSE;
+    }
+
+    return TRUE;
+  };
+
+  EnumWindows(callback, 0);
 }
 
 void open_settings_window() {
-  if (settings_window_is_running) {
-    MessageBox(NULL, L"There's a PowerToys Settings window already running. Close the first instance first.", L"Settings", MB_OK && MB_TOPMOST);
+  if (g_settings_process_id != 0) {
+    bring_settings_to_front();
   } else {
-    settings_window_is_running = true;
     std::thread(run_settings_window).detach();
   }
 }
