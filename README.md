@@ -58,7 +58,7 @@ Here's the current set of utilities we're considering.  Please use issues and +1
 
 ## Build Prerequisites
  * Windows 10 1803 (build 10.0.17134.0) or above in order to build and run PowerToys.
- * Visual Studio 2017 Community version 15.9.12 or higher, with the 'Desktop Development with C++' component and the Windows 10 SDK version 10.0.17763.0.
+ * Visual Studio 2019 Community edition or higher, with the 'Desktop Development with C++' component and the Windows 10 SDK version 10.0.18362.0 or higher.
  
 ## Building the Code
  * Open `powertoys.sln` in Visual Studio, in the `Solutions Configuration` drop-down menu select `Release` or `Debug`, from the `Build` menu choose `Build Solution`.
@@ -66,7 +66,7 @@ Here's the current set of utilities we're considering.  Please use issues and +1
  * If you want to copy the `PowerToys.exe` binary to a different location, you'll also need to copy the `modules` and the `svgs` folders.
 
 ## Prerequisites to Build the Installer
- * Install the [WiX Toolset Visual Studio 2017 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
+ * Install the [WiX Toolset Visual Studio 2019 Extension](https://marketplace.visualstudio.com/items?itemName=RobMensching.WiXToolset).
  * Install the [WiX Toolset build tools](https://wixtoolset.org/releases/).
  
 ## Building the .msi Installer
