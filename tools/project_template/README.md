@@ -1,8 +1,8 @@
-# PowerToy DLL Project For Visual Studio 2017
+# PowerToy DLL Project For Visual Studio 2019
 
 ## Installation
 
-- Put the `PowerToy Module.zip` file inside the `%USERPROFILE%\Documents\Visual Studio 2017\Templates\ProjectTemplate\Visual C++` folder. 
+- Put the `PowerToy Module.zip` file inside the `%USERPROFILE%\Documents\Visual Studio 2019\Templates\ProjectTemplate\Visual C++` folder. 
 - The template will be available in Visual Studio, when adding a new project, under the `Visual C++` tab.
 
 ## Create a new PowerToy Module
