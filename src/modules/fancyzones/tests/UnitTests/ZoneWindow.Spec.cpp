@@ -27,7 +27,7 @@ namespace FancyZonesUnitTests
         {
             // Unique id of the format "ParsedMonitorDeviceId_MonitorWidth_MonitorHeight_VirtualDesktopId
             // Example: "DELA026#5&10a58c63&0&UID16777488_1024_768_MyVirtualDesktopId"
-            std::wstring deviceId(L"\\?\DISPLAY#DELA026#5&10a58c63&0&UID16777488#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}");
+            std::wstring deviceId(L"\\\\?\\DISPLAY#DELA026#5&10a58c63&0&UID16777488#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}");
             // Window initialization requires a valid HMONITOR - just use the primary for now.
             HMONITOR pimaryMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
             MONITORINFO info;

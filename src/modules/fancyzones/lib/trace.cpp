@@ -85,7 +85,7 @@ void Trace::SettingsChanged(const Settings& settings) noexcept
         TraceLoggingBoolean(settings.shiftDrag, "Shift drag"),
         TraceLoggingBoolean(settings.displayChange_moveWindows, "Move Windows On Display Change"),
         TraceLoggingBoolean(settings.virtualDesktopChange_moveWindows, "Move Windows On Virtual Desktop Change"),
-        TraceLoggingBoolean(settings.virtualDesktopChange_flashZones, "Flash zones On Virtual Desktop Change"),
+        TraceLoggingBoolean(settings.zoneSetChange_flashZones, "Flash zones On Zone Set Change"),
         TraceLoggingBoolean(settings.zoneSetChange_moveWindows, "Move Windows On Zone Set Change"),
         TraceLoggingBoolean(settings.overrideSnapHotkeys, "Override snap hot keys"),
         TraceLoggingWideString(settings.zoneHightlightColor.c_str(), "Zone highlight color"));

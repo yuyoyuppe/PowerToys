@@ -3,6 +3,8 @@
 #include <interface/powertoy_module_interface.h>
 #include <interface/lowlevel_keyboard_event_data.h>
 #include <interface/win_hook_event_data.h>
+#include <lib/ZoneSet.h>
+#include <lib/RegistryHelpers.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -23,6 +25,49 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
             break;
     }
     return TRUE;
+}
+
+// TODO: multimon support, need to pass the HMONITOR from the editor to here instead
+// of using MonitorFromPoint
+STDAPI PersistZoneSet(
+    PCWSTR activeKey, // Registry key holding ActiveZoneSet
+    PCWSTR resolutionKey, // Registry key for screen resolution
+    WORD layoutId, // LayoutModel Id
+    int zoneCount, // Number of zones in zones
+    int zones[]) // Array of zones serialized in left/top/right/bottom chunks
+{
+    UUID generatedId;
+    if (UuidCreate(&generatedId) == RPC_S_OK)
+    {
+        winrt::com_ptr<IZoneSet> zoneSet = MakeZoneSet(
+            ZoneSetConfig(
+                generatedId,
+                layoutId,
+                MonitorFromPoint({}, MONITOR_DEFAULTTOPRIMARY),
+                resolutionKey,
+                ZoneSetLayout::Custom,
+                0, 0, 0));
+
+        for (int i = 0; i < zoneCount; i++)
+        {
+            const int baseIndex = i * 4;
+            const int left = zones[baseIndex];
+            const int top = zones[baseIndex+1];
+            const int right = zones[baseIndex+2];
+            const int bottom = zones[baseIndex+3];
+            zoneSet->AddZone(MakeZone({ left, top, right, bottom }), false);
+        }
+        zoneSet->Save();
+
+        wil::unique_cotaskmem_string zoneSetId;
+        if (SUCCEEDED_LOG(StringFromCLSID(generatedId, &zoneSetId)))
+        {
+            RegistryHelpers::SetString(activeKey, L"ActiveZoneSetId", zoneSetId.get());
+        }
+
+        return S_OK;
+    }
+    return E_FAIL;
 }
 
 class FancyZonesModule : public PowertoyModuleIface
@@ -122,7 +167,8 @@ private:
     static bool IsInterestingWindow(HWND window)
     {
         auto style = GetWindowLongPtr(window, GWL_STYLE);
-        return WI_IsFlagSet(style, WS_MAXIMIZEBOX) && WI_IsFlagClear(style, WS_CHILD);
+        auto exStyle = GetWindowLongPtr(window, GWL_EXSTYLE);
+        return WI_IsFlagSet(style, WS_MAXIMIZEBOX) && WI_IsFlagClear(style, WS_CHILD) && WI_IsFlagClear(exStyle, WS_EX_TOOLWINDOW);
     }
 
     intptr_t HandleKeyboardHookEvent(LowlevelKeyboardEvent* data) noexcept;

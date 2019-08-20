@@ -69,23 +69,34 @@ private:
     void MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT const& ptScreen, require_write_lock) noexcept;
     void MoveSizeEndInternal(HWND window, POINT const& ptScreen, require_write_lock) noexcept;
     void MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen, require_write_lock) noexcept;
+    void ToggleEditor() noexcept;
 
     const HINSTANCE m_hinstance{};
-    static UINT WM_PRIV_VDCHANGED;
 
+    mutable std::shared_mutex m_lock;
     HWND m_window{};
     HWND m_windowMoveSize{}; // The window that is being moved/sized
     bool m_editorsVisible{}; // Are we showing the zone editors?
     bool m_inMoveSize{};  // Whether or not a move/size operation is currently active
     bool m_dragEnabled{}; // True if we should be showing zone hints while dragging
-    std::map<HMONITOR, winrt::com_ptr<IZoneWindow>> m_zoneWindowMap;
-    winrt::com_ptr<IZoneWindow> m_zoneWindowMoveSize;
+    std::map<HMONITOR, winrt::com_ptr<IZoneWindow>> m_zoneWindowMap; // Map of monitor to ZoneWindow (one per monitor)
+    winrt::com_ptr<IZoneWindow> m_zoneWindowMoveSize; // "Active" ZoneWindow, where the move/size is happening. Will update as drag moves between monitors.
     winrt::com_ptr<IFancyZonesSettings> m_settings;
     GUID m_currentVirtualDesktopId{};
-    mutable std::shared_mutex m_lock;
+    wil::unique_handle m_terminateEditorEvent;
+
+    static UINT WM_PRIV_VDCHANGED;
+    static UINT WM_PRIV_EDITOR;
+
+    enum class EditorExitKind : byte
+    {
+        Exit,
+        Terminate
+    };
 };
 
 UINT FancyZones::WM_PRIV_VDCHANGED = RegisterWindowMessage(L"{128c2cb0-6bdf-493e-abbe-f8705e04aa95}");
+UINT FancyZones::WM_PRIV_EDITOR = RegisterWindowMessage(L"{87543824-7080-4e91-9d9c-0404642fc7b6}");
 
 // IFancyZones
 IFACEMETHODIMP_(void) FancyZones::Run() noexcept
@@ -257,12 +268,9 @@ LRESULT FancyZones::WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lpa
     {
         if (wparam == 1)
         {
-            DWORD value{};
-            RegistryHelpers::GetValue<DWORD>(nullptr, L"StandaloneEditor", &value, sizeof(value));
-
-            if (value)
+            if (m_settings->GetSettings().use_standalone_editor)
             {
-                ShellExecute(nullptr, nullptr, L"JeffsFancyEditor.exe", nullptr, nullptr, SW_SHOWNORMAL);
+                ToggleEditor();
             }
             else
             {
@@ -293,6 +301,20 @@ LRESULT FancyZones::WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lpa
         {
             OnDisplayChange(DisplayChangeType::VirtualDesktop);
         }
+        else if (message == WM_PRIV_EDITOR)
+        {
+            if (lparam == static_cast<LPARAM>(EditorExitKind::Exit))
+            {
+                // Don't reload settings if we terminated the editor
+                OnDisplayChange(DisplayChangeType::Editor);
+            }
+
+            {
+                // Clean up the event either way
+                std::unique_lock writeLock(m_lock);
+                m_terminateEditorEvent.release();
+            }
+        }
         else
         {
             return DefWindowProc(window, message, wparam, lparam);
@@ -307,11 +329,20 @@ void FancyZones::OnDisplayChange(DisplayChangeType changeType) noexcept
 {
     if (changeType == DisplayChangeType::VirtualDesktop)
     {
+        // Explorer persists this value to the registry on a per session basis but only after
+        // the first virtual desktop switch happens. If the user hasn't switched virtual desktops in this session
+        // then this value will be empty. This means loading the first virtual desktop's configuration can be
+        // funky the first time we load up at boot since the user will not have switched virtual desktops yet.
         std::shared_lock readLock(m_lock);
         GUID currentVirtualDesktopId{};
-        if (SUCCEEDED_LOG(RegistryHelpers::GetCurrentVirtualDesktop(&currentVirtualDesktopId)))
+        if (SUCCEEDED(RegistryHelpers::GetCurrentVirtualDesktop(&currentVirtualDesktopId)))
         {
             m_currentVirtualDesktopId = currentVirtualDesktopId;
+        }
+        else
+        {
+            // TODO: Use the previous "Desktop 1" fallback
+            // Need to maintain a map of desktop name to virtual desktop uuid
         }
     }
 
@@ -327,6 +358,13 @@ void FancyZones::OnDisplayChange(DisplayChangeType changeType) noexcept
     else if (changeType == DisplayChangeType::VirtualDesktop)
     {
         if (m_settings->GetSettings().virtualDesktopChange_moveWindows)
+        {
+            MoveWindowsOnDisplayChange();
+        }
+    }
+    else if (changeType == DisplayChangeType::Editor)
+    {
+        if (m_settings->GetSettings().zoneSetChange_moveWindows)
         {
             MoveWindowsOnDisplayChange();
         }
@@ -351,7 +389,7 @@ void FancyZones::AddZoneWindow(HMONITOR monitor, PCWSTR deviceId) noexcept
     wil::unique_cotaskmem_string virtualDesktopId;
     if (SUCCEEDED_LOG(StringFromCLSID(m_currentVirtualDesktopId, &virtualDesktopId)))
     {
-        const bool flash = m_settings->GetSettings().virtualDesktopChange_flashZones;
+        const bool flash = m_settings->GetSettings().zoneSetChange_flashZones;
         if (auto zoneWindow = MakeZoneWindow(this, m_hinstance, monitor, deviceId, virtualDesktopId.get(), flash))
         {
             m_zoneWindowMap[monitor] = std::move(zoneWindow);
@@ -501,7 +539,7 @@ void FancyZones::MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT cons
     ::GetTitleBarInfo(window, &titlebarInfo);
 
     // Titlebar height is weird and apps can do custom drag areas.
-    // Give it most of the height of the window to make sure.
+    // Give it half of the height of the window to make sure.
     titlebarInfo.rcTitleBar.bottom += ((windowRect.bottom - windowRect.top) / 2);
 
     if (PtInRect(&titlebarInfo.rcTitleBar, ptScreen))
@@ -513,6 +551,7 @@ void FancyZones::MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT cons
         {
             m_windowMoveSize = window;
 
+            // This updates m_dragEnabled depending on if the shift key is being held down.
             UpdateDragState(writeLock);
 
             if (m_dragEnabled)
@@ -549,12 +588,15 @@ void FancyZones::MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen,
 {
     if (m_inMoveSize)
     {
+        // This updates m_dragEnabled depending on if the shift key is being held down.
         UpdateDragState(writeLock);
 
         if (m_zoneWindowMoveSize)
         {
+            // Update the ZoneWindow already handling move/size
             if (!m_dragEnabled)
             {
+                // Drag got disabled, tell it to cancel and clear out m_zoneWindowMoveSize
                 auto zoneWindow = std::move(m_zoneWindowMoveSize);
                 zoneWindow->MoveSizeCancel();
             }
@@ -577,8 +619,70 @@ void FancyZones::MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen,
         }
         else if (m_dragEnabled)
         {
+            // We'll get here if the user presses/releases shift while dragging.
+            // Restart the drag on the ZoneWindow that m_windowMoveSize is on
             MoveSizeStartInternal(m_windowMoveSize, monitor, ptScreen, writeLock);
             MoveSizeUpdateInternal(monitor, ptScreen, writeLock);
+        }
+    }
+}
+
+void FancyZones::ToggleEditor() noexcept
+{
+    {
+        std::shared_lock readLock(m_lock);
+        if (m_terminateEditorEvent)
+        {
+            SetEvent(m_terminateEditorEvent.get());
+            return;
+        }
+    }
+
+    {
+        std::unique_lock writeLock(m_lock);
+        m_terminateEditorEvent.reset(CreateEvent(nullptr, true, false, nullptr));
+    }
+
+    // TODO: multimon support
+    if (const HMONITOR monitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY))
+    {
+        std::shared_lock readLock(m_lock);
+        auto iter = m_zoneWindowMap.find(monitor);
+        if (iter != m_zoneWindowMap.end())
+        {
+            // Pass command line args to the editor to tell it which layout it should pick by default
+            auto activeZoneSet = iter->second->ActiveZoneSet();
+            std::wstring params = iter->second->UniqueId() + L" " + std::to_wstring(activeZoneSet->LayoutId());
+            SHELLEXECUTEINFO sei{ sizeof(sei) };
+            sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
+            sei.lpFile = L"modules\\FancyZonesEditor.exe";
+            sei.lpParameters = params.c_str();
+            sei.nShow = SW_SHOWNORMAL;
+            ShellExecuteEx(&sei);
+
+            // Launch the editor on a background thread
+            // Wait for the editor's process to exit
+            // Post back to the main thread to update
+            std::thread waitForEditorThread([window = m_window, processHandle = sei.hProcess, terminateEditorEvent = m_terminateEditorEvent.get()]()
+            {
+                HANDLE waitEvents[2] = { processHandle, terminateEditorEvent };
+                auto result = WaitForMultipleObjects(2, waitEvents, false, INFINITE);
+                if (result == WAIT_OBJECT_0 + 0)
+                {
+                    // Editor exited
+                    // Update any changes it may have made
+                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Exit));
+                }
+                else if (result == WAIT_OBJECT_0 + 1)
+                {
+                    // User hit Win+~ while editor is already running
+                    // Shut it down
+                    TerminateProcess(processHandle, 2);
+                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Terminate));
+                }
+                CloseHandle(processHandle);
+            });
+            waitForEditorThread.detach();
         }
     }
 }

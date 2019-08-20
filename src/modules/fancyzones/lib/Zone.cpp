@@ -15,7 +15,7 @@ public:
     IFACEMETHODIMP_(void) AddWindowToZone(HWND window, HWND zoneWindow, bool stampZone) noexcept;
     IFACEMETHODIMP_(void) RemoveWindowFromZone(HWND window, bool restoreSize) noexcept;
     IFACEMETHODIMP_(void) SetId(size_t id) noexcept { m_id = id; }
-    IFACEMETHODIMP_(size_t) GetId() noexcept { return m_id; }
+    IFACEMETHODIMP_(size_t) Id() noexcept { return m_id; }
 
 private:
     void SizeWindowToZone(HWND window, HWND zoneWindow) noexcept;

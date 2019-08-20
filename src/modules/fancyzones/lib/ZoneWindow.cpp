@@ -4,7 +4,7 @@
 struct ZoneWindow : public winrt::implements<ZoneWindow, IZoneWindow>
 {
 public:
-    ZoneWindow(IZoneWindowHost* host, HINSTANCE hinstance, HMONITOR monitor, PCWSTR deviceId, PCWSTR virtualDesktopId, bool flashZones); 
+    ZoneWindow(IZoneWindowHost* host, HINSTANCE hinstance, HMONITOR monitor, PCWSTR deviceId, PCWSTR virtualDesktopId, bool flashZones);
 
     IFACEMETHODIMP ShowZoneWindow(bool activate, bool fadeIn) noexcept;
     IFACEMETHODIMP HideZoneWindow() noexcept;
@@ -19,6 +19,7 @@ public:
     IFACEMETHODIMP_(std::wstring) DeviceId() noexcept { return { m_deviceId.get() }; }
     IFACEMETHODIMP_(std::wstring) UniqueId() noexcept { return { m_uniqueId }; }
     IFACEMETHODIMP_(void) SaveWindowProcessToZoneIndex(HWND window) noexcept;
+    IFACEMETHODIMP_(IZoneSet*) ActiveZoneSet() noexcept { return m_activeZoneSet.get(); }
 
 protected:
     static LRESULT CALLBACK s_WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) noexcept;
@@ -41,7 +42,6 @@ private:
     void MakeActiveZoneSetCustom() noexcept;
     void UpdateActiveZoneSet(_In_opt_ IZoneSet* zoneSet) noexcept;
     LRESULT WndProc(UINT message, WPARAM wparam, LPARAM lparam) noexcept;
-    void OnTimer(WPARAM wparam) noexcept;
     void OnLButtonDown(LPARAM lparam) noexcept;
     void OnLButtonUp(LPARAM lparam) noexcept;
     void OnRButtonUp(LPARAM lparam) noexcept;
@@ -63,7 +63,7 @@ private:
     void ChooseDefaultActiveZoneSet() noexcept;
     bool IsOccluded(POINT pt, size_t index) noexcept;
     void CycleActiveZoneSetInternal(DWORD wparam, Trace::ZoneWindow::InputMode mode) noexcept;
-    void FlashZones(bool delayed) noexcept;
+    void FlashZones() noexcept;
     int GetSwitchButtonIndexFromPoint(POINT ptClient) noexcept;
     UINT GetDpiForMonitor() noexcept;
 
@@ -91,7 +91,6 @@ private:
     int m_gridHeight{};
     int m_gridRows{};
     int m_gridColumns{};
-    UINT_PTR m_flashTimer{};
     int m_switchButtonWidth = 50;
     int m_switchButtonPadding = 5;
     int m_switchButtonHover = -1;
@@ -99,7 +98,8 @@ private:
     RECT m_zoneBuilder{};
     RECT m_switchButtonContainerRect{};
     Trace::ZoneWindow::EditorModeActivity m_editorModeActivity;
-    static const UINT m_showAnimationDuration = 200;
+    static const UINT m_showAnimationDuration = 200; // ms
+    static const UINT m_flashDuration = 700; // ms
 };
 
 ZoneWindow::ZoneWindow(
@@ -118,7 +118,7 @@ ZoneWindow::ZoneWindow(
     if (GetMonitorInfoW(m_monitor, &mi))
     {
         const UINT dpi = GetDpiForMonitor();
-        const Rect monitorRect(mi.rcMonitor, dpi);
+        const Rect monitorRect(mi.rcMonitor);
         const Rect workAreaRect(mi.rcWork, dpi);
 
         StringCchPrintf(m_workArea, ARRAYSIZE(m_workArea), L"%d_%d", monitorRect.width(), monitorRect.height());
@@ -147,7 +147,7 @@ ZoneWindow::ZoneWindow(
             UpdateGrid(0, 0);
             if (flashZones)
             {
-                FlashZones(true /*delayed*/);
+                FlashZones();
             }
         }
     }
@@ -180,7 +180,11 @@ IFACEMETHODIMP ZoneWindow::ShowZoneWindow(bool activate, bool fadeIn) noexcept
 
         if (fadeIn)
         {
-            AnimateWindow(m_window.get(), m_showAnimationDuration, AW_BLEND);
+            std::thread([window = m_window.get(), duration = m_showAnimationDuration]()
+                {
+                    AnimateWindow(window, duration, AW_BLEND);
+                    InvalidateRect(window, nullptr, true);
+                }).detach();
         }
 
         return S_OK;
@@ -305,7 +309,7 @@ IFACEMETHODIMP_(void) ZoneWindow::CycleActiveZoneSet(DWORD wparam) noexcept
     }
     else
     {
-        FlashZones(false /*delayed*/);
+        FlashZones();
     }
 }
 
@@ -329,7 +333,10 @@ void ZoneWindow::InitializeId(PCWSTR deviceId, PCWSTR virtualDesktopId) noexcept
 
 void ZoneWindow::LoadSettings() noexcept
 {
-    RegistryHelpers::GetValue<GUID>(m_uniqueId, L"ActiveZoneSetId", &m_activeZoneSetId, sizeof(m_activeZoneSetId));
+    wchar_t activeZoneSetId[256];
+    RegistryHelpers::GetString(m_uniqueId, L"ActiveZoneSetId", activeZoneSetId, sizeof(activeZoneSetId));
+    CLSIDFromString(activeZoneSetId, &m_activeZoneSetId);
+
     RegistryHelpers::GetValue<SIZE>(m_uniqueId, L"GridMargins", &m_gridMargins, sizeof(m_gridMargins));
 }
 
@@ -376,25 +383,26 @@ void ZoneWindow::LoadZoneSetsFromRegistry() noexcept
         DWORD i = 0;
         while (RegEnumValueW(key.get(), i++, value, &valueLength, nullptr, nullptr, reinterpret_cast<BYTE*>(&data), &dataSize) == ERROR_SUCCESS)
         {
-            if (data.version == VERSION_PERSISTEDDATA)
+            if (data.Version == VERSION_PERSISTEDDATA)
             {
                 GUID zoneSetId;
                 if (SUCCEEDED_LOG(CLSIDFromString(value, &zoneSetId)))
                 {
                     auto zoneSet = MakeZoneSet(ZoneSetConfig(
                         zoneSetId,
+                        data.LayoutId,
                         m_monitor,
                         m_workArea,
-                        data.layout,
+                        data.Layout,
                         0,
-                        static_cast<int>(data.paddingInner),
-                        static_cast<int>(data.paddingOuter)));
+                        static_cast<int>(data.PaddingInner),
+                        static_cast<int>(data.PaddingOuter)));
 
                     if (zoneSet)
                     {
-                        for (UINT j = 0; j < data.zoneCount; j++)
+                        for (UINT j = 0; j < data.ZoneCount; j++)
                         {
-                            zoneSet->AddZone(MakeZone(data.zones[j]), false);
+                            zoneSet->AddZone(MakeZone(data.Zones[j]), false);
                         }
 
                         m_zoneSets.emplace_back(zoneSet);
@@ -408,7 +416,7 @@ void ZoneWindow::LoadZoneSetsFromRegistry() noexcept
             }
             else
             {
-                // XXXX: Setting migration
+                // Migrate from older settings format
             }
 
             valueLength = ARRAYSIZE(value);
@@ -422,7 +430,7 @@ winrt::com_ptr<IZoneSet> ZoneWindow::AddZoneSet(ZoneSetLayout layout, int numZon
     GUID zoneSetId;
     if (SUCCEEDED_LOG(CoCreateGuid(&zoneSetId)))
     {
-        if (auto zoneSet = MakeZoneSet(ZoneSetConfig(zoneSetId, m_monitor, m_workArea, layout, numZones, paddingOuter, paddingInner)))
+        if (auto zoneSet = MakeZoneSet(ZoneSetConfig(zoneSetId, 0, m_monitor, m_workArea, layout, numZones, paddingOuter, paddingInner)))
         {
             m_zoneSets.emplace_back(zoneSet);
             return zoneSet;
@@ -449,7 +457,11 @@ void ZoneWindow::UpdateActiveZoneSet(_In_opt_ IZoneSet* zoneSet) noexcept
 
     if (m_activeZoneSet)
     {
-        RegistryHelpers::SetValue<GUID>(m_uniqueId, L"ActiveZoneSetId", m_activeZoneSet->GetId(), sizeof(GUID));
+        wil::unique_cotaskmem_string zoneSetId;
+        if (SUCCEEDED_LOG(StringFromCLSID(m_activeZoneSet->Id(), &zoneSetId)))
+        {
+            RegistryHelpers::SetString(m_uniqueId, L"ActiveZoneSetId", zoneSetId.get());
+        }
     }
 }
 
@@ -488,10 +500,6 @@ LRESULT ZoneWindow::WndProc(UINT message, WPARAM wparam, LPARAM lparam) noexcept
         }
         break;
 
-        case WM_TIMER:
-            OnTimer(wparam);
-            break;
-
         case WM_LBUTTONDOWN:
             OnLButtonDown(lparam);
             break;
@@ -518,16 +526,6 @@ LRESULT ZoneWindow::WndProc(UINT message, WPARAM wparam, LPARAM lparam) noexcept
         }
     }
     return 0;
-}
-
-void ZoneWindow::OnTimer(WPARAM wparam) noexcept
-{
-    if (wparam == 1)
-    {
-        ShowWindow(m_window.get(), SW_SHOWNA);
-        KillTimer(m_window.get(), m_flashTimer);
-        AnimateWindow(m_window.get(), 700, AW_HIDE | AW_BLEND);
-    }
 }
 
 void ZoneWindow::OnLButtonDown(LPARAM lparam) noexcept
@@ -740,7 +738,7 @@ void ZoneWindow::DrawZone(wil::unique_hdc& hdc, ColorSetting const& colorSetting
     {
         COLORREF const colorFill = RGB(255, 255, 255);
 
-        size_t const index = zone->GetId();
+        size_t const index = zone->Id();
         int const padding = 5;
         int const size = 10;
         POINT offset = { zoneRect.left + padding, zoneRect.top + padding };
@@ -1051,7 +1049,7 @@ void ZoneWindow::OnKeyUp(WPARAM wparam) noexcept
                 {
                     if (iter->get() == m_activeZoneSet.get())
                     {
-                        RegistryHelpers::DeleteZoneSet(m_workArea, m_activeZoneSet->GetId());
+                        RegistryHelpers::DeleteZoneSet(m_workArea, m_activeZoneSet->Id());
                         m_zoneSets.erase(iter);
                         m_activeZoneSet = nullptr;
                         break;
@@ -1257,10 +1255,15 @@ void ZoneWindow::CycleActiveZoneSetInternal(DWORD wparam, Trace::ZoneWindow::Inp
     }
 }
 
-void ZoneWindow::FlashZones(bool delayed) noexcept
+void ZoneWindow::FlashZones() noexcept
 {
     m_flashMode = true;
-    m_flashTimer = SetTimer(m_window.get(), 1, delayed ? 1000 : 1, nullptr);
+
+    ShowWindow(m_window.get(), SW_SHOWNA);
+    std::thread([window = m_window.get()]()
+        {
+            AnimateWindow(window, m_flashDuration, AW_HIDE | AW_BLEND);
+        }).detach();
 }
 
 int ZoneWindow::GetSwitchButtonIndexFromPoint(POINT ptClient) noexcept

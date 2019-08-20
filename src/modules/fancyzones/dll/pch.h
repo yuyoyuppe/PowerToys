@@ -6,7 +6,7 @@
 #include <ProjectTelemetry.h>
 #include <TraceLoggingActivity.h>
 #include <wil\common.h>
-
+#include <wil\result.h>
 
 #include "lib\trace.h"
 #include "lib\FancyZones.h"

@@ -12,6 +12,11 @@ namespace CustomAssert
     {
         Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue(g1 == g2);
     }
+
+    static void AreEqual(WORD w1, WORD w2)
+    {
+        Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue(w1 == w2);
+    }
 }
 
 namespace Mocks

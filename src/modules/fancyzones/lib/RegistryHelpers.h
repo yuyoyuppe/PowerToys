@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shlwapi.h>
+
 namespace RegistryHelpers
 {
     static PCWSTR REG_SETTINGS = L"Software\\SuperFancyZones";
@@ -69,6 +71,20 @@ namespace RegistryHelpers
         SHRegSetUSValueW(keyPath, appPath, REG_DWORD, &zoneIndex, sizeof(zoneIndex), SHREGSET_FORCE_HKCU);
     }
 
+    inline void GetString(PCWSTR uniqueId, PCWSTR setting, PWSTR value, DWORD cbValue)
+    {
+        wchar_t key[256]{};
+        GetKey(uniqueId, key, ARRAYSIZE(key));
+        SHRegGetUSValueW(key, setting, nullptr, value, &cbValue, FALSE, nullptr, 0);
+    }
+
+    inline void SetString(PCWSTR uniqueId, PCWSTR setting, PCWSTR value)
+    {
+        wchar_t key[256]{};
+        GetKey(uniqueId, key, ARRAYSIZE(key));
+        SHRegSetUSValueW(key, setting, REG_SZ, value, sizeof(value) * static_cast<DWORD>(wcslen(value)), SHREGSET_FORCE_HKCU);
+    }
+
     template<typename t>
     inline void GetValue(PCWSTR monitorId, PCWSTR setting, t* value, DWORD size)
     {
@@ -103,8 +119,10 @@ namespace RegistryHelpers
         SHDeleteKey(HKEY_CURRENT_USER, key);
     }
 
-    inline HRESULT GetCurrentVirtualDesktop(GUID* id)
+    inline HRESULT GetCurrentVirtualDesktop(_Out_ GUID* id)
     {
+        *id = GUID_NULL;
+
         DWORD sessionId;
         ProcessIdToSessionId(GetCurrentProcessId(), &sessionId);
 
@@ -127,6 +145,6 @@ namespace RegistryHelpers
                 return S_OK;
             }
         }
-        return S_OK;
+        return E_FAIL;
     }
 }

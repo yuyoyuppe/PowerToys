@@ -8,10 +8,11 @@ struct Settings
     bool shiftDrag = false;
     bool displayChange_moveWindows = false;
     bool virtualDesktopChange_moveWindows = false;
-    bool virtualDesktopChange_flashZones = true;
+    bool zoneSetChange_flashZones = true;
     bool zoneSetChange_moveWindows = false;
     bool overrideSnapHotkeys = true;
     bool appLastZone_moveWindows = false;
+    bool use_standalone_editor = false;
     std::wstring zoneHightlightColor = L"#0078D7";
 };
 

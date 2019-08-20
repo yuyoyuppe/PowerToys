@@ -17,7 +17,7 @@ namespace FancyZonesUnitTests
 
             constexpr size_t id = 10;
             zone->SetId(id);
-            Assert::AreEqual(zone->GetId(), id);
+            Assert::AreEqual(zone->Id(), id);
         }
 
         TEST_METHOD(ContainsWindow)

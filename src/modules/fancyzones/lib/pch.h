@@ -8,7 +8,6 @@
 #include <windowsx.h>
 #include <dwmapi.h>
 #include <ProjectTelemetry.h>
-#include <shlwapi.h>
 #include <shellapi.h>
 #include <strsafe.h>
 #include <TraceLoggingActivity.h>

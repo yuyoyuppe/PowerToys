@@ -76,5 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="fancyzones.def" />
   </ItemGroup>
 </Project>
