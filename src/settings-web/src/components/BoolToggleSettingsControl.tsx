@@ -39,8 +39,8 @@ export class BoolToggleSettingsControl extends BaseSettingsControl {
         }
         checked={this.state.property_values.value}
         label={this.state.property_values.display_name}
-        onText="Enabled"
-        offText="Disabled"
+        onText="On"
+        offText="Off"
         componentRef= {(input) => {this.toggleref=input;}}
       />
     );
