@@ -245,6 +245,7 @@ void bring_settings_to_front() {
   {
     DWORD processId;
     if (GetWindowThreadProcessId(hwnd, &processId) && processId == g_settings_process_id) {
+      ShowWindow(hwnd, SW_NORMAL);
       SetForegroundWindow(hwnd);
       return FALSE;
     }
