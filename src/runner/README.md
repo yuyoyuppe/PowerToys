@@ -20,13 +20,13 @@ Contains the executable starting point, initialization code and the list of know
 Contains code for initializing and managing the PowerToy modules.
 
 #### [`powertoys_events.cpp`](./powertoys_events.cpp)
-Contains code for registering and sending events to the PowerToy modules.
+Contains code that handles the various events listeners, and forwards those events to the PowerToys modules.
 
 #### [`lowlevel_keyboard_event.cpp`](./lowlevel_keyboard_event.cpp)
-Contains code for registering the low level keyboard event hook.
+Contains code for registering the low level keyboard event hook that listens for keyboard events.
 
 #### [`win_hook_event.cpp`](./win_hook_event.cpp)
-Contains code for registering a Windows event hook through `SetWinEventHook`.
+Contains code for registering a Windows event hook through `SetWinEventHook`, that listens for various events raised when a window is interacted with.
 
 #### [`tray_icon.cpp`](./tray_icon.cpp)
 Contains code for managing the PowerToys tray icon and its menu commands.
@@ -47,4 +47,4 @@ Contains helper code to get stack traces in builds. Can be used by adding a call
 Contains code for telemetry.
 
 #### [`svgs`](./svgs/)
-Contains the svg assets used by the PowerToys modules.
+Contains the SVG assets used by the PowerToys modules.

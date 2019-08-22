@@ -2,7 +2,7 @@
 
 To minimize the performance impact on the machine only `runner` installs global hooks, passing the events to registered callbacks in each PowerToy module.
 
-When a PowerToy module is loaded, the `runner` calls the [`get_events()`](/src/modules/interface/powertoy_module_interface.h#L40) method to get a NULL-terminated array of NULL-terminated strings with the names of the events that the PowerToy wants to subcribe to. A `const wchar_t*` string is provided for each of the event names.
+When a PowerToy module is loaded, the `runner` calls the [`get_events()`](/src/modules/interface/powertoy_module_interface.h#L40) method to get a NULL-terminated array of NULL-terminated strings with the names of the events that the PowerToy wants to subscribe to. A `const wchar_t*` string is provided for each of the event names.
 
 Events are signalled by the `runner` calling the [`signal_event(name, data)`](/src/modules/interface/powertoy_module_interface.h#L53) method of the PowerToy module. The `name` parameter contains the NULL-terminated name of the event. The `data` parameter and the method return value are specific for each event.
 
@@ -83,4 +83,3 @@ virtual intptr_t signal_event(const wchar_t* name, intptr_t data) override {
 ```
 
 Taking too long to process the events has negative impact on the whole system performance. To address this, the events are signaled from a different thread, not from the event hook callback itself.
-

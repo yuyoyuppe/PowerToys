@@ -15,9 +15,9 @@
 ## DPI Awareness
 
 All PowerToy modules need to be DPI aware and calculate dimensions and positions of the UI elements using the Windows API for DPI awareness.
-The src/common library has some helpers that you can use and extend:
- - dpi_aware.h, dpi_aware.cpp
- - monitors.h, monitors.cpp
+The `/src/common` library has some helpers that you can use and extend:
+ - [`dpi_aware.h`](/src/common/dpi_aware.h), [`dpi_aware.cpp`](/src/common/dpi_aware.cpp)
+ - [`monitors.h`](/src/common/monitors.h), [`monitors.cpp`](/src/common/monitors.cpp)
 
 ## PowerToy settings
 
