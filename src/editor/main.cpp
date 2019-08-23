@@ -219,7 +219,7 @@ void receive_message_from_webview(const std::wstring& msg) {
   }
 }
 
-void initialize_win32_webview() {
+void initialize_win32_webview(HWND hwnd, int nCmdShow) {
   
   // initialize the base_path for the html content relative to the executable.
   WCHAR executable_path[MAX_PATH];
@@ -264,6 +264,7 @@ void initialize_win32_webview() {
       NavigateToLocalhostReactServer();
 #else
       // navigates to settings-html/index.html
+      ShowWindow(main_window_handler, nCmdShow);
       NavigateToUri(L"index.html");
 #endif
     });
@@ -389,8 +390,7 @@ int init_instance(HINSTANCE hInstance, int nCmdShow) {
     hInstance,
     nullptr);
 
-  initialize_win32_webview();
-  ShowWindow(main_window_handler, nCmdShow);
+  initialize_win32_webview(main_window_handler, nCmdShow);
   UpdateWindow(main_window_handler);
 
   return TRUE;
@@ -435,7 +435,7 @@ void read_arguments() {
   } else {
 #ifndef _DEBUG
     MessageBox(NULL, L"This executable isn't supposed to be called as a stand-alone process", L"Error running settings", MB_OK);
-    PostQuitMessage(1);
+    exit(1);
 #endif
   }
   LocalFree(argument_list);

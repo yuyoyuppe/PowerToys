@@ -14,8 +14,16 @@ mergeStyles({
   }
 });
 
-ReactDOM.render(<App 
-  ref={(app_component) => {(window as any).react_app_component=app_component;}} // in order to call the app from outside react.
-  />, 
-  document.getElementById('app')
-  );
+const root = document.getElementById('app');
+if (root && root.hasChildNodes()) {
+  ReactDOM.hydrate(<App 
+    ref={(app_component) => {(window as any).react_app_component=app_component;}} // in order to call the app from outside react.
+    />, 
+    root);
+} else {
+  ReactDOM.render(<App 
+    ref={(app_component) => {(window as any).react_app_component=app_component;}} // in order to call the app from outside react.
+    />, 
+    root);
+}
+
