@@ -11,6 +11,19 @@ environment:
 signing_options:
   profile: 'azure'
 
+package_sources:
+  nuget:
+    feeds:
+      'Toolset': 'https://msazure.pkgs.visualstudio.com/_packaging/Toolset/nuget/v3/index.json'
+      'CloudES-CDP': 'https://cloudes.pkgs.visualstudio.com/_packaging/CDP/nuget/v3/index.json'
+      'CloudES-Internal': 'https://cloudes.pkgs.visualstudio.com/_packaging/Internal/nuget/v3/index.json'
+      'MsNugetMirror': 'https://msazure.pkgs.visualstudio.com/_packaging/MsNugetMirror/nuget/v3/index.json'
+      'NugetMirror': 'https://msazure.pkgs.visualstudio.com/_packaging/NugetMirror/nuget/v3/index.json'
+      'CorextMirror': 'https://msazure.pkgs.visualstudio.com/_packaging/CorextMirror/nuget/v3/index.json'
+      'Official': 'https://msazure.pkgs.visualstudio.com/_packaging/Official/nuget/v3/index.json'
+      'Toolset': 'https://msazure.pkgs.visualstudio.com/_packaging/Toolset/nuget/v3/index.json'
+      'AzureCXP': 'https://msazure.pkgs.visualstudio.com/_packaging/AzureCXP/nuget/v3/index.json'
+
 restore:
   commands:
     - !!defaultcommand
