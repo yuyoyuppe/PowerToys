@@ -92,41 +92,47 @@ int run_message_loop() {
   return static_cast<int>(msg.wParam);
 }
 
-void show_last_error_message(LPCTSTR lpszFunction, DWORD dw) {
+void show_last_error_message(LPCWSTR lpszFunction, DWORD dw) {
   // Retrieve the system error message for the error code
-  LPVOID lpMsgBuf;
-  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                FORMAT_MESSAGE_FROM_SYSTEM |
-                FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL,
-                dw,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&lpMsgBuf,
-                0, NULL);
-  // Display the error message and exit the process
-  auto lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-                                         (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-  StringCchPrintf((LPTSTR)lpDisplayBuf,
-                  LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-                  TEXT("%s failed with error %d: %s"),
-                  lpszFunction, dw, lpMsgBuf);
-  MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-  LocalFree(lpMsgBuf);
-  LocalFree(lpDisplayBuf);
+  LPWSTR lpMsgBuf = NULL;
+  if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                     FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS,
+                     NULL,
+                     dw,
+                     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                     lpMsgBuf,
+                     0, NULL) > 0) {
+    // Display the error message and exit the process
+    LPWSTR lpDisplayBuf = (LPWSTR)LocalAlloc(LMEM_ZEROINIT, (lstrlenW(lpMsgBuf) + lstrlenW(lpszFunction) + 40) * sizeof(WCHAR));
+    if (lpDisplayBuf != NULL) {
+      StringCchPrintfW(lpDisplayBuf,
+        LocalSize(lpDisplayBuf) / sizeof(WCHAR),
+        L"%s failed with error %d: %s",
+        lpszFunction, dw, lpMsgBuf);
+      MessageBoxW(NULL, (LPCTSTR)lpDisplayBuf, L"Error", MB_OK);
+      LocalFree(lpDisplayBuf);
+    }
+    LocalFree(lpMsgBuf);
+  }
 }
 
 WindowState get_window_state(HWND hwnd) {
   WINDOWPLACEMENT placement;
   placement.length = sizeof(WINDOWPLACEMENT);
-  if (GetWindowPlacement(hwnd, &placement) == 0)
+  if (GetWindowPlacement(hwnd, &placement) == 0) {
     return UNKNONW;
-  if (placement.showCmd == SW_MINIMIZE || placement.showCmd == SW_SHOWMINIMIZED || IsIconic(hwnd))
+  }
+  if (placement.showCmd == SW_MINIMIZE || placement.showCmd == SW_SHOWMINIMIZED || IsIconic(hwnd)) {
     return MINIMIZED;
-  if (placement.showCmd == SW_MAXIMIZE || placement.showCmd == SW_SHOWMAXIMIZED)
+  }
+  if (placement.showCmd == SW_MAXIMIZE || placement.showCmd == SW_SHOWMAXIMIZED) {
     return MAXIMIZED;
+  }
   auto rectp = get_window_pos(hwnd);
-  if (!rectp)
+  if (!rectp) {
     return UNKNONW;
+  }
   auto rect = *rectp;
   MONITORINFO monitor;
   monitor.cbSize = sizeof(MONITORINFO);

@@ -7,35 +7,35 @@
 #include <sstream>
 #include <signal.h>
 
-static IMAGEHLP_SYMBOL64* p_symbol = (IMAGEHLP_SYMBOL64*)malloc(sizeof(IMAGEHLP_SYMBOL64) + MAX_PATH * sizeof(TCHAR));
+static IMAGEHLP_SYMBOL64* p_symbol = (IMAGEHLP_SYMBOL64*)malloc(sizeof(IMAGEHLP_SYMBOL64) + MAX_PATH * sizeof(WCHAR));
 static IMAGEHLP_LINE64 line;
 static bool processing_exception = false;
-static TCHAR module_path[MAX_PATH];
+static WCHAR module_path[MAX_PATH];
 static LPTOP_LEVEL_EXCEPTION_FILTER default_top_level_exception_handler = NULL;
 
-static const TCHAR* exception_description(const DWORD& code) {
+static const WCHAR* exception_description(const DWORD& code) {
   switch (code) {
-  case EXCEPTION_ACCESS_VIOLATION:         return TEXT("EXCEPTION_ACCESS_VIOLATION");
-  case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:    return TEXT("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
-  case EXCEPTION_BREAKPOINT:               return TEXT("EXCEPTION_BREAKPOINT");
-  case EXCEPTION_DATATYPE_MISALIGNMENT:    return TEXT("EXCEPTION_DATATYPE_MISALIGNMENT");
-  case EXCEPTION_FLT_DENORMAL_OPERAND:     return TEXT("EXCEPTION_FLT_DENORMAL_OPERAND");
-  case EXCEPTION_FLT_DIVIDE_BY_ZERO:       return TEXT("EXCEPTION_FLT_DIVIDE_BY_ZERO");
-  case EXCEPTION_FLT_INEXACT_RESULT:       return TEXT("EXCEPTION_FLT_INEXACT_RESULT");
-  case EXCEPTION_FLT_INVALID_OPERATION:    return TEXT("EXCEPTION_FLT_INVALID_OPERATION");
-  case EXCEPTION_FLT_OVERFLOW:             return TEXT("EXCEPTION_FLT_OVERFLOW");
-  case EXCEPTION_FLT_STACK_CHECK:          return TEXT("EXCEPTION_FLT_STACK_CHECK");
-  case EXCEPTION_FLT_UNDERFLOW:            return TEXT("EXCEPTION_FLT_UNDERFLOW");
-  case EXCEPTION_ILLEGAL_INSTRUCTION:      return TEXT("EXCEPTION_ILLEGAL_INSTRUCTION");
-  case EXCEPTION_IN_PAGE_ERROR:            return TEXT("EXCEPTION_IN_PAGE_ERROR");
-  case EXCEPTION_INT_DIVIDE_BY_ZERO:       return TEXT("EXCEPTION_INT_DIVIDE_BY_ZERO");
-  case EXCEPTION_INT_OVERFLOW:             return TEXT("EXCEPTION_INT_OVERFLOW");
-  case EXCEPTION_INVALID_DISPOSITION:      return TEXT("EXCEPTION_INVALID_DISPOSITION");
-  case EXCEPTION_NONCONTINUABLE_EXCEPTION: return TEXT("EXCEPTION_NONCONTINUABLE_EXCEPTION");
-  case EXCEPTION_PRIV_INSTRUCTION:         return TEXT("EXCEPTION_PRIV_INSTRUCTION");
-  case EXCEPTION_SINGLE_STEP:              return TEXT("EXCEPTION_SINGLE_STEP");
-  case EXCEPTION_STACK_OVERFLOW:           return TEXT("EXCEPTION_STACK_OVERFLOW");
-  default:                                 return TEXT("UNKNOWN EXCEPTION");
+  case EXCEPTION_ACCESS_VIOLATION:         return L"EXCEPTION_ACCESS_VIOLATION";
+  case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:    return L"EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
+  case EXCEPTION_BREAKPOINT:               return L"EXCEPTION_BREAKPOINT";
+  case EXCEPTION_DATATYPE_MISALIGNMENT:    return L"EXCEPTION_DATATYPE_MISALIGNMENT";
+  case EXCEPTION_FLT_DENORMAL_OPERAND:     return L"EXCEPTION_FLT_DENORMAL_OPERAND";
+  case EXCEPTION_FLT_DIVIDE_BY_ZERO:       return L"EXCEPTION_FLT_DIVIDE_BY_ZERO";
+  case EXCEPTION_FLT_INEXACT_RESULT:       return L"EXCEPTION_FLT_INEXACT_RESULT";
+  case EXCEPTION_FLT_INVALID_OPERATION:    return L"EXCEPTION_FLT_INVALID_OPERATION";
+  case EXCEPTION_FLT_OVERFLOW:             return L"EXCEPTION_FLT_OVERFLOW";
+  case EXCEPTION_FLT_STACK_CHECK:          return L"EXCEPTION_FLT_STACK_CHECK";
+  case EXCEPTION_FLT_UNDERFLOW:            return L"EXCEPTION_FLT_UNDERFLOW";
+  case EXCEPTION_ILLEGAL_INSTRUCTION:      return L"EXCEPTION_ILLEGAL_INSTRUCTION";
+  case EXCEPTION_IN_PAGE_ERROR:            return L"EXCEPTION_IN_PAGE_ERROR";
+  case EXCEPTION_INT_DIVIDE_BY_ZERO:       return L"EXCEPTION_INT_DIVIDE_BY_ZERO";
+  case EXCEPTION_INT_OVERFLOW:             return L"EXCEPTION_INT_OVERFLOW";
+  case EXCEPTION_INVALID_DISPOSITION:      return L"EXCEPTION_INVALID_DISPOSITION";
+  case EXCEPTION_NONCONTINUABLE_EXCEPTION: return L"EXCEPTION_NONCONTINUABLE_EXCEPTION";
+  case EXCEPTION_PRIV_INSTRUCTION:         return L"EXCEPTION_PRIV_INSTRUCTION";
+  case EXCEPTION_SINGLE_STEP:              return L"EXCEPTION_SINGLE_STEP";
+  case EXCEPTION_STACK_OVERFLOW:           return L"EXCEPTION_STACK_OVERFLOW";
+  default:                                 return L"UNKNOWN EXCEPTION";
   }
 }
 
@@ -97,7 +97,7 @@ void log_stack_trace(std::wstring& generalErrorDescription) {
     }
   }
   auto errorString = ss.str();
-  MessageBox(NULL, errorString.c_str(), TEXT("Unhandled Error"), MB_OK | MB_ICONERROR);
+  MessageBoxW(NULL, errorString.c_str(), L"Unhandled Error", MB_OK | MB_ICONERROR);
 
 }
 
@@ -106,7 +106,7 @@ LONG WINAPI unhandled_exceptiont_handler(PEXCEPTION_POINTERS info) {
     processing_exception = true;
     try {
       init_symbols();
-      std::wstring ex_description = TEXT("Exception code not available");
+      std::wstring ex_description = L"Exception code not available";
       if (info != NULL && info->ExceptionRecord != NULL && info->ExceptionRecord->ExceptionCode != NULL) {
         ex_description = exception_description(info->ExceptionRecord->ExceptionCode);
       }
@@ -123,7 +123,7 @@ LONG WINAPI unhandled_exceptiont_handler(PEXCEPTION_POINTERS info) {
 
 extern "C" void AbortHandler(int signal_number) {
   init_symbols();
-  std::wstring ex_description = TEXT("SIGABRT was raised.");
+  std::wstring ex_description = L"SIGABRT was raised.";
   log_stack_trace(ex_description);
 }
 

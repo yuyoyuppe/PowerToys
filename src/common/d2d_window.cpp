@@ -4,7 +4,7 @@
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 D2DWindow::D2DWindow() {
-  static const TCHAR* class_name = TEXT("PToyD2DPopup");
+  static const WCHAR* class_name = L"PToyD2DPopup";
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
@@ -12,17 +12,17 @@ D2DWindow::D2DWindow() {
   wc.style = CS_HREDRAW | CS_VREDRAW;
   wc.lpfnWndProc = d2d_window_proc;
   RegisterClass(&wc);
-  hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED,
-                        wc.lpszClassName,
-                        TEXT("PToyD2DPopup"),
-                        WS_POPUP| WS_VISIBLE,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        nullptr, nullptr, wc.hInstance, this);
+  hwnd = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED,
+                         wc.lpszClassName,
+                         L"PToyD2DPopup",
+                         WS_POPUP| WS_VISIBLE,
+                         CW_USEDEFAULT, CW_USEDEFAULT,
+                         CW_USEDEFAULT, CW_USEDEFAULT,
+                         nullptr, nullptr, wc.hInstance, this);
   WINRT_VERIFY(hwnd);
 }
 
-void D2DWindow::show(int x, int y, int width, int height) {
+void D2DWindow::show(UINT x, UINT y, UINT width, UINT height) {
   if (!initialized) {
     base_init();
   }
@@ -81,14 +81,16 @@ void D2DWindow::base_init() {
   initialized = true;
 }
 
-void D2DWindow::base_resize(int width, int height) {
+void D2DWindow::base_resize(UINT width, UINT height) {
   std::unique_lock lock(mutex);
-  if (!initialized)
+  if (!initialized) {
     return;
+  }
   window_width = width;
   window_height = height;
-  if (window_width == 0 || window_height == 0)
+  if (window_width == 0 || window_height == 0) {
     return;
+  }
   DXGI_SWAP_CHAIN_DESC1 sc_description = {};
   sc_description.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
   sc_description.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -172,6 +174,7 @@ LRESULT __stdcall D2DWindow::d2d_window_proc(HWND window, UINT message, WPARAM w
   case WM_MOVE:
   case WM_SIZE:
     this_from_hwnd(window)->base_resize((unsigned)lparam & 0xFFFF, (unsigned)lparam >> 16);
+    // Fall through to call 'base_render()'
   case WM_PAINT:
     this_from_hwnd(window)->base_render();
     return 0;

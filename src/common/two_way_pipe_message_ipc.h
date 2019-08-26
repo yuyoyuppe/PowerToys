@@ -104,7 +104,7 @@ private:
 
     // Send a message to the pipe server. 
 
-    cbToWrite = (lstrlen(message_send)) * sizeof(TCHAR); // no need to send final '\0'. Pipe is in message mode.
+    cbToWrite = (lstrlen(message_send)) * sizeof(WCHAR); // no need to send final '\0'. Pipe is in message mode.
 
     fSuccess = WriteFile(
       output_pipe_handle,                  // pipe handle 
@@ -276,19 +276,16 @@ private:
     DWORD sid_size = SECURITY_MAX_SID_SIZE;
     BYTE medium_sid[SECURITY_MAX_SID_SIZE];
     if (!SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER, SAFER_LEVEL_OPEN, &level_handle, NULL)) {
-      //show_last_error_message(TEXT("Can't create a safer level token"), GetLastError());
       return NULL;
     }
     if (!SaferComputeTokenFromLevel(level_handle, NULL, &restricted_token_handle, 0, NULL)) {
       SaferCloseLevel(level_handle);
-      //show_last_error_message(TEXT("Can't create the restricted token"), GetLastError());
       return NULL;
     }
     SaferCloseLevel(level_handle);
 
     if (!CreateWellKnownSid(WinMediumLabelSid, nullptr, medium_sid, &sid_size)) {
       CloseHandle(restricted_token_handle);
-      //show_last_error_message(TEXT("Can't create a SID for medium integrity"), GetLastError());
       return NULL;
     }
 
@@ -298,7 +295,6 @@ private:
 
     if (!SetTokenInformation(restricted_token_handle, TokenIntegrityLevel, &integrity_level, sizeof(integrity_level))) {
       CloseHandle(restricted_token_handle);
-      //show_last_error_message(TEXT("Can't set the token integrity level to medium"), GetLastError());
       return NULL;
     }
 
@@ -312,9 +308,8 @@ private:
 
     DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
     BOOL fSuccess = FALSE;
-    // Do some extra error checking since the app will keep running even if this
-    // thread fails.
-
+    
+    // Do some extra error checking since the app will keep running even if this thread fails.
     std::list<std::vector<uint8_t>> message_parts;
 
     if (input_pipe_handle == NULL) {
@@ -332,14 +327,15 @@ private:
       // up to BUFSIZE characters in length.
       ZeroMemory(pchRequest, BUFSIZE * sizeof(uint8_t));
       fSuccess = ReadFile(
-        input_pipe_handle,        // handle to pipe 
-        pchRequest,    // buffer to receive data 
-        BUFSIZE * sizeof(uint8_t), // size of buffer 
-        &cbBytesRead, // number of bytes read 
-        NULL);        // not overlapped I/O 
+        input_pipe_handle,          // handle to pipe 
+        pchRequest,                 // buffer to receive data 
+        BUFSIZE * sizeof(uint8_t),  // size of buffer 
+        &cbBytesRead,               // number of bytes read 
+        NULL);                      // not overlapped I/O 
 
-      if (!fSuccess && GetLastError() != ERROR_MORE_DATA)
+      if (!fSuccess && GetLastError() != ERROR_MORE_DATA) {
         break;
+      }
       std::vector<uint8_t> part_vector;
       part_vector.reserve(cbBytesRead);
       std::copy(pchRequest, pchRequest + cbBytesRead, std::back_inserter(part_vector));
@@ -360,8 +356,6 @@ private:
       std::wstring unicode_msg;
       unicode_msg.assign(reinterpret_cast<std::wstring::const_pointer>(reconstructed_message.data()), reconstructed_message.size() / sizeof(std::wstring::value_type));
       input_queue.queue_message(unicode_msg);
-      //checkCPPjson(unicode_msg);
-      //MessageBox(NULL, unicode_msg.c_str(), TEXT("Sent by settings."), MB_OK);
     }
 
     // Flush the pipe to allow the client to read the pipe's contents 
@@ -421,7 +415,6 @@ private:
       }
     }
   }
-
 
   void consume_input_queue_thread() {
     while (!closed) {

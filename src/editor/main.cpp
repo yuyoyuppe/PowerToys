@@ -222,7 +222,7 @@ void receive_message_from_webview(const std::wstring& msg) {
 void initialize_win32_webview() {
   
   // initialize the base_path for the html content relative to the executable.
-  TCHAR executable_path[MAX_PATH];
+  WCHAR executable_path[MAX_PATH];
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
   wcscat_s(executable_path, L"\\settings-html");
@@ -269,7 +269,7 @@ void initialize_win32_webview() {
     });
   }
   catch (hresult_error const& e) {
-    TCHAR message[1024] = L"";
+    WCHAR message[1024] = L"";
     StringCchPrintf(message, ARRAYSIZE(message), L"failed: %ls", e.message().c_str());
     MessageBox(main_window_handler, message, L"Error", MB_OK);
   }
@@ -301,8 +301,8 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     }
     break;
   case WM_CREATE:
-    wm_copydata_webview = RegisterWindowMessage(TEXT("PTSettingsCopyDataWebView"));
-    wm_my_destroy_window = RegisterWindowMessage(TEXT("PTSettingsParentTerminated"));
+    wm_copydata_webview = RegisterWindowMessageW(L"PTSettingsCopyDataWebView");
+    wm_my_destroy_window = RegisterWindowMessageW(L"PTSettingsParentTerminated");
     m_window_created_mutex.unlock();
     break;
   case WM_DPICHANGED:
@@ -376,9 +376,9 @@ int init_instance(HINSTANCE hInstance, int nCmdShow) {
   int wind_height = 700;
   DPIAware::Convert(NULL, wind_width, wind_height);
   
-  main_window_handler = CreateWindow(
-    TEXT("PTSettingsClass"),
-    TEXT("PowerToys Settings"),
+  main_window_handler = CreateWindowW(
+    L"PTSettingsClass",
+    L"PowerToys Settings",
     WS_OVERLAPPEDWINDOW,
     (desktopRect.right - wind_width)/2,
     (desktopRect.bottom - wind_height)/2,
@@ -442,7 +442,7 @@ void read_arguments() {
 }
 
 int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-  //To be unlocked after the Window has finished being created.
+  // To be unlocked after the Window has finished being created.
   m_window_created_mutex.lock();
   read_arguments();
   register_classes(hInstance);

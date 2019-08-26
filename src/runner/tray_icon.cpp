@@ -35,16 +35,15 @@ bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID
   return true;
 }
 
-NOTIFYICONDATA tray_icon_data;
-
+NOTIFYICONDATAW tray_icon_data;
 static bool about_box_shown = false;
 
 LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
   case WM_CREATE:
     tray_icon_hwnd = window;
-    wm_taskbar_restart = RegisterWindowMessage(TEXT("TaskbarCreated"));
-    wm_run_on_main_ui_thread = RegisterWindowMessage(TEXT("RunOnMainThreadCallback"));
+    wm_taskbar_restart = RegisterWindowMessageW(L"TaskbarCreated");
+    wm_run_on_main_ui_thread = RegisterWindowMessage(L"RunOnMainThreadCallback");
     break;
   case WM_DESTROY:
     Shell_NotifyIcon(NIM_DELETE, &tray_icon_data);
@@ -105,12 +104,12 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
 }
 
 void start_tray_icon() {
-  id_tray_icon = wm_icon_notify = RegisterWindowMessage(TEXT("WM_PowerToysIconNotify"));
+  id_tray_icon = wm_icon_notify = RegisterWindowMessageW(L"WM_PowerToysIconNotify");
 
   auto h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   auto icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
 
-  static LPCTSTR class_name = TEXT("PToyTrayIconWindow");
+  static LPCWSTR class_name = L"PToyTrayIconWindow";
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = h_instance;
@@ -119,17 +118,17 @@ void start_tray_icon() {
   wc.lpfnWndProc = tray_icon_window_proc;
   wc.hIcon = icon;
   RegisterClass(&wc);
-  auto hwnd = CreateWindow(wc.lpszClassName,
-                           TEXT("PToyTrayIconWindow"),
-                           WS_OVERLAPPEDWINDOW | WS_POPUP,
-                           CW_USEDEFAULT,
-                           CW_USEDEFAULT,
-                           CW_USEDEFAULT,
-                           CW_USEDEFAULT,
-                           nullptr,
-                           nullptr,
-                           wc.hInstance,
-                           nullptr);
+  auto hwnd = CreateWindowW(wc.lpszClassName,
+                            L"PToyTrayIconWindow",
+                            WS_OVERLAPPEDWINDOW | WS_POPUP,
+                            CW_USEDEFAULT,
+                            CW_USEDEFAULT,
+                            CW_USEDEFAULT,
+                            CW_USEDEFAULT,
+                            nullptr,
+                            nullptr,
+                            wc.hInstance,
+                            nullptr);
   WINRT_VERIFY(hwnd);
 
   memset(&tray_icon_data, 0, sizeof(tray_icon_data));
@@ -138,7 +137,7 @@ void start_tray_icon() {
   tray_icon_data.hWnd = hwnd;
   tray_icon_data.uID = id_tray_icon;
   tray_icon_data.uCallbackMessage = wm_icon_notify;
-  wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip), TEXT("PowerToys"));
+  wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip) / sizeof(WCHAR), L"PowerToys");
   tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
 
   Shell_NotifyIcon(NIM_ADD, &tray_icon_data);

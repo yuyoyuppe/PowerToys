@@ -24,8 +24,8 @@ const DWORD USERNAME_LEN = UNLEN + 1; // User Name + '\0'
 bool enable_auto_start_task_for_this_user() {
   HRESULT hr = S_OK;
 
-  TCHAR username_domain[USERNAME_DOMAIN_LEN];
-  TCHAR username[USERNAME_LEN];
+  WCHAR username_domain[USERNAME_DOMAIN_LEN];
+  WCHAR username[USERNAME_LEN];
 
   std::wstring wstrTaskName;
 
@@ -53,7 +53,7 @@ bool enable_auto_start_task_for_this_user() {
   wstrTaskName += username;
 
   // Get the executable path passed to the custom action.
-  TCHAR wszExecutablePath[MAX_PATH];
+  WCHAR wszExecutablePath[MAX_PATH];
   GetModuleFileName(NULL, wszExecutablePath, MAX_PATH);
 
   // ------------------------------------------------------
@@ -234,7 +234,7 @@ LExit:
 bool disable_auto_start_task_for_this_user() {
   HRESULT hr = S_OK;
 
-  TCHAR username[USERNAME_LEN];
+  WCHAR username[USERNAME_LEN];
   std::wstring wstrTaskName;
 
   ITaskService *pService = NULL;
@@ -299,7 +299,7 @@ LExit:
 bool is_auto_start_task_active_for_this_user(){
   HRESULT hr = S_OK;
 
-  TCHAR username[USERNAME_LEN];
+  WCHAR username[USERNAME_LEN];
   std::wstring wstrTaskName;
 
   ITaskService *pService = NULL;

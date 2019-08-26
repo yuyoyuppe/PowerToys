@@ -12,7 +12,7 @@ const LPWSTR maximize_tooltip_message = (LPWSTR)L"Maximize to new desktop";
 const LPWSTR restore_tooltip_message = (LPWSTR)L"Return to primary desktop";
 
 D2DWindowManagerPopup::D2DWindowManagerPopup() {
-  static const TCHAR* class_name = L"PToyD2DWindowManagerPopup";
+  static const WCHAR* class_name = L"PToyD2DWindowManagerPopup";
   WNDCLASS wc = {};
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   wc.hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);

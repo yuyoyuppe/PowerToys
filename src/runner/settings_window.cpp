@@ -111,14 +111,14 @@ void run_settings_window() {
   HANDLE hToken = NULL;
   STARTUPINFOEX siex = { 0 };
   PPROC_THREAD_ATTRIBUTE_LIST pptal = NULL;
-  TCHAR executable_path[MAX_PATH];
+  WCHAR executable_path[MAX_PATH];
   GetModuleFileName(NULL, executable_path, MAX_PATH);
   PathRemoveFileSpec(executable_path);
-  wcscat_s(executable_path, TEXT("\\PowerToysSettings.exe"));
-  TCHAR executable_args[MAX_PATH * 3];
+  wcscat_s(executable_path, L"\\PowerToysSettings.exe");
+  WCHAR executable_args[MAX_PATH * 3];
   // Generate unique names for the pipes, if getting a UUID is possible
-  std::wstring powertoys_pipe_name(TEXT("\\\\.\\pipe\\powertoys_runner_"));
-  std::wstring settings_pipe_name(TEXT("\\\\.\\pipe\\powertoys_settings_"));
+  std::wstring powertoys_pipe_name(L"\\\\.\\pipe\\powertoys_runner_");
+  std::wstring settings_pipe_name(L"\\\\.\\pipe\\powertoys_settings_");
   SIZE_T size = 0;
   UUID temp_uuid;
   UuidCreate(&temp_uuid);
@@ -136,14 +136,14 @@ void run_settings_window() {
   // powertoys_pipe - PowerToys pipe server.
   // settings_pipe - Settings pipe server.
   // powertoys_pid - PowerToys process pid.
-  wcscpy_s(executable_args, TEXT("\""));
+  wcscpy_s(executable_args, L"\"");
   wcscat_s(executable_args, executable_path);
-  wcscat_s(executable_args, TEXT("\""));
-  wcscat_s(executable_args, TEXT(" "));
+  wcscat_s(executable_args, L"\"");
+  wcscat_s(executable_args, L" ");
   wcscat_s(executable_args, powertoys_pipe_name.c_str());
-  wcscat_s(executable_args, TEXT(" "));
+  wcscat_s(executable_args, L" ");
   wcscat_s(executable_args, settings_pipe_name.c_str());
-  wcscat_s(executable_args, TEXT(" "));
+  wcscat_s(executable_args, L" ");
   wcscat_s(executable_args, std::to_wstring(powertoys_pid).c_str());
 
   // Run the Settings process with non-elevated privileges
@@ -205,7 +205,7 @@ void run_settings_window() {
 
   WaitForSingleObject(process_info.hProcess, INFINITE);
   if (WaitForSingleObject(process_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
-    show_last_error_message(TEXT("Couldn't wait on the Settings Window to close."), GetLastError());
+    show_last_error_message(L"Couldn't wait on the Settings Window to close.", GetLastError());
   }
 
 LExit:

@@ -15,7 +15,7 @@ class D2DWindow
 {
 public:
   D2DWindow();
-  void show(int x, int y, int width, int height);
+  void show(UINT x, UINT y, UINT width, UINT height);
   void hide();
   void initialize();
   virtual ~D2DWindow();
@@ -37,14 +37,14 @@ protected:
   static D2DWindow* this_from_hwnd(HWND window);
   
   void base_init();
-  void base_resize(int width, int height);
+  void base_resize(UINT width, UINT height);
   void base_render();
   void render_empty();
 
   std::recursive_mutex mutex;
   bool initialized = false;
   HWND hwnd;
-  long window_width, window_height;
+  UINT window_width, window_height;
   winrt::com_ptr<ID3D11Device> d3d_device;
   winrt::com_ptr<IDXGIDevice> dxgi_device;
   winrt::com_ptr<IDXGIFactory2> dxgi_factory;
