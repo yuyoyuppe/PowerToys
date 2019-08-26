@@ -1,0 +1,30 @@
+environment:
+  host:
+    os: 'windows'
+    flavor: 'server'
+    version: '2016'
+  runtime:
+    provider: 'appcontainer'
+    image: 'cdpxwinrs4test.azurecr.io/global/vse2017u7-external-azsdk-mobile-ext-win1803:latest-nodetools'
+    source_mode: 'link'
+
+signing_options:
+  profile: 'azure'
+
+restore:
+  commands:
+    - !!defaultcommand
+      name: 'Restore CSharp'
+      command: '.pipelines\restore.cmd'
+      
+build:
+  commands:
+    - !!buildcommand
+      name: 'Build CSharp'
+      command: '.pipelines\build.cmd'
+      artifacts:
+        - from: '**\bin'
+          to: 'Build_Output'
+          include:
+            - '**/*'
+
