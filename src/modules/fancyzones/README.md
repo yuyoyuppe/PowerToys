@@ -1,6 +1,8 @@
 # Fancy Zones
 Fancy Zones is a window manager that is designed to make it easy to arrange and snap windows into efficient layouts for your workflow and also to restore these layouts quickly.  Fancy Zones allows the user to define a set of window locations for a desktop that are drag targets for windows.  When the user drags a window into a zone, the windows is resized and repositioned to fill that zone.  
 
+![Fancy Zones](FancyZones.png)
+
 To get started with Fancy Zones, you need to enable the utility in Power Toys settings and then invoke the Fancy Zones setup UI.  There is a button in settings to invoke this UI, or you can press Win+~ to launch it.  When first launched, the UI presents a list of zone layouts that can be quickly adjusted by how many windows are on the monitor.  Choosing a layout shows a preview of that layout on the monitor.  Pressing the save and close button sets that layout to the monitor.  
 
 The editor also supports creating and saving custom layouts.  This functionality is in the “Custom” tab in the editor UI.  There are two ways to create custom zone layouts, window layout and table layout.  These can also be thought of as additive and subtractive models.  The additive window layout model starts with a blank layout and supports adding zones that can be dragged and resized similar to windows.  
@@ -18,6 +20,7 @@ The backlog for the utility can be found here and the source code is here.
 
 ## Settings
 | Setting | Description |
+| --------- | ------------- |
 | Enable zones while dragging with the shift key | Toggles between auto-snap mode with the shift key disabling snapping during a drag and manual snap mode where pressing the shift key during a drag enables snapping |
 | Override Windows Snap hotkeys (win+arrow) to move between zones | Enables or disables Windows Aero Snapping when Fancy Zones is running |
 | Keep windows in their zones when the screen resolution changes | After a screen resolution change, if this setting is enabled, Fancy Zones will resize and reposition windows into the zones they were previously in |
