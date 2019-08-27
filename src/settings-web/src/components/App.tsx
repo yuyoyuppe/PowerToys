@@ -240,8 +240,6 @@ export class App extends React.Component <any, any> {
                     on_change={this.on_setting_change}
                     ref={(input:any) => {this.settings_screen_ref = input;}}
                     />
-                } else {
-                  return <Spinner size={SpinnerSize.large} label="Loading the Settings..." labelPosition="top" />
                 }
               })()
             }
