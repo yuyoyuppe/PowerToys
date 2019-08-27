@@ -5,9 +5,15 @@ Fancy Zones is a window manager that is designed to make it easy to arrange and 
 
 To get started with Fancy Zones, you need to enable the utility in Power Toys settings and then invoke the Fancy Zones setup UI.  There is a button in settings to invoke this UI, or you can press Win+~ to launch it.  When first launched, the UI presents a list of zone layouts that can be quickly adjusted by how many windows are on the monitor.  Choosing a layout shows a preview of that layout on the monitor.  Pressing the save and close button sets that layout to the monitor.  
 
+![Fancy Zones Picker](Picker.png)
+
 The editor also supports creating and saving custom layouts.  This functionality is in the “Custom” tab in the editor UI.  There are two ways to create custom zone layouts, window layout and table layout.  These can also be thought of as additive and subtractive models.  The additive window layout model starts with a blank layout and supports adding zones that can be dragged and resized similar to windows.  
 
+![Fancy Zones Window Editor Mode](WindowEditor.png)
+
 The subtractive table layout model starts with a table layout and allows zones to be created by splitting and merging zones and then resizing the gutter between zones.  
+
+![Fancy Zones Table Editor Mode](TableEditor.png)
 
 The backlog for the utility can be found here and the source code is here.
 
@@ -30,3 +36,6 @@ The backlog for the utility can be found here and the source code is here.
 | Zone Highlight Color (Default #0078D7) | the color that a zone becomes when it is the active drop target during a window drag 
 | Use new zone editing experience (Preview) | When enabled, the new editor is enabled.  The original editor has better support for multi-mon layouts |  
 | Move newly created windows to the last known zone | Automatically move a newly opened window into the last zone location that application was in |
+
+![Fancy Zones Settings UI](FancyZonesSettings.png)
+
