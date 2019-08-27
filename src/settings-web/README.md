@@ -19,11 +19,8 @@ npm run start
 ### Building and integrating into PowerToys settings project
 
 ```
-npm run build -- --min --production
+npm run build
 ```
-
-Copy the resulting `./dist` to `../editor/settings-html/dist`.
-Also copy `index.html` to `../editor/settings-html/index.html` if you change it.
 
 ## Updating the icons
 
