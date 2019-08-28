@@ -4,32 +4,29 @@ PowerToys is a set of utilities for power users to tune and streamline their Win
 
 Inspired by the [Windows 95 era PowerToys project](https://en.wikipedia.org/wiki/Microsoft_PowerToys), this reboot provides power users with ways to squeeze more efficiency out of the Windows 10 shell and customize it for individual workflows.  A great overview of the Windows 95 PowerToys can be found [here](https://socket3.wordpress.com/2016/10/22/using-windows-95-powertoys/).
 
-The first preview of these utilities and corresponding source code will be released Summer 2019.
+The first preview of these utilities can be installed from [here](https://github.com/Microsoft/powertoys/releases).
 
 ![logo](doc/images/Logo.jpg)
 
 # What's Happening
 
-## June Update
-Since the announcement of the PowerToys reboot at BUILD, the interest in the project has been incredible to see.  Due to the excitement we are optimizing the first preview to make it easy to integrate new utilities into the repo.  We also have two interns working on additional PowerToys.  The specs for these are:
+## September Update
+The first preview release of the Power Toys utilities and source code is now live!  This release includes two utilities as well as the tools and specs to make it easy to create new Power Toys utilities.  
 
+1. [Fancy Zones](/src/modules/fancyzones/) - Fancy Zones is a window manager that makes it easy to create copmlex window layouts and quickly position windows into those layouts.  
+
+![Fancy Zones](src/modules/fancyzones/FancyZones.png)
+
+2. [Windows key shortcut guide](/src/modules/shortcut-guide) - The shortcut guide appears when a user holds the Windows key down for more than one second and shows the available shortcuts for the current state of the desktop.
+
+![Windows key shortcut guide](doc/images/WindowsKeyShortcutGuide.jpg)
+
+Additional utilities in the pipeline are:
+
+* Maximize to new desktop widget - The MTND widget shows a pop-up button when a user hovers over the maximize / restore button on any window.  Clicking it creates a new desktop, sends the app to that desktop and maximizes the app on the new desktop.
 * [Process terminate tool](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/Terminate%20Spec.md)
 * [Batch file renamer](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/File%20Classification%20Spec.md)
 * [Animated gif screen recorder](https://github.com/indierawk2k2/PowerToys-1/blob/master/specs/GIF%20Maker%20Spec.md)
-
-Finally, we are organizing a team to productize an internal window manager into the PowerToys project for the 2019 [One Week Hackathon](https://www.onmsft.com/news/take-a-peek-inside-microsofts-recent-one-week-hackathon).
-
-We are still targeting to release the preview and code during Summer 2019.
-
-## The first two utilities we're working on are:
-
-1. Maximize to new desktop widget - The MTND widget shows a pop-up button when a user hovers over the maximize / restore button on any window.  Clicking it creates a new desktop, sends the app to that desktop and maximizes the app on the new desktop.
-
-![Maximize to new desktop widget](doc/images/MTNDWidget.jpg)
-
-2. Windows key shortcut guide - The shortcut guide appears when a user holds the Windows key down for more than one second and shows the available shortcuts for the current state of the desktop.
-
-![Windows key shortcut guide](doc/images/WindowsKeyShortcutGuide.jpg)
 
 # Backlog
 
