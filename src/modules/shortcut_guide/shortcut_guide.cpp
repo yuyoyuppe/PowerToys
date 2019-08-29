@@ -26,6 +26,7 @@ bool OverlayWindow::get_config(wchar_t* buffer, int *buffer_size) {
 
   PowerToysSettings::Settings settings(hinstance, get_name());
   settings.set_description(L"Shows a help overlay with Windows shortcuts when the Windows key is pressed.");
+  settings.set_overview_link(L"https://github.com/microsoft/PowerToys/blob/master/src/modules/shortcut_guide/README.md");
   settings.set_icon_key(L"pt-shortcut-guide");
 
   settings.add_int_spinner(

@@ -62,7 +62,6 @@ export class CustomSettingsScreen extends React.Component <any, any> {
             this.state.powertoy.hasOwnProperty('overview_link')
             ?
             <Stack horizontal tokens={{childrenGap:5}}>
-              <Text>- Overview:</Text>
               <Link
                 styles = {{
                   root: {
@@ -71,7 +70,7 @@ export class CustomSettingsScreen extends React.Component <any, any> {
                 }}
                 href={this.state.powertoy.overview_link}
                 target='_blank'
-              >link</Link>
+              >Module overview</Link>
             </Stack>
             :
             null
@@ -80,14 +79,13 @@ export class CustomSettingsScreen extends React.Component <any, any> {
             this.state.powertoy.hasOwnProperty('video_link')
             ?
             <Stack horizontal tokens={{childrenGap:5}}>
-              <Text>- Video demo:</Text>
               <Link
                 styles = {{
                   root: {
                     alignSelf:'center'
                   }
                 }}
-                href={this.state.powertoy.video_link} target='_blank'>link</Link>
+                href={this.state.powertoy.video_link} target='_blank'>Video demo</Link>
             </Stack>
             :
             null

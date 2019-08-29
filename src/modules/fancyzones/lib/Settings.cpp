@@ -58,6 +58,7 @@ IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PWSTR buffer, _Out_ in
     // Pass a string literal or a resource id to Settings::set_description().
     settings.set_description(L"Helps organize your windows.");
     settings.set_icon_key(L"pt-fancy-zones");
+    settings.set_overview_link(L"https://github.com/microsoft/PowerToys/blob/master/src/modules/fancyzones/README.md");
 
     for (auto const& setting : m_configBools)
     {
