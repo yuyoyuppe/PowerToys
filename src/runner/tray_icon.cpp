@@ -10,11 +10,13 @@ HWND tray_icon_hwnd = NULL;
 
 // Message code that Windows will use for tray icon notifications.
 UINT wm_icon_notify = 0;
-UINT id_tray_icon = 0;
 
 // Contains the Windows Message for taskbar creation.
 UINT wm_taskbar_restart = 0;
 UINT wm_run_on_main_ui_thread = 0;
+
+NOTIFYICONDATAW tray_icon_data;
+static bool about_box_shown = false;
 
 // Struct to fill with callback and the data. The window_proc is responsible for cleaning it.
 struct run_on_main_ui_thread_msg {
@@ -35,15 +37,14 @@ bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID
   return true;
 }
 
-NOTIFYICONDATAW tray_icon_data;
-static bool about_box_shown = false;
-
 LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
   switch (message) {
   case WM_CREATE:
-    tray_icon_hwnd = window;
-    wm_taskbar_restart = RegisterWindowMessageW(L"TaskbarCreated");
-    wm_run_on_main_ui_thread = RegisterWindowMessage(L"RunOnMainThreadCallback");
+    if (wm_taskbar_restart == 0) {
+      tray_icon_hwnd = window;
+      wm_taskbar_restart = RegisterWindowMessageW(L"TaskbarCreated");
+      wm_run_on_main_ui_thread = RegisterWindowMessage(L"RunOnMainThreadCallback");
+    }
     break;
   case WM_DESTROY:
     Shell_NotifyIcon(NIM_DELETE, &tray_icon_data);
@@ -98,47 +99,51 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         lparam = NULL;
       }
       break;
+    } else if (message == wm_taskbar_restart) {
+      Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+      break;
     }
   }
   return DefWindowProc(window, message, wparam, lparam);
 }
 
 void start_tray_icon() {
-  id_tray_icon = wm_icon_notify = RegisterWindowMessageW(L"WM_PowerToysIconNotify");
-
   auto h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
   auto icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
+  if (icon) {
+    UINT id_tray_icon = wm_icon_notify = RegisterWindowMessageW(L"WM_PowerToysIconNotify");
 
-  static LPCWSTR class_name = L"PToyTrayIconWindow";
-  WNDCLASS wc = {};
-  wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-  wc.hInstance = h_instance;
-  wc.lpszClassName = class_name;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  wc.lpfnWndProc = tray_icon_window_proc;
-  wc.hIcon = icon;
-  RegisterClass(&wc);
-  auto hwnd = CreateWindowW(wc.lpszClassName,
-                            L"PToyTrayIconWindow",
-                            WS_OVERLAPPEDWINDOW | WS_POPUP,
-                            CW_USEDEFAULT,
-                            CW_USEDEFAULT,
-                            CW_USEDEFAULT,
-                            CW_USEDEFAULT,
-                            nullptr,
-                            nullptr,
-                            wc.hInstance,
-                            nullptr);
-  WINRT_VERIFY(hwnd);
+    static LPCWSTR class_name = L"PToyTrayIconWindow";
+    WNDCLASS wc = {};
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hInstance = h_instance;
+    wc.lpszClassName = class_name;
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc = tray_icon_window_proc;
+    wc.hIcon = icon;
+    RegisterClass(&wc);
+    auto hwnd = CreateWindowW(wc.lpszClassName,
+                              L"PToyTrayIconWindow",
+                              WS_OVERLAPPEDWINDOW | WS_POPUP,
+                              CW_USEDEFAULT,
+                              CW_USEDEFAULT,
+                              CW_USEDEFAULT,
+                              CW_USEDEFAULT,
+                              nullptr,
+                              nullptr,
+                              wc.hInstance,
+                              nullptr);
+    WINRT_VERIFY(hwnd);
 
-  memset(&tray_icon_data, 0, sizeof(tray_icon_data));
-  tray_icon_data.cbSize = sizeof(tray_icon_data);
-  tray_icon_data.hIcon = icon;
-  tray_icon_data.hWnd = hwnd;
-  tray_icon_data.uID = id_tray_icon;
-  tray_icon_data.uCallbackMessage = wm_icon_notify;
-  wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip) / sizeof(WCHAR), L"PowerToys");
-  tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+    memset(&tray_icon_data, 0, sizeof(tray_icon_data));
+    tray_icon_data.cbSize = sizeof(tray_icon_data);
+    tray_icon_data.hIcon = icon;
+    tray_icon_data.hWnd = hwnd;
+    tray_icon_data.uID = id_tray_icon;
+    tray_icon_data.uCallbackMessage = wm_icon_notify;
+    wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip) / sizeof(WCHAR), L"PowerToys");
+    tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
 
-  Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+    Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+  }
 }
