@@ -8,15 +8,6 @@ TargetState::TargetState(int ms_delay) : delay(std::chrono::milliseconds(ms_dela
 
 bool TargetState::signal_event(unsigned vk_code, bool key_down) {
   std::unique_lock lock(mutex);
-  // some special case:
-  if (state == Shown && key_down &&
-    (vk_code == VK_OEM_COMMA ||
-      vk_code == 0x4C || // L
-      vk_code == 0x54 || // T
-      (vk_code >= 0x30 && vk_code <= 0x39))) {
-    state = Hidden;
-    return false;
-  }
   if (!events.empty() && events.back().key_down == key_down && events.back().vk_code == vk_code) {
     return false;
   }
@@ -46,9 +37,11 @@ bool TargetState::signal_event(unsigned vk_code, bool key_down) {
 }
 
 void TargetState::was_hiden() {
-  std::lock_guard<std::mutex> lock(mutex);
+  std::unique_lock<std::mutex> lock(mutex);
   state = Hidden;
   events.clear();
+  lock.unlock();
+  cv.notify_one();
 }
 
 void TargetState::exit() {
