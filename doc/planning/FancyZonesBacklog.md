@@ -5,15 +5,16 @@ This file captures the prioritized list of issues the FancyZones team will tackl
 ## v1
 ~~Convert FancyZones to use Power Toys installer and .dll model [148](https://github.com/JaneaSystems/powertoys/issues/148)~~  
 ~~Convert FancyZones to use Power Toys settings infrastructure [147](https://github.com/JaneaSystems/powertoys/issues/147)~~  
+Implement multi-mon support
 Implement test infrastructure for FancyZones [164](https://github.com/JaneaSystems/powertoys/issues/164)  
 Add telemetry to FancyZones [156](https://github.com/JaneaSystems/powertoys/issues/156)  
 ~~Handle work area changes better somehow [135](https://github.com/JaneaSystems/powertoys/issues/135)~~  
-Streamline the win+~ experience for choosing a layout and applying that layout automatically to open windows [155](https://github.com/JaneaSystems/powertoys/issues/155)  
-Make a good vertical 50/50 layout [129](https://github.com/JaneaSystems/powertoys/issues/129)  
-Change editing mode to use windows instead of custom rectangles [154](https://github.com/JaneaSystems/powertoys/issues/154)  
+~~Streamline the win+~ experience for choosing a layout and applying that layout automatically to open windows [155](https://github.com/JaneaSystems/powertoys/issues/155)~~  
+~~Make a good vertical 50/50 layout [129](https://github.com/JaneaSystems/powertoys/issues/129)~~  
+~~Change editing mode to use windows instead of custom rectangles [154](https://github.com/JaneaSystems/powertoys/issues/154)~~  
 
 ## Backlog
-Automatically move windows into previous zone based on appid [126](https://github.com/JaneaSystems/powertoys/issues/126)  
+~~Automatically move windows into previous zone based on appid [126](https://github.com/JaneaSystems/powertoys/issues/126)~~  
 Cycle through windows in a Zone [145](https://github.com/JaneaSystems/powertoys/issues/145)  
 Hitting Esc while dragging should cancel the drag and not move the window into a zone [140](https://github.com/JaneaSystems/powertoys/issues/140)  
 Flash Zones is wayyyy too slow with multiple large monitors [137](https://github.com/JaneaSystems/powertoys/issues/137)  
