@@ -15,7 +15,7 @@ The subtractive table layout model starts with a table layout and allows zones t
 
 ![Fancy Zones Table Editor Mode](TableEditor.png)
 
-The backlog for the utility can be found here and the source code is here.
+The backlog for the utility can be found [here](https://github.com/Microsoft/PowerToys/tree/master/doc/planning/FancyZonesBacklog.md) and the source code is [here](https://github.com/Microsoft/PowerToys/tree/master/src/modules/fancyzones).
 
 ## Shortcut Keys
 | Shortcut      | Action |
