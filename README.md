@@ -11,7 +11,7 @@ The first preview of these utilities can be installed from [here](https://github
 # What's Happening
 
 ## September Update
-The first preview release of the Power Toys utilities and source code is now live!  This release includes two utilities as well as the tools and specs to make it easy to create new Power Toys utilities.  
+The first preview release of the Power Toys utilities and source code is now live!  This release includes two preview quality utilities as well as the tools and docs to make it easy to create new Power Toys utilities.  
 
 1. [Fancy Zones](/src/modules/fancyzones/) - Fancy Zones is a window manager that makes it easy to create copmlex window layouts and quickly position windows into those layouts.  
 
