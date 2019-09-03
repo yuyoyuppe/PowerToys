@@ -61,6 +61,8 @@ IFACEMETHODIMP_(bool) FancyZonesSettings::GetConfig(_Out_ PWSTR buffer, _Out_ in
     // Pass a string literal or a resource id to Settings::set_description().
     settings.set_description(IDS_SETTING_DESCRIPTION);
     settings.set_icon_key(L"pt-fancy-zones");
+    settings.set_overview_link(L"https://github.com/microsoft/PowerToys/blob/master/src/modules/fancyzones/README.md");
+    settings.set_video_link(L"https://youtu.be/X31_kRqOT5o");
 
     // Add a custom action property. When using this settings type, the "PowertoyModuleIface::call_custom_action()"
     // method should be overriden as well.
