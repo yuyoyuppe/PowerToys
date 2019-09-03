@@ -142,12 +142,11 @@ void Trace::ZoneWindow::CycleActiveZoneSet(_In_opt_ winrt::com_ptr<IZoneSet> act
 
 void Trace::ZoneWindow::EditorModeActivity::Start() noexcept
 {
-    m_activity = TraceLoggingActivity<g_hProvider>();
+    m_activity = TraceLoggingActivity<g_hProvider, PROJECT_KEYWORD_MEASURE>();
     TraceLoggingWriteStart(
         m_activity.value(),
         "FancyZones::Activity::EditorMode",
-        ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
-        TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE));
+        ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance));
 }
 
 void Trace::ZoneWindow::EditorModeActivity::Stop(_In_opt_ winrt::com_ptr<IZoneSet> activeSet) noexcept
@@ -157,7 +156,6 @@ void Trace::ZoneWindow::EditorModeActivity::Stop(_In_opt_ winrt::com_ptr<IZoneSe
         m_activity.value(),
         "FancyZones::Activity::EditorMode",
         ProjectTelemetryPrivacyDataTag(ProjectTelemetryTag_ProductAndServicePerformance),
-        TraceLoggingKeyword(PROJECT_KEYWORD_MEASURE),
         TraceLoggingValue(reinterpret_cast<void*>(activeSet.get()), "Active Set"),
         TraceLoggingValue(zoneInfo.NumberOfZones, "NumberOfZones"),
         TraceLoggingValue(zoneInfo.NumberOfWindows, "NumberOfWindows"),

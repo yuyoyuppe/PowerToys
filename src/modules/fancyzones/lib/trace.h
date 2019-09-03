@@ -39,7 +39,7 @@ public:
             void Start() noexcept;
             void Stop(_In_opt_ winrt::com_ptr<IZoneSet> activeSet) noexcept;
         private:
-            std::optional<TraceLoggingActivity<g_hProvider>> m_activity{};
+            std::optional<TraceLoggingActivity<g_hProvider, PROJECT_KEYWORD_MEASURE>> m_activity{};
         };
     };
 };
