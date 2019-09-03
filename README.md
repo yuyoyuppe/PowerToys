@@ -30,18 +30,7 @@ Additional utilities in the pipeline are:
 
 # Backlog
 
-Here's the current set of utilities we're considering.  Please use issues and votes to guide the project to suggest new ideas and help us prioritize the list below.
-
-1. [Full window manager including specific layouts for docking and undocking laptops](https://github.com/microsoft/PowerToys/issues/4)
-2. [Keyboard shortcut manager](https://github.com/microsoft/PowerToys/issues/6)
-3. [Win+R replacement](https://github.com/microsoft/PowerToys/issues/44)
-4. Better Alt+Tab including browser tab integration and search for running apps
-5. [Battery tracker](https://github.com/microsoft/PowerToys/issues/7)
-6. [Batch file re-namer](https://github.com/microsoft/PowerToys/issues/101)
-7. [Quick resolution swaps in taskbar](https://github.com/microsoft/PowerToys/issues/27)
-8. Mouse events without focus
-9. Cmd (or PS or Bash) from here
-10. Contents menu file browsing
+The full backlog of utilities can be found [here](https://github.com/Microsoft/PowerToys/tree/master/doc/planning/PowerToysBacklog.md)
 
 # Where to download PowerToys
 
