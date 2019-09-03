@@ -30,7 +30,7 @@ Additional utilities in the pipeline are:
 
 # Backlog
 
-Here's the current set of utilities we're considering.  Please use issues and +1's to guide the project to suggest new ideas and help us prioritize the list below.
+Here's the current set of utilities we're considering.  Please use issues and votes to guide the project to suggest new ideas and help us prioritize the list below.
 
 1. [Full window manager including specific layouts for docking and undocking laptops](https://github.com/microsoft/PowerToys/issues/4)
 2. [Keyboard shortcut manager](https://github.com/microsoft/PowerToys/issues/6)
