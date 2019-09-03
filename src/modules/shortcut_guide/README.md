@@ -9,11 +9,11 @@ Press and hold the keyboard Windows key for about 1 second, an overlay appears s
 - Common Windows shortcuts.
 - Taskbar shortcuts.
 
-Releasing the Windows key will make the overlay disappear.
+Releasing the Windows key will make the overlay disappear.  If the shortcut guide was visible for less than a second, the start menu will appear after the shortcut guide is dismissed.
 
 ![Image of the Overlay](/doc/images/shortcut_guide/usage.png)
 
-The keyboard shortcuts can be used while the guide is being shown.
+Windows key keyboard shortcuts can be used while the guide is being shown and the result of those shortcuts (active window moved, arrow shortcut behavior changes, etc) will be displayed in the guide.
 
 # Options
 These configurations can be edited from the PowerToys Settings screen:
