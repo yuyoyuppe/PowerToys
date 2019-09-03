@@ -22,8 +22,8 @@ These configurations can be edited from the PowerToys Settings screen:
 
 ![Image of the Options](/doc/images/shortcut_guide/settings.png)
 
-# Known issues
-The Shortcut Guide hasn't been localized yet. Some of the shortcuts shown may not apply to localized Windows versions.
+# Backlog
+The backlog for the utility can be found [here](https://github.com/Microsoft/PowerToys/tree/master/doc/planning/ShortcutGuideBacklog.md) and the source code is [here](https://github.com/Microsoft/PowerToys/tree/master/src/modules/shortcut_guide).
 
 # Code organization
 
