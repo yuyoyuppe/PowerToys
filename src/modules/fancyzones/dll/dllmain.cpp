@@ -29,6 +29,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 // TODO: multimon support, need to pass the HMONITOR from the editor to here instead
 // of using MonitorFromPoint
+// This function is exported and called from FancyZonesEditor.exe to save a layout from the editor.
 STDAPI PersistZoneSet(
     PCWSTR activeKey, // Registry key holding ActiveZoneSet
     PCWSTR resolutionKey, // Registry key for screen resolution
@@ -36,12 +37,41 @@ STDAPI PersistZoneSet(
     int zoneCount, // Number of zones in zones
     int zones[]) // Array of zones serialized in left/top/right/bottom chunks
 {
-    UUID generatedId;
-    if (UuidCreate(&generatedId) == RPC_S_OK)
+    // See if we have already persisted this layout we can update.
+    UUID id{GUID_NULL};
+    if (wil::unique_hkey key{ RegistryHelpers::OpenKey(resolutionKey) })
+    {
+        ZoneSetPersistedData data{};
+        DWORD dataSize = sizeof(data);
+        wchar_t value[256]{};
+        DWORD valueLength = ARRAYSIZE(value);
+        DWORD i = 0;
+        while (RegEnumValueW(key.get(), i++, value, &valueLength, nullptr, nullptr, reinterpret_cast<BYTE*>(&data), &dataSize) == ERROR_SUCCESS)
+        {
+            if (data.LayoutId == layoutId)
+            {
+                if (data.ZoneCount == zoneCount)
+                {
+                    CLSIDFromString(value, &id);
+                    break;
+                }
+            }
+            valueLength = ARRAYSIZE(value);
+            dataSize = sizeof(data);
+        }
+    }
+
+    if (id == GUID_NULL)
+    {
+        // No existing layout found so let's create a new one.
+        UuidCreate(&id);
+    }
+
+    if (id != GUID_NULL)
     {
         winrt::com_ptr<IZoneSet> zoneSet = MakeZoneSet(
             ZoneSetConfig(
-                generatedId,
+                id,
                 layoutId,
                 MonitorFromPoint({}, MONITOR_DEFAULTTOPRIMARY),
                 resolutionKey,
@@ -60,7 +90,7 @@ STDAPI PersistZoneSet(
         zoneSet->Save();
 
         wil::unique_cotaskmem_string zoneSetId;
-        if (SUCCEEDED_LOG(StringFromCLSID(generatedId, &zoneSetId)))
+        if (SUCCEEDED_LOG(StringFromCLSID(id, &zoneSetId)))
         {
             RegistryHelpers::SetString(activeKey, L"ActiveZoneSetId", zoneSetId.get());
         }
@@ -99,6 +129,13 @@ public:
     virtual void set_config(PCWSTR config) override
     {
         m_settings->SetConfig(config);
+    }
+
+    // Signal from the Settings editor to call a custom action.
+    // This can be used to spawn more complex editors.
+    virtual void call_custom_action(const wchar_t* action) override
+    {
+        m_settings->CallCustomAction(action);
     }
 
     // Enable the powertoy

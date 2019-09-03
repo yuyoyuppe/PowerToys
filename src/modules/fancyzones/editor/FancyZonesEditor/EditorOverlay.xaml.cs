@@ -70,6 +70,10 @@ namespace FancyZonesEditor
         {
             InitializeComponent();
             Current = this;
+
+            // TODO: multimon
+            // Need to set Left and Top to the correct monitor based on the
+            // foreground window passed in the command line arguments
             Rect workArea = System.Windows.SystemParameters.WorkArea;
             Left = workArea.Left;
             Top = workArea.Top;

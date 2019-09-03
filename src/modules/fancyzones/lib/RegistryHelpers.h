@@ -44,31 +44,45 @@ namespace RegistryHelpers
         return nullptr;
     }
 
-    inline LSTATUS GetAppLastZone(PCWSTR appPath, _Out_ PINT iZoneIndex)
+    inline LSTATUS GetAppLastZone(HWND window, PCWSTR appPath, _Out_ PINT iZoneIndex)
     {
         *iZoneIndex = -1; 
 
-        wchar_t keyPath[256]{};
-        StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY);
+        LSTATUS res{};
+        if (auto monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONULL))
+        {
+            wchar_t keyPath[256]{};
+            StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s\\%x", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY, monitor);
 
-        DWORD zoneIndex;
-        DWORD dataType = REG_DWORD;
-        DWORD dataSize = sizeof(DWORD);
-        LSTATUS res = SHRegGetUSValueW(keyPath, appPath, &dataType, &zoneIndex, &dataSize, FALSE, nullptr, 0);
-        if (res == ERROR_SUCCESS)
-        { 
-            *iZoneIndex = (INT)zoneIndex;
+            DWORD zoneIndex;
+            DWORD dataType = REG_DWORD;
+            DWORD dataSize = sizeof(DWORD);
+            res = SHRegGetUSValueW(keyPath, appPath, &dataType, &zoneIndex, &dataSize, FALSE, nullptr, 0);
+            if (res == ERROR_SUCCESS)
+            {
+                *iZoneIndex = static_cast<INT>(zoneIndex);
+            }
         }
-
         return res;
     }
 
-    inline void SaveAppLastZone(PCWSTR appPath, DWORD zoneIndex)
+    // Pass -1 for the zoneIndex to delete the entry from the registry
+    inline void SaveAppLastZone(HWND window, PCWSTR appPath, DWORD zoneIndex)
     {
-        wchar_t keyPath[256]{};
-        StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY);
-
-        SHRegSetUSValueW(keyPath, appPath, REG_DWORD, &zoneIndex, sizeof(zoneIndex), SHREGSET_FORCE_HKCU);
+        LSTATUS res{};
+        if (auto monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONULL))
+        {
+            wchar_t keyPath[256]{};
+            StringCchPrintf(keyPath, ARRAYSIZE(keyPath), L"%s\\%s\\%x", REG_SETTINGS, APP_ZONE_HISTORY_SUBKEY, monitor);
+            if (zoneIndex == -1)
+            {
+                SHDeleteValueW(HKEY_CURRENT_USER, keyPath, appPath);
+            }
+            else
+            {
+                SHRegSetUSValueW(keyPath, appPath, REG_DWORD, &zoneIndex, sizeof(zoneIndex), SHREGSET_FORCE_HKCU);
+            }
+        }
     }
 
     inline void GetString(PCWSTR uniqueId, PCWSTR setting, PWSTR value, DWORD cbValue)

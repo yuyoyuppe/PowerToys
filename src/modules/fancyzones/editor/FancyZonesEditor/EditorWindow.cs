@@ -26,14 +26,16 @@ namespace FancyZonesEditor
             {
                 model.Persist(mainEditor.GetZoneRects());
             }
+            _choosing = true;
             this.Close();
+            EditorOverlay.Current.Close();
         }
 
         protected void OnClosed(object sender, EventArgs e)
         {
             if (!_choosing)
             {
-                EditorOverlay.Current.Close();
+                EditorOverlay.Current.ShowLayoutPicker();
             }
         }
 

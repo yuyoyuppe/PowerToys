@@ -7,6 +7,7 @@ public:
         : m_hinstance(hinstance)
     {
         m_settings.attach(settings);
+        m_settings->SetCallback(this);
     }
 
     // IFancyZones
@@ -21,6 +22,7 @@ public:
     IFACEMETHODIMP_(void) VirtualDesktopChanged() noexcept;
     IFACEMETHODIMP_(void) WindowCreated(HWND window) noexcept;
     IFACEMETHODIMP_(bool) OnKeyDown(PKBDLLHOOKSTRUCT info) noexcept;
+    IFACEMETHODIMP_(void) ToggleEditor() noexcept;
 
     // IZoneWindowHost
     IFACEMETHODIMP_(void) ToggleZoneViewers() noexcept;
@@ -69,7 +71,6 @@ private:
     void MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT const& ptScreen, require_write_lock) noexcept;
     void MoveSizeEndInternal(HWND window, POINT const& ptScreen, require_write_lock) noexcept;
     void MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen, require_write_lock) noexcept;
-    void ToggleEditor() noexcept;
 
     const HINSTANCE m_hinstance{};
 
@@ -166,13 +167,13 @@ IFACEMETHODIMP_(void) FancyZones::WindowCreated(HWND window) noexcept
 {
     if (m_settings->GetSettings().appLastZone_moveWindows)
     {
-        wchar_t windowModuleFullPath[MAX_PATH] = { 0 };
-        DWORD modulePathSize = GetProcessPath(window, windowModuleFullPath, (DWORD)MAX_PATH);
+        wchar_t processPath[MAX_PATH] = { 0 };
+        DWORD modulePathSize = GetProcessPath(window, processPath, static_cast<DWORD>(MAX_PATH));
         if (modulePathSize > 0) 
         {
             INT zoneIndex = -1;
-            LRESULT res = RegistryHelpers::GetAppLastZone(windowModuleFullPath, &zoneIndex);
-            if (res == ERROR_SUCCESS && zoneIndex != -1)
+            LRESULT res = RegistryHelpers::GetAppLastZone(window, processPath, &zoneIndex);
+            if ((res == ERROR_SUCCESS) && (zoneIndex != -1))
             {
                 MoveWindowIntoZoneByIndex(window, zoneIndex);
             }
@@ -217,6 +218,69 @@ IFACEMETHODIMP_(bool) FancyZones::OnKeyDown(PKBDLLHOOKSTRUCT info) noexcept
         return true;
     }
     return false;
+}
+
+// IFancyZonesCallback
+void FancyZones::ToggleEditor() noexcept
+{
+    {
+        std::shared_lock readLock(m_lock);
+        if (m_terminateEditorEvent)
+        {
+            SetEvent(m_terminateEditorEvent.get());
+            return;
+        }
+    }
+
+    {
+        std::unique_lock writeLock(m_lock);
+        m_terminateEditorEvent.reset(CreateEvent(nullptr, true, false, nullptr));
+    }
+
+    // TODO: multimon support
+    // Pass in args so that the editor shows up on the correct monitor
+    // This can be an HWND, HMONITOR, or the X/Y/Width/Height of the monitor's work area, (whichever works best).
+    if (const HMONITOR monitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY))
+    {
+        std::shared_lock readLock(m_lock);
+        auto iter = m_zoneWindowMap.find(monitor);
+        if (iter != m_zoneWindowMap.end())
+        {
+            // Pass command line args to the editor to tell it which layout it should pick by default
+            auto activeZoneSet = iter->second->ActiveZoneSet();
+            std::wstring params = iter->second->UniqueId() + L" " + std::to_wstring(activeZoneSet->LayoutId());
+            SHELLEXECUTEINFO sei{ sizeof(sei) };
+            sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
+            sei.lpFile = L"modules\\FancyZonesEditor.exe";
+            sei.lpParameters = params.c_str();
+            sei.nShow = SW_SHOWNORMAL;
+            ShellExecuteEx(&sei);
+
+            // Launch the editor on a background thread
+            // Wait for the editor's process to exit
+            // Post back to the main thread to update
+            std::thread waitForEditorThread([window = m_window, processHandle = sei.hProcess, terminateEditorEvent = m_terminateEditorEvent.get()]()
+            {
+                HANDLE waitEvents[2] = { processHandle, terminateEditorEvent };
+                auto result = WaitForMultipleObjects(2, waitEvents, false, INFINITE);
+                if (result == WAIT_OBJECT_0 + 0)
+                {
+                    // Editor exited
+                    // Update any changes it may have made
+                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Exit));
+                }
+                else if (result == WAIT_OBJECT_0 + 1)
+                {
+                    // User hit Win+~ while editor is already running
+                    // Shut it down
+                    TerminateProcess(processHandle, 2);
+                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Terminate));
+                }
+                CloseHandle(processHandle);
+            });
+            waitForEditorThread.detach();
+        }
+    }
 }
 
 // IZoneWindowHost
@@ -581,6 +645,13 @@ void FancyZones::MoveSizeEndInternal(HWND window, POINT const& ptScreen, require
     else
     {
         ::RemoveProp(window, ZONE_STAMP);
+
+        wchar_t processPath[MAX_PATH]{};
+        DWORD processPathSize = GetProcessPath(window, processPath, static_cast<DWORD>(MAX_PATH));
+        if (processPathSize > 0)
+        {
+            RegistryHelpers::SaveAppLastZone(window, processPath, -1);
+        }
     }
 }
 
@@ -623,66 +694,6 @@ void FancyZones::MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen,
             // Restart the drag on the ZoneWindow that m_windowMoveSize is on
             MoveSizeStartInternal(m_windowMoveSize, monitor, ptScreen, writeLock);
             MoveSizeUpdateInternal(monitor, ptScreen, writeLock);
-        }
-    }
-}
-
-void FancyZones::ToggleEditor() noexcept
-{
-    {
-        std::shared_lock readLock(m_lock);
-        if (m_terminateEditorEvent)
-        {
-            SetEvent(m_terminateEditorEvent.get());
-            return;
-        }
-    }
-
-    {
-        std::unique_lock writeLock(m_lock);
-        m_terminateEditorEvent.reset(CreateEvent(nullptr, true, false, nullptr));
-    }
-
-    // TODO: multimon support
-    if (const HMONITOR monitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY))
-    {
-        std::shared_lock readLock(m_lock);
-        auto iter = m_zoneWindowMap.find(monitor);
-        if (iter != m_zoneWindowMap.end())
-        {
-            // Pass command line args to the editor to tell it which layout it should pick by default
-            auto activeZoneSet = iter->second->ActiveZoneSet();
-            std::wstring params = iter->second->UniqueId() + L" " + std::to_wstring(activeZoneSet->LayoutId());
-            SHELLEXECUTEINFO sei{ sizeof(sei) };
-            sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
-            sei.lpFile = L"modules\\FancyZonesEditor.exe";
-            sei.lpParameters = params.c_str();
-            sei.nShow = SW_SHOWNORMAL;
-            ShellExecuteEx(&sei);
-
-            // Launch the editor on a background thread
-            // Wait for the editor's process to exit
-            // Post back to the main thread to update
-            std::thread waitForEditorThread([window = m_window, processHandle = sei.hProcess, terminateEditorEvent = m_terminateEditorEvent.get()]()
-            {
-                HANDLE waitEvents[2] = { processHandle, terminateEditorEvent };
-                auto result = WaitForMultipleObjects(2, waitEvents, false, INFINITE);
-                if (result == WAIT_OBJECT_0 + 0)
-                {
-                    // Editor exited
-                    // Update any changes it may have made
-                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Exit));
-                }
-                else if (result == WAIT_OBJECT_0 + 1)
-                {
-                    // User hit Win+~ while editor is already running
-                    // Shut it down
-                    TerminateProcess(processHandle, 2);
-                    PostMessage(window, WM_PRIV_EDITOR, 0, static_cast<LPARAM>(EditorExitKind::Terminate));
-                }
-                CloseHandle(processHandle);
-            });
-            waitForEditorThread.detach();
         }
     }
 }

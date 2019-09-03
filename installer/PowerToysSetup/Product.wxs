@@ -215,6 +215,7 @@
       </Component>
       <Component Id="Module_FancyZones" Guid="C6B5272E-6ED4-4B80-B0E7-2FF0355D8CF4" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\fancyzones.dll" KeyPath="yes" />
+        <File Source="$(var.BinX64Dir)\modules\fancyzoneseditor.exe" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="SettingsHtmlInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\">
@@ -269,8 +270,8 @@
     </DirectoryRef>
   </Fragment>
 
-	<Fragment>
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <ComponentRef Id="powertoys_exe" />
       <ComponentRef Id="License_rtf" />
       <ComponentRef Id="PowerToysSvgs" />

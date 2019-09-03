@@ -210,6 +210,7 @@ namespace FancyZonesEditor.Models
 
                 string uniqueId = args[1];
 
+                // TODO: multimon
                 double height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
                 double width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
                 var key = width.ToString() + "_" + height.ToString();

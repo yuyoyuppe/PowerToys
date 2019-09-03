@@ -98,8 +98,10 @@ namespace FancyZonesEditor
         }
 
         private static int c_zIndex = 0;
-        private static Rect c_workArea = System.Windows.SystemParameters.WorkArea;
 
+        // TODO: multimon
+        // This needs to be the work area of the monitor we get launched on
+        private static Rect c_workArea = System.Windows.SystemParameters.WorkArea;
 
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {

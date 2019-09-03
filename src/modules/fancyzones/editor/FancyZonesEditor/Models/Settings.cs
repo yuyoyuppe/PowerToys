@@ -46,7 +46,7 @@ namespace FancyZonesEditor
             _priorityGridModel = new GridLayoutModel("Priority Grid", c_priorityGridModelId);
             _defaultModels.Add(_priorityGridModel);
 
-            _blankCustomModel = new CanvasLayoutModel("Start Blank", c_blankCustomModelId, (int)workArea.Width, (int)workArea.Height);
+            _blankCustomModel = new CanvasLayoutModel("Create new custom", c_blankCustomModelId, (int)workArea.Width, (int)workArea.Height);
 
             _zoneCount = (int)Registry.GetValue(FullRegistryPath, "ZoneCount", 3);
             _spacing = (int)Registry.GetValue(FullRegistryPath, "Spacing", 16);

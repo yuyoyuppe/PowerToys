@@ -180,11 +180,8 @@ IFACEMETHODIMP ZoneWindow::ShowZoneWindow(bool activate, bool fadeIn) noexcept
 
         if (fadeIn)
         {
-            std::thread([window = m_window.get(), duration = m_showAnimationDuration]()
-                {
-                    AnimateWindow(window, duration, AW_BLEND);
-                    InvalidateRect(window, nullptr, true);
-                }).detach();
+            AnimateWindow(m_window.get(), m_showAnimationDuration, AW_BLEND);
+            InvalidateRect(m_window.get(), nullptr, true);
         }
 
         return S_OK;
@@ -345,25 +342,8 @@ void ZoneWindow::InitializeZoneSets() noexcept
     LoadZoneSetsFromRegistry();
     if (m_zoneSets.empty())
     {
-        int const paddingOuter = 40;
-        int const paddingInner = 20;
-
-        for (int numZones = 2; numZones <= 5; numZones++)
-        {
-            AddZoneSet(ZoneSetLayout::Focus, numZones, paddingOuter, paddingInner);
-        }
-
-        for (int numZones = 1; numZones <= 9; numZones++)
-        {
-            AddZoneSet(ZoneSetLayout::Grid, numZones, paddingOuter, paddingInner);
-            AddZoneSet(ZoneSetLayout::Grid, numZones, 0, 0);
-        }
-
-        for (int numZones = 3; numZones <= 6; numZones++)
-        {
-            AddZoneSet(ZoneSetLayout::Row, numZones, paddingOuter, paddingInner);
-            AddZoneSet(ZoneSetLayout::Row, numZones, 0, 0);
-        }
+        // Add a "maximize" zone as the only default layout.
+        AddZoneSet(ZoneSetLayout::Grid, 1, 0, 0);
     }
 
     if (!m_activeZoneSet)
@@ -1122,6 +1102,7 @@ void ZoneWindow::ChooseDefaultActiveZoneSet() noexcept
 
         if ((monitorRect.width() == 3840) && (monitorRect.height() == 2160))
         {
+            // For 4k screens, pick a layout with 5 zones in focus mode as the default.
             winrt::com_ptr<IZoneSet> zoneSetBest;
             for (auto zoneSet : m_zoneSets)
             {
@@ -1145,8 +1126,9 @@ void ZoneWindow::ChooseDefaultActiveZoneSet() noexcept
                 UpdateActiveZoneSet(zoneSetBest.get());
             }
         }
-        else if (monitorRect.aspectRatio() < 40) // ultrawide
+        else if (monitorRect.aspectRatio() < 40)
         {
+            // Ultrawide, prefer 3 columns
             winrt::com_ptr<IZoneSet> zoneSetBest;
             for (auto zoneSet : m_zoneSets)
             {
@@ -1170,18 +1152,13 @@ void ZoneWindow::ChooseDefaultActiveZoneSet() noexcept
                 UpdateActiveZoneSet(zoneSetBest.get());
             }
         }
-        else
-        {
-            for (auto zoneSet : m_zoneSets)
-            {
-                auto zones = zoneSet->GetZones();
-                if (zones.size() == 1)
-                {
-                    UpdateActiveZoneSet(zoneSet.get());
-                    break;
-                }
-            }
-        }
+    }
+
+    if (!m_activeZoneSet)
+    {
+        // Couldn't find a ZoneSet to use so just use the first one.
+        auto zoneSet = m_zoneSets.at(0);
+        UpdateActiveZoneSet(zoneSet.get());
     }
 }
 
@@ -1274,14 +1251,14 @@ int ZoneWindow::GetSwitchButtonIndexFromPoint(POINT ptClient) noexcept
 
 IFACEMETHODIMP_(void) ZoneWindow::SaveWindowProcessToZoneIndex(HWND window) noexcept
 {
-    wchar_t windowProcessPath[MAX_PATH] = { 0 };
-    DWORD processPathSize = GetProcessPath(window, windowProcessPath, static_cast<DWORD>(MAX_PATH));
+    wchar_t processPath[MAX_PATH] = { 0 };
+    DWORD processPathSize = GetProcessPath(window, processPath, static_cast<DWORD>(MAX_PATH));
     if (processPathSize > 0)
     {
         DWORD zoneIndex = static_cast<DWORD>(m_activeZoneSet->GetZoneIndexFromWindow(window));
         if (zoneIndex != -1)
         {
-            RegistryHelpers::SaveAppLastZone(windowProcessPath, zoneIndex);
+            RegistryHelpers::SaveAppLastZone(window, processPath, zoneIndex);
         }
     }
 }
@@ -1328,23 +1305,4 @@ winrt::com_ptr<IZoneWindow> MakeZoneWindow(IZoneWindowHost* host, HINSTANCE hins
     PCWSTR deviceId, PCWSTR virtualDesktopId, bool flashZones) noexcept
 {
     return winrt::make_self<ZoneWindow>(host, hinstance, monitor, deviceId, virtualDesktopId, flashZones);
-}
-
-DWORD GetProcessPath(HWND window, LPWSTR processPath, DWORD processPathMaxSize) noexcept
-{
-    DWORD procId = 0;
-    GetWindowThreadProcessId(window, &procId);
-
-    DWORD numCopiedChars = 0;
-    HANDLE windowProcessHandler = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, TRUE, procId);
-    if (windowProcessHandler != nullptr && windowProcessHandler != INVALID_HANDLE_VALUE)
-    {
-        // numCopiedChars first holds the size of processPath[], will then hold amount of characters returned by QueryFullProcessImageNameW
-        // if QueryFullProcessImageNameW fails, numCopiedChars will be zero.
-        numCopiedChars = processPathMaxSize; 
-        QueryFullProcessImageNameW(windowProcessHandler, 0, processPath, &numCopiedChars);
-        CloseHandle(windowProcessHandler);
-    }
-
-    return numCopiedChars;
 }

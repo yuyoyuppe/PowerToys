@@ -133,3 +133,20 @@ inline void ParseDeviceId(PCWSTR deviceId, PWSTR parsedId, size_t size)
         StringCchCopy(parsedId, size, L"FallbackDevice");
     }
 }
+
+inline DWORD GetProcessPath(HWND window, LPWSTR processPath, DWORD processPathMaxSize) noexcept
+{
+    DWORD pid{};
+    GetWindowThreadProcessId(window, &pid);
+
+    DWORD numCopiedChars = 0;
+    wil::unique_handle windowProcessHandle(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, TRUE, pid));
+    if (windowProcessHandle && (windowProcessHandle.get() != INVALID_HANDLE_VALUE))
+    {
+        // numCopiedChars first holds the size of processPath[], will then hold amount of characters returned by QueryFullProcessImageNameW
+        // if QueryFullProcessImageNameW fails, numCopiedChars will be zero.
+        numCopiedChars = processPathMaxSize;
+        QueryFullProcessImageNameW(windowProcessHandle.get(), 0, processPath, &numCopiedChars);
+    }
+    return numCopiedChars;
+}
