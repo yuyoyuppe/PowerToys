@@ -71,7 +71,7 @@ Here's the current set of utilities we're considering.  Please use issues and +1
   The following configuration issue only applies if the user is a member of the Administrators group.
   
   Some PowerToys modules require to run with the highest permission level if the current user is a member of the Administrators group. The highest permission level is required in order to be able to perform some actions when an elevated application (e.g. Task Manager) is in the foreground or is the target of an action. Without elevated privileges some PowerToys modules will still work but with some limitations:
- - the `Maximize to New Desktop` module will be able to move an elevated window to a new desktop but it will not be able to maximize it.
+ - the `Fancy Zones` module will be not be able to move an elevated window to a zone.
  - the `Shortcut Guide` module will not appear if the foreground window belongs to an elevated application.
  
  In order to run and debug PowerToys from Visual Studio when the user is a member of the Administrators group, Visual Studio has to be started with elevated privileges. If you want to avoid running Visual Studio with elevated privileges and don't mind the limitations described above, you can do the following: open the `runner` project properties and navigate to the `Linker -> Manifest File` settings, edit the `UAC Execution Level` property and change it from `highestAvailable (/level='highestAvailable')` to `asInvoker (/level='asInvoker')`, save the changes.
