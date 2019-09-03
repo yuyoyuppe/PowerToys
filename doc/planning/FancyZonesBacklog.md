@@ -4,7 +4,7 @@ This file captures the prioritized list of issues the FancyZones team will tackl
 
 ## On deck
 Implement multi-mon editor support [331](https://github.com/JaneaSystems/powertoys/issues/331)  
-Add telemetry to new edito [332](https://github.com/JaneaSystems/powertoys/issues/332)  
+Add telemetry to new editor [332](https://github.com/JaneaSystems/powertoys/issues/332)  
 
 ## Backlog
 Add tests to the new editor [333](https://github.com/JaneaSystems/powertoys/issues/333)  
