@@ -50,7 +50,7 @@
     <Property Id="CREATESCHEDULEDTASK" Value="1"/>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch PowerToys" />
-    <Property Id="WixShellExecTarget" Value="[#powertoys.exe]" />
+    <Property Id="WixShellExecTarget" Value="[#PowerToys.exe]" />
     <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
 
     <InstallExecuteSequence>
@@ -72,7 +72,7 @@
 
     <CustomAction Id="SetRegisterPowerToysSchTaskParam"
                   Property="RegisterPowerToysSchTask"
-                  Value="[#powertoys.exe]" />
+                  Value="[#PowerToys.exe]" />
 
     <!-- Needs to Impersonate="no" and Execute="deferred" in order to run elevated. -->
     <CustomAction Id="RegisterPowerToysSchTask"
@@ -148,9 +148,9 @@
                   DllEntry="TelemetryLogRepairFailCA"
                    />
 
-    <!-- Close 'powertoys.exe' before uninstall-->
+    <!-- Close 'PowerToys.exe' before uninstall-->
     <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
-    <util:CloseApplication CloseMessage="yes" Target="powertoys.exe" ElevatedCloseMessage="yes" RebootPrompt="no" TerminateProcess="0" />
+    <util:CloseApplication CloseMessage="yes" Target="PowerToys.exe" ElevatedCloseMessage="yes" RebootPrompt="no" TerminateProcess="0" />
   </Product>
 
   <Fragment>
@@ -178,7 +178,7 @@
   <Fragment>
     <DirectoryRef Id="INSTALLFOLDER" FileSource="$(var.BinX64Dir)">
       <Component Id="powertoys_exe" Guid="A2C66D91-3485-4D00-B04D-91844E6B345B" Win64="yes">
-        <File Id="powertoys.exe" KeyPath="yes" Checksum="yes" />
+        <File Id="PowerToys.exe" KeyPath="yes" Checksum="yes" />
       </Component>
       <Component Id="settings_exe" Guid="A5A461A9-7097-4CBA-9D39-3DBBB6B7B80C" Win64="yes">
         <File Id="PowerToysSettings.exe" KeyPath="yes" Checksum="yes" />
@@ -215,7 +215,10 @@
       </Component>
       <Component Id="Module_FancyZones" Guid="C6B5272E-6ED4-4B80-B0E7-2FF0355D8CF4" Win64="yes">
         <File Source="$(var.BinX64Dir)\modules\fancyzones.dll" KeyPath="yes" />
-        <File Source="$(var.BinX64Dir)\modules\fancyzoneseditor.exe" />
+        <File Source="$(var.BinX64Dir)\modules\FancyZonesEditor.exe" />
+        <File Source="$(var.BinX64Dir)\modules\ControlzEx.dll" />
+        <File Source="$(var.BinX64Dir)\modules\MahApps.Metro.dll" />
+        <File Source="$(var.BinX64Dir)\modules\Microsoft.Xaml.Behaviors.dll" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="SettingsHtmlInstallFolder" FileSource="$(var.RepoDir)\editor\settings-html\">
@@ -235,7 +238,7 @@
         <Shortcut Id="ApplicationStartMenuShortcut"
                   Name="PowerToys"
                   Description="PowerToys - Windows system utilities to maximize productivity"
-                  Target="[!powertoys.exe]"
+                  Target="[!PowerToys.exe]"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="powertoys.ico"
                   IconIndex="0"/>
@@ -262,7 +265,7 @@
         <Shortcut Id="DesktopShortcutId"
                   Name="PowerToys"
                   Description="PowerToys - Windows system utilities to maximize productivity"
-                  Target="[!powertoys.exe]"
+                  Target="[!PowerToys.exe]"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="powertoys.ico"
                   Directory="DesktopFolder"/>
