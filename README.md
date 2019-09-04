@@ -35,7 +35,8 @@ The full backlog of utilities can be found [here](https://github.com/Microsoft/P
 # Where to download PowerToys
 
   The latest release of PowerToys can be downloaded from https://github.com/microsoft/PowerToys/releases <br />
-  Click on `Assets` to show the files available in the release and then click on `PowerToysSetup.msi` to download the PowerToys installer.
+  Click on `Assets` to show the files available in the release and then click on `PowerToysSetup.msi` to download the PowerToys installer. <br />
+  PDB symbols for the release are available in a separate zip file `PDB symbols.zip`.
 
 # Developer Guidance
 
