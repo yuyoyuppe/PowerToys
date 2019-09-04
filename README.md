@@ -17,7 +17,7 @@ The first preview release of the Power Toys utilities and source code is now liv
 
 ![Fancy Zones](src/modules/fancyzones/FancyZones.png)
 
-2. [Windows key shortcut guide](/src/modules/shortcut-guide) - The shortcut guide appears when a user holds the Windows key down for more than one second and shows the available shortcuts for the current state of the desktop.  The shortcut guide backlog can be found [here](https://github.com/Microsoft/PowerToys/tree/master/doc/planning/ShortcutGuideBacklog.md)
+2. [Windows key shortcut guide](/src/modules/shortcut_guide) - The shortcut guide appears when a user holds the Windows key down for more than one second and shows the available shortcuts for the current state of the desktop.  The shortcut guide backlog can be found [here](https://github.com/Microsoft/PowerToys/tree/master/doc/planning/ShortcutGuideBacklog.md)
 
 ![Windows key shortcut guide](doc/images/WindowsKeyShortcutGuide.jpg)
 
