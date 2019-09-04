@@ -1,6 +1,6 @@
 import React from 'react';
 import {BaseSettingsControl} from './BaseSettingsControl';
-import {Label, Stack, PrimaryButton, TextField} from 'office-ui-fabric-react';
+import {Label, Stack, PrimaryButton, Text } from 'office-ui-fabric-react';
 
 export class CustomActionSettingsControl extends BaseSettingsControl {
   colorpickerref:any = null;
@@ -32,32 +32,12 @@ export class CustomActionSettingsControl extends BaseSettingsControl {
         <Label>{this.state.property_values.display_name}</Label>
         {
           this.state.property_values.value ?
-          <TextField
-            styles = {{
+            <Text styles ={{
               root: {
-                paddingBottom: '5px',
-              },
-              fieldGroup: {
-                minHeight: '0px',
-                borderColor: '#d0d0d0',
-                selectors: {
-                  '&:hover': {
-                    borderColor: '#d0d0d0'
-                  }
-                }
-              },
-              field: {
-                height: '0px' // To override the initial height set by fabric for a multiline textfield.
+                paddingBottom: '0.5em'
               }
-            }}
-            multiline={true}
-            borderless={false}
-            autoAdjustHeight={true}
-            readOnly={true}
-            resizable={false}
-            value={this.state.property_values.value}
-          /> :
-          <span/>
+            }}>{this.state.property_values.value}</Text>
+          : <span/>
         }
         <PrimaryButton
             styles={{
