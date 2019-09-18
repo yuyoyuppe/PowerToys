@@ -35,7 +35,7 @@ bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID
   wnd_msg->_callback = _callback;
   wnd_msg->data = data;
 
-  PostMessage(tray_icon_hwnd, wm_run_on_main_ui_thread, 0, (LPARAM)wnd_msg);
+  WINRT_VERIFY(PostMessage(tray_icon_hwnd, wm_run_on_main_ui_thread, 0, (LPARAM)wnd_msg));
 
   return true;
 }
@@ -50,7 +50,7 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
     }
     break;
   case WM_DESTROY:
-    Shell_NotifyIcon(NIM_DELETE, &tray_icon_data);
+    WINRT_VERIFY(Shell_NotifyIcon(NIM_DELETE, &tray_icon_data));
     PostQuitMessage(0);
     break;
   case WM_CLOSE:
@@ -89,14 +89,16 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         {
           if (!h_menu) {
             h_menu = LoadMenu(reinterpret_cast<HINSTANCE>(&__ImageBase), MAKEINTRESOURCE(ID_TRAY_MENU));
+            WINRT_VERIFY(h_menu);
           }
           if (!h_sub_menu) {
             h_sub_menu = GetSubMenu(h_menu, 0);
+            WINRT_VERIFY(h_sub_menu);
           }
           POINT mouse_pointer;
-          GetCursorPos(&mouse_pointer);
-          SetForegroundWindow(window); // Needed for the context menu to disappear.
-          TrackPopupMenu(h_sub_menu, TPM_CENTERALIGN|TPM_BOTTOMALIGN, mouse_pointer.x, mouse_pointer.y, 0, window, nullptr);
+          WINRT_VERIFY(GetCursorPos(&mouse_pointer));
+          WINRT_VERIFY(SetForegroundWindow(window)); // Needed for the context menu to disappear.
+          WINRT_VERIFY(TrackPopupMenu(h_sub_menu, TPM_CENTERALIGN|TPM_BOTTOMALIGN, mouse_pointer.x, mouse_pointer.y, 0, window, nullptr));
         }
         break;
       }
@@ -109,7 +111,7 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
       }
       break;
     } else if (message == wm_taskbar_restart) {
-      Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+      WINRT_VERIFY(Shell_NotifyIcon(NIM_ADD, &tray_icon_data));
       break;
     }
   }
@@ -118,10 +120,12 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
 
 void start_tray_icon() {
   auto h_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+  WINRT_VERIFY(h_instance);
   auto icon = LoadIcon(h_instance, MAKEINTRESOURCE(APPICON));
+  WINRT_VERIFY(icon);
   if (icon) {
     UINT id_tray_icon = wm_icon_notify = RegisterWindowMessageW(L"WM_PowerToysIconNotify");
-
+    WINRT_VERIFY(id_tray_icon);
     static LPCWSTR class_name = L"PToyTrayIconWindow";
     WNDCLASS wc = {};
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -130,7 +134,7 @@ void start_tray_icon() {
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = tray_icon_window_proc;
     wc.hIcon = icon;
-    RegisterClass(&wc);
+    WINRT_VERIFY(RegisterClass(&wc));
     auto hwnd = CreateWindowW(wc.lpszClassName,
                               L"PToyTrayIconWindow",
                               WS_OVERLAPPEDWINDOW | WS_POPUP,
@@ -153,6 +157,6 @@ void start_tray_icon() {
     wcscpy_s(tray_icon_data.szTip, sizeof(tray_icon_data.szTip) / sizeof(WCHAR), L"PowerToys");
     tray_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
 
-    Shell_NotifyIcon(NIM_ADD, &tray_icon_data);
+    WINRT_VERIFY(Shell_NotifyIcon(NIM_ADD, &tray_icon_data));
   }
 }

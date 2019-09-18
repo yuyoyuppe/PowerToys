@@ -112,8 +112,8 @@ void run_settings_window() {
   STARTUPINFOEX siex = { 0 };
   PPROC_THREAD_ATTRIBUTE_LIST pptal = NULL;
   WCHAR executable_path[MAX_PATH];
-  GetModuleFileName(NULL, executable_path, MAX_PATH);
-  PathRemoveFileSpec(executable_path);
+  WINRT_VERIFY(GetModuleFileName(NULL, executable_path, MAX_PATH));
+  WINRT_VERIFY(PathRemoveFileSpec(executable_path));
   wcscat_s(executable_path, L"\\PowerToysSettings.exe");
   WCHAR executable_args[MAX_PATH * 3];
   // Generate unique names for the pipes, if getting a UUID is possible
@@ -121,9 +121,9 @@ void run_settings_window() {
   std::wstring settings_pipe_name(L"\\\\.\\pipe\\powertoys_settings_");
   SIZE_T size = 0;
   UUID temp_uuid;
-  UuidCreate(&temp_uuid);
-  wchar_t* uuid_chars;
-  UuidToString(&temp_uuid, (RPC_WSTR*)&uuid_chars);
+  WINRT_VERIFY_(RPC_S_OK, UuidCreate(&temp_uuid));
+  wchar_t* uuid_chars = nullptr;
+  WINRT_VERIFY_(RPC_S_OK, UuidToString(&temp_uuid, (RPC_WSTR*)&uuid_chars));
   if (uuid_chars != NULL) {
     powertoys_pipe_name += std::wstring(uuid_chars);
     settings_pipe_name += std::wstring(uuid_chars);

@@ -15,17 +15,20 @@
 void chdir_current_executable() {
   // Change current directory to the path of the executable.
   WCHAR executable_path[MAX_PATH];
-  GetModuleFileName(NULL, executable_path, MAX_PATH);
-  PathRemoveFileSpec(executable_path);
+  WINRT_VERIFY(GetModuleFileName(NULL, executable_path, MAX_PATH));
+  WINRT_VERIFY(PathRemoveFileSpec(executable_path));
   if(!SetCurrentDirectory(executable_path)) {
     show_last_error_message(L"Change Directory to Executable Path", GetLastError());
   }
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
+  init_debug_trace_runner();
+  trace_bool(is_process_elevated(), "is elevated");
+
   WCHAR username[UNLEN + 1];
   DWORD username_length = UNLEN + 1;
-  GetUserNameW(username, &username_length);
+  WINRT_VERIFY(GetUserNameW(username, &username_length));
   auto runner_mutex = CreateMutexW(NULL, TRUE, (std::wstring(L"Local\\PowerToyRunMutex") + username).c_str());
   if (runner_mutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
     // The app is already running
@@ -42,7 +45,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   start_tray_icon();
   int result;
   try {
-
     // Singletons initialization order needs to be preserved, first events and
     // then modules to guarantee the reverse destruction order.
     powertoys_events();
@@ -56,10 +58,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
       L"fancyzones.dll" 
     };
     for (auto& file : std::filesystem::directory_iterator(L"modules/")) {
-      if (file.path().extension() != L".dll")
+      if (file.path().extension() != L".dll") {
         continue;
-      if (known_dlls.find(file.path().filename()) == known_dlls.end())
+      }
+      if (known_dlls.find(file.path().filename()) == known_dlls.end()) {
         continue;
+      }
       try {
         auto module = load_powertoy(file.path().wstring());
         modules().emplace(module.get_name(), std::move(module));
@@ -77,5 +81,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     result = -1;
   }
   Trace::UnregisterProvider();
+  close_debug_trace();
   return result;
 }

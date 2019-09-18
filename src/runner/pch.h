@@ -23,4 +23,5 @@
 #include <unordered_set>
 #include <string>
 #include <common/common.h>
+#include <common/debug_trace.h>
 #include <ProjectTelemetry.h>

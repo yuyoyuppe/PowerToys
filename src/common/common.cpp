@@ -3,7 +3,8 @@
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 #include <strsafe.h>
-
+#include "debug_trace.h"
+#include <sddl.h>
 
 std::optional<RECT> get_button_pos(HWND hwnd) {
   RECT button;
@@ -177,4 +178,54 @@ WindowState get_window_state(HWND hwnd) {
   if (top_right) return SNAPED_TOP_RIGHT;
   if (bottom_right) return SNAPED_BOTTOM_RIGHT;
   return RESTORED;
+}
+
+bool is_process_elevated() {
+  HANDLE token = nullptr;
+  bool elevated = false;
+
+  if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+    TOKEN_ELEVATION elevation;
+    DWORD size;
+    if (GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &size)) {
+      elevated = (elevation.TokenIsElevated != 0);
+    }
+  }
+
+  if (token) {
+    CloseHandle(token);
+  }
+
+  return elevated;
+}
+
+void drop_elevated_privileges() {
+  HANDLE token = nullptr;
+  LPCTSTR lpszPrivilege = SE_SECURITY_NAME;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_DEFAULT | WRITE_OWNER, &token)) {
+    trace("OpenProcessToken failed");
+    return;
+  }
+
+  PSID medium_sid = NULL;
+  if (!::ConvertStringSidToSid(SDDL_ML_MEDIUM, &medium_sid)) {
+    trace("ConvertStringSidToSid failed");
+    return;
+  }
+
+  TOKEN_MANDATORY_LABEL label = { 0 };
+  label.Label.Attributes = SE_GROUP_INTEGRITY;
+  label.Label.Sid = medium_sid;
+  DWORD size = (DWORD)sizeof(TOKEN_MANDATORY_LABEL) + ::GetLengthSid(medium_sid);
+
+  BOOL result = SetTokenInformation(token, TokenIntegrityLevel, &label, size);
+  LocalFree(medium_sid);
+  CloseHandle(token);
+
+  if (result) {
+    trace("success");
+  } else {
+    MessageBox(NULL, L"Failed to drop admin privileges.\nPlease report the bug to https://github.com/microsoft/PowerToys/issues.", L"PowerToys Settings Error", MB_OK);
+    exit(1);
+  }
 }
