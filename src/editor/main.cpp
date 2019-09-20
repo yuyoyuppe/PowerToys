@@ -235,6 +235,8 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
     WINRT_VERIFY(asyncwebview);
     asyncwebview.Completed([=](IAsyncOperation<WebViewControl> const& sender, AsyncStatus args) {
       trace("asyncwebview.Completed");
+      trace_bool((sender != nullptr), "asyncwebview.Completed sender");
+      WINRT_VERIFY(sender);
       webview_control = sender.GetResults();
       WINRT_VERIFY(webview_control);
       trace("asyncwebview.Completed step 1");
@@ -494,6 +496,7 @@ int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
   init_debug_trace_settings();
+  trace("revision B");
   
   if (is_process_elevated()) {
     trace("process is elevated");
