@@ -233,61 +233,69 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
     }
     auto asyncwebview = webview_process.CreateWebViewControlAsync((int64_t)main_window_handler, hwnd_client_rect_to_bounds_rect(main_window_handler));
     WINRT_VERIFY(asyncwebview);
-    asyncwebview.Completed([=](IAsyncOperation<WebViewControl> const& sender, AsyncStatus args) {
-      trace("asyncwebview.Completed");
-      trace_bool((sender != nullptr), "asyncwebview.Completed sender");
-      WINRT_VERIFY(sender);
-      webview_control = sender.GetResults();
-      WINRT_VERIFY(webview_control);
-      trace("asyncwebview.Completed step 1");
-      // In order to receive window.external.notify() calls in ScriptNotify
-      webview_control.Settings().IsScriptNotifyAllowed(true);
-      trace("asyncwebview.Completed step 2");
-      webview_control.Settings().IsJavaScriptEnabled(true);
-      
-      trace("asyncwebview.Completed step 3");
-      webview_control.NewWindowRequested([=](IWebViewControl sender_requester, WebViewControlNewWindowRequestedEventArgs args ) {
-        trace("webview_control.NewWindowRequested invoked");
-        // Open the requested link in the default browser registered in the Shell
-        int res = (int)ShellExecute(NULL, L"open", args.Uri().AbsoluteUri().c_str(), NULL, NULL, SW_SHOWNORMAL);
-        WINRT_VERIFY(res > 32);
-      });
-      
-      trace("asyncwebview.Completed step 4");
-      webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
-        trace("webview_control.DOMContentLoaded invoked");
-        // runs when the content has been loaded.
-      });
 
-      trace("asyncwebview.Completed step 5");
-      webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
-        trace("webview_control.ScriptNotify invoked");
-        // content called window.external.notify()
-        std::wstring message_sent = args_script_notify.Value().c_str();
-        receive_message_from_webview(message_sent);
-      });
+    asyncwebview.Completed([=](IAsyncOperation<WebViewControl> const& sender, AsyncStatus status) {
+      if (status == AsyncStatus::Completed) {
+        trace("asyncwebview.Completed OK");
+        WINRT_VERIFY(sender);
+        webview_control = sender.GetResults();
+        WINRT_VERIFY(webview_control);
+        trace("asyncwebview.Completed step 1");
+        // In order to receive window.external.notify() calls in ScriptNotify
+        webview_control.Settings().IsScriptNotifyAllowed(true);
+        trace("asyncwebview.Completed step 2");
+        webview_control.Settings().IsJavaScriptEnabled(true);
 
-      trace("asyncwebview.Completed step 6");
-      webview_control.AcceleratorKeyPressed([&](IWebViewControl sender, WebViewControlAcceleratorKeyPressedEventArgs const& args) {
-        if (args.VirtualKey() == winrt::Windows::System::VirtualKey::F4) {
-          trace("webview_control.AcceleratorKeyPressed invoked");
-          // WebView swallows key-events. Detect Alt-F4 one and close the window manually.
-          webview_control.InvokeScriptAsync(hstring(L"exit_settings_app"), {});
-        }
-      });
+        trace("asyncwebview.Completed step 3");
+        webview_control.NewWindowRequested([=](IWebViewControl sender_requester, WebViewControlNewWindowRequestedEventArgs args) {
+          trace("webview_control.NewWindowRequested invoked");
+          // Open the requested link in the default browser registered in the Shell
+          int res = (int)ShellExecute(NULL, L"open", args.Uri().AbsoluteUri().c_str(), NULL, NULL, SW_SHOWNORMAL);
+          WINRT_VERIFY(res > 32);
+          });
 
-      resize_web_view();
+        trace("asyncwebview.Completed step 4");
+        webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
+          trace("webview_control.DOMContentLoaded invoked");
+          // runs when the content has been loaded.
+          });
+
+        trace("asyncwebview.Completed step 5");
+        webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
+          trace("webview_control.ScriptNotify invoked");
+          // content called window.external.notify()
+          std::wstring message_sent = args_script_notify.Value().c_str();
+          receive_message_from_webview(message_sent);
+          });
+
+        trace("asyncwebview.Completed step 6");
+        webview_control.AcceleratorKeyPressed([&](IWebViewControl sender, WebViewControlAcceleratorKeyPressedEventArgs const& args) {
+          if (args.VirtualKey() == winrt::Windows::System::VirtualKey::F4) {
+            trace("webview_control.AcceleratorKeyPressed invoked");
+            // WebView swallows key-events. Detect Alt-F4 one and close the window manually.
+            webview_control.InvokeScriptAsync(hstring(L"exit_settings_app"), {});
+          }
+          });
+
+        resize_web_view();
 #if defined(_DEBUG) && _DEBUG_WITH_LOCALHOST
-      // navigates to localhost:8080
-      //NavigateToLocalhostReactServer();
+        // navigates to localhost:8080
+        //NavigateToLocalhostReactServer();
 #else
-      // Navigates to settings-html/index.html
-      trace("asyncwebview.Completed step 7");
-      BOOL result = ShowWindow(main_window_handler, nCmdShow);
-      trace_bool(result, "ShowWindow");
-      trace("asyncwebview.Completed step 8");
-      NavigateToUri(L"index.html");
+        // Navigates to settings-html/index.html
+        trace("asyncwebview.Completed step 7");
+        BOOL result = ShowWindow(main_window_handler, nCmdShow);
+        trace_bool(result, "ShowWindow");
+        trace("asyncwebview.Completed step 8");
+        NavigateToUri(L"index.html");
 #endif
+      } else if (status == AsyncStatus::Error ) {
+        trace("asyncwebview.Completed with ERROR");
+      } else if (status == AsyncStatus::Started) {
+        trace("asyncwebview.Completed Started");
+      } else if (status == AsyncStatus::Canceled) {
+        trace("asyncwebview.Completed Canceled");
+      }
     });
   }
   catch (hresult_error const& e) {
