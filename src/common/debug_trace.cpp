@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <sstream>
 
 using namespace std;
 using namespace filesystem;
@@ -44,6 +45,12 @@ void _trace(const char* function, const char* file, const int line, const char* 
     fprintf(file_log, "%s [line %ld] %s: %s\n", file, line, function, message);
     fflush(file_log);
   }
+}
+
+void _trace_hr(const char* function, const char* file, const int line, const char* message, int value) {
+  std::stringstream ss;
+  ss << message << " 0x" << std::hex << value;
+  _trace(function, file, line, ss.str().c_str());
 }
 
 void _trace_last_error(const char* function, const char* file, const int line, const char* message) {
