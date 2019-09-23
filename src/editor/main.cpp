@@ -40,8 +40,7 @@ using namespace winrt::Windows::Web::UI::Interop;
 using namespace winrt::Windows::System;
 
 winrt::Windows::Web::UI::Interop::WebViewControl webview_control = nullptr;
-winrt::Windows::Web::UI::Interop::WebViewControlProcess webview_process = nullptr;
-winrt::Windows::Web::UI::Interop::WebViewControlProcessOptions webview_process_options = nullptr;
+
 StreamUriResolverFromFile local_uri_resolver;
 
 // Windows message for receiving copied data to send to the webview.
@@ -70,7 +69,12 @@ void NavigateToLocalhostReactServer() {
 void NavigateToUri(_In_ LPCWSTR uri_as_string) {
   trace("invoked");
   Uri url = webview_control.BuildLocalStreamUri(hstring(L"settings-html"), hstring(uri_as_string));
-  trace("step 2");
+
+  // Initialize the base_path for the html content relative to the executable.
+  WINRT_VERIFY(GetModuleFileName(NULL, local_uri_resolver.base_path, MAX_PATH));
+  WINRT_VERIFY(PathRemoveFileSpec(local_uri_resolver.base_path));
+  wcscat_s(local_uri_resolver.base_path, L"\\settings-html");
+
   webview_control.NavigateToLocalStreamUri(url, local_uri_resolver);
 }
 
@@ -90,32 +94,30 @@ Rect hwnd_client_rect_to_bounds_rect(_In_ HWND hwnd) {
 }
 
 void resize_web_view() {
-  trace("step 1");
+  trace("invoked");
   Rect bounds = hwnd_client_rect_to_bounds_rect(main_window_handler);
-  trace("step 2");
-  winrt::Windows::Web::UI::Interop::IWebViewControlSite webViewControlSite = (winrt::Windows::Web::UI::Interop::IWebViewControlSite) webview_control;
-  trace("step 3");
+  IWebViewControlSite webViewControlSite = (IWebViewControlSite) webview_control;
   webViewControlSite.Bounds(bounds);
 }
 
 #define SEND_TO_WEBVIEW_MSG 1
 
 void send_message_to_webview(const std::wstring& msg) {
-  if (main_window_handler != NULL && wm_copydata_webview!=0) {
+  if (main_window_handler != NULL && wm_copydata_webview != 0) {
     trace("invoked");
     // Allocate the COPYDATASTRUCT and message to pass to the Webview.
     // This is needed in order to use PostMessage, since COM calls to
     // webview_control.InvokeScriptAsync can't be made from 
     PCOPYDATASTRUCT copy_data_message = new COPYDATASTRUCT();
-    const wchar_t* orig_msg = msg.c_str();
-    DWORD orig_len = (DWORD)wcslen(orig_msg);
-    wchar_t* copy_msg = new wchar_t[orig_len + 1];
-    wcscpy_s(copy_msg, orig_len + 1, orig_msg);
+
+    DWORD buff_size = (DWORD)(msg.length() + 1);
+    wchar_t* buffer = new wchar_t[buff_size];
+    wcscpy_s(buffer, buff_size, msg.c_str());
     copy_data_message->dwData = SEND_TO_WEBVIEW_MSG;
-    copy_data_message->cbData = (orig_len + 1) * sizeof(wchar_t);
-    copy_data_message->lpData = (PVOID)copy_msg;
+    copy_data_message->cbData = buff_size * sizeof(wchar_t);
+    copy_data_message->lpData = (PVOID)buffer;
     WINRT_VERIFY(PostMessage(main_window_handler, wm_copydata_webview, (WPARAM)main_window_handler, (LPARAM)copy_data_message));
-    // wnd_static_proc will be responsible for freeing these.
+    // wnd_proc_static will be responsible for freeing these.
   }
 }
 
@@ -212,25 +214,16 @@ void receive_message_from_webview(const std::wstring& msg) {
 
 void initialize_win32_webview(HWND hwnd, int nCmdShow) {
   trace("invoked");
-  // initialize the base_path for the html content relative to the executable.
-  WCHAR executable_path[MAX_PATH];
-  WINRT_VERIFY(GetModuleFileName(NULL, executable_path, MAX_PATH));
-  WINRT_VERIFY(PathRemoveFileSpec(executable_path));
-  wcscat_s(executable_path, L"\\settings-html");
-  wcscpy_s(local_uri_resolver.base_path, executable_path);
-  
   try {
-    if (!webview_process_options) {
-      trace("webview_process_options");
-      webview_process_options = winrt::Windows::Web::UI::Interop::WebViewControlProcessOptions();
-      WINRT_VERIFY(webview_process_options);
-    }
+    trace("webview_process_options");
+    WebViewControlProcessOptions webview_process_options = WebViewControlProcessOptions();
+    WINRT_VERIFY(webview_process_options);
+    webview_process_options.PrivateNetworkClientServerCapability(WebViewControlProcessCapabilityState::Disabled);
+    
+    trace("webview_process");
+    WebViewControlProcess webview_process = WebViewControlProcess(webview_process_options);
+    WINRT_VERIFY(webview_process);
 
-    if (!webview_process) {
-      trace("webview_process");
-      webview_process = winrt::Windows::Web::UI::Interop::WebViewControlProcess(webview_process_options);
-      WINRT_VERIFY(webview_process);
-    }
     auto asyncwebview = webview_process.CreateWebViewControlAsync((int64_t)main_window_handler, hwnd_client_rect_to_bounds_rect(main_window_handler));
     WINRT_VERIFY(asyncwebview);
 
@@ -240,13 +233,11 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
         WINRT_VERIFY(sender);
         webview_control = sender.GetResults();
         WINRT_VERIFY(webview_control);
-        trace("asyncwebview.Completed step 1");
+
         // In order to receive window.external.notify() calls in ScriptNotify
         webview_control.Settings().IsScriptNotifyAllowed(true);
-        trace("asyncwebview.Completed step 2");
         webview_control.Settings().IsJavaScriptEnabled(true);
 
-        trace("asyncwebview.Completed step 3");
         webview_control.NewWindowRequested([=](IWebViewControl sender_requester, WebViewControlNewWindowRequestedEventArgs args) {
           trace("webview_control.NewWindowRequested invoked");
           // Open the requested link in the default browser registered in the Shell
@@ -254,13 +245,11 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
           WINRT_VERIFY(res > 32);
           });
 
-        trace("asyncwebview.Completed step 4");
         webview_control.DOMContentLoaded([=](IWebViewControl sender_loaded, WebViewControlDOMContentLoadedEventArgs const& args_loaded) {
           trace("webview_control.DOMContentLoaded invoked");
           // runs when the content has been loaded.
           });
 
-        trace("asyncwebview.Completed step 5");
         webview_control.ScriptNotify([=](IWebViewControl sender_script_notify, WebViewControlScriptNotifyEventArgs const& args_script_notify) {
           trace("webview_control.ScriptNotify invoked");
           // content called window.external.notify()
@@ -268,7 +257,6 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
           receive_message_from_webview(message_sent);
           });
 
-        trace("asyncwebview.Completed step 6");
         webview_control.AcceleratorKeyPressed([&](IWebViewControl sender, WebViewControlAcceleratorKeyPressedEventArgs const& args) {
           if (args.VirtualKey() == winrt::Windows::System::VirtualKey::F4) {
             trace("webview_control.AcceleratorKeyPressed invoked");
@@ -283,14 +271,12 @@ void initialize_win32_webview(HWND hwnd, int nCmdShow) {
         //NavigateToLocalhostReactServer();
 #else
         // Navigates to settings-html/index.html
-        trace("asyncwebview.Completed step 7");
         BOOL result = ShowWindow(main_window_handler, nCmdShow);
         trace_bool(result, "ShowWindow");
-        trace("asyncwebview.Completed step 8");
         NavigateToUri(L"index.html");
 #endif
       } else if (status == AsyncStatus::Error ) {
-        trace("asyncwebview.Completed with ERROR");
+        trace_hr(sender.ErrorCode(), "asyncwebview.Completed with ERROR");
       } else if (status == AsyncStatus::Started) {
         trace("asyncwebview.Completed Started");
       } else if (status == AsyncStatus::Canceled) {
@@ -508,7 +494,7 @@ int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
   init_debug_trace_settings();
-  trace("revision C");
+  trace("revision E");
   
   if (is_process_elevated()) {
     trace("process is elevated");
@@ -516,7 +502,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
   } else {
     trace("process is not elevated");
   }
-  
+
   winrt::init_apartment(apartment_type::single_threaded);
   return start_webview_window(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
