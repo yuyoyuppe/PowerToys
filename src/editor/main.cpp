@@ -485,6 +485,17 @@ void read_arguments() {
   LocalFree(argument_list);
 }
 
+int _run_message_loop() {
+  MSG msg;
+  // Main message loop.
+  while (GetMessage(&msg, nullptr, 0, 0)) {
+    trace((std::to_string(msg.message).c_str()));
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+  }
+  return (int)msg.wParam;
+} 
+
 int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   trace("invoked");
   // To be unlocked after the Window has finished being created.
@@ -492,19 +503,12 @@ int start_webview_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
   read_arguments();
   register_classes(hInstance);
   init_instance(hInstance, nCmdShow);
-  MSG msg;
-  // Main message loop.
-  while (GetMessage(&msg, nullptr, 0, 0)) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-
-  return (int)msg.wParam;
+  return _run_message_loop();
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
   init_debug_trace_settings();
-  trace("revision B");
+  trace("revision C");
   
   if (is_process_elevated()) {
     trace("process is elevated");
@@ -513,6 +517,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     trace("process is not elevated");
   }
   
-  WINRT_VERIFY_(S_OK,CoInitialize(nullptr));
+  winrt::init_apartment(apartment_type::single_threaded);
   return start_webview_window(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
