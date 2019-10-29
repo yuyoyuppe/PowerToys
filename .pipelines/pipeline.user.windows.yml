@@ -45,11 +45,18 @@ build:
           to: 'Build_Output'
           include:
           - 'PowerToys.exe'
+          - 'PowerToys.pdb'
           - 'PowerToysSettings.exe'
-          - 'modules\FancyZonesEditor.exe'
+          - 'PowerToysSettings.pdb'
           - 'modules\fancyzones.dll'
+          - 'modules\fancyzones.pdb'
+          - 'modules\FancyZonesEditor.exe'
+          - 'modules\FancyZonesEditor.pdb'
           - 'modules\shortcut_guide.dll'
-          - '**/*.pdb'
+          - 'modules\shortcut_guide.pdb'
+          - 'modules\MahApps.Metro.pdb'
+          - 'modules\PowerRename.pdb'
+
           signing_options:
             sign_inline: true  # This does signing a soon as this command completes
     - !!buildcommand
