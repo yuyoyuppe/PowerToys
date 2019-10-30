@@ -108,9 +108,13 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DebugData.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StreamUriResolverFromFile.h" />
+    <ClInclude Include="WebView1.h" />
+    <ClInclude Include="WebView2.h" />
+    <ClInclude Include="WindowUserMessages.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -119,6 +123,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="StreamURIResolverFromFile.cpp" />
+    <ClCompile Include="WebView1.cpp" />
+    <ClCompile Include="WebView2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="settings.rc" />
