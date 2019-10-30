@@ -13,7 +13,7 @@ UINT wm_icon_notify = 0;
 
 // Contains the Windows Message for taskbar creation.
 UINT wm_taskbar_restart = 0;
-UINT wm_run_on_main_ui_thread = 0;
+UINT wm_run_callback_on_ui_thread = 0;
 
 NOTIFYICONDATAW tray_icon_data;
 static bool about_box_shown = false;
@@ -27,7 +27,7 @@ struct run_on_main_ui_thread_msg {
   PVOID data;
 };
 
-bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID data) {
+bool postmessage_on_ui_thread(main_loop_callback_function _callback, PVOID data) {
   if (tray_icon_hwnd == NULL) {
     return false;
   }
@@ -35,7 +35,7 @@ bool dispatch_run_on_main_ui_thread(main_loop_callback_function _callback, PVOID
   wnd_msg->_callback = _callback;
   wnd_msg->data = data;
 
-  PostMessage(tray_icon_hwnd, wm_run_on_main_ui_thread, 0, (LPARAM)wnd_msg);
+  PostMessage(tray_icon_hwnd, wm_run_callback_on_ui_thread, 0, (LPARAM)wnd_msg);
 
   return true;
 }
@@ -46,7 +46,7 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
     if (wm_taskbar_restart == 0) {
       tray_icon_hwnd = window;
       wm_taskbar_restart = RegisterWindowMessageW(L"TaskbarCreated");
-      wm_run_on_main_ui_thread = RegisterWindowMessage(L"RunOnMainThreadCallback");
+      wm_run_callback_on_ui_thread = RegisterWindowMessage(L"RunCallbackOnUIThread");
     }
     break;
   case WM_DESTROY:
@@ -101,7 +101,7 @@ LRESULT __stdcall tray_icon_window_proc(HWND window, UINT message, WPARAM wparam
         }
         break;
       }
-    } else if (message == wm_run_on_main_ui_thread) {
+    } else if (message == wm_run_callback_on_ui_thread) {
       if (lparam != NULL) {
         struct run_on_main_ui_thread_msg *msg = (struct run_on_main_ui_thread_msg *)lparam;
         msg->_callback(msg->data);

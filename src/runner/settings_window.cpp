@@ -62,7 +62,7 @@ void dispatch_json_config_to_modules(const json::value& powertoys_configs) {
   }
 };
 
-void dispatch_received_json(const std::wstring &json_to_parse) {
+void process_received_json(const std::wstring &json_to_parse) {
   json::value j = json::value::parse(json_to_parse);
   for(auto base_element : j.as_object()) {
     if (base_element.first == L"general") {
@@ -92,15 +92,15 @@ void dispatch_received_json(const std::wstring &json_to_parse) {
   return;
 }
 
-void dispatch_received_json_callback(PVOID data) {
+void received_json_callback(PVOID data) {
   std::wstring* msg = (std::wstring*)data;
-  dispatch_received_json(*msg);
+  process_received_json(*msg);
   delete msg;
 }
 
-void receive_json_send_to_main_thread(const std::wstring &msg) {
+void dispatch_to_ui_thread(const std::wstring &msg) {
   std::wstring* copy = new std::wstring(msg);
-  dispatch_run_on_main_ui_thread(dispatch_received_json_callback, copy);
+  postmessage_on_ui_thread(received_json_callback, copy);
 }
 
 DWORD g_settings_process_id = 0;
@@ -208,7 +208,7 @@ void run_settings_window() {
   if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
     goto LExit;
   }
-  msg_pipe = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
+  msg_pipe = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, dispatch_to_ui_thread);
   msg_pipe->start(hToken);
   g_settings_process_id = process_info.dwProcessId;
 
