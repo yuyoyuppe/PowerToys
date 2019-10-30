@@ -15,7 +15,7 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::II
     file = folder.GetFileAsync(winrt::param::hstring(myuri)).get();
   }
   catch (winrt::hresult_error const& e) {
-    WCHAR message[1024] = L"";
+    WCHAR message[1024] = {};
     StringCchPrintf(message, ARRAYSIZE(message), L"failed: %ls", e.message().c_str());
     MessageBox(NULL, message, L"Error", MB_OK);
   }

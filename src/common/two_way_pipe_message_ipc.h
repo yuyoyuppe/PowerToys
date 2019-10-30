@@ -136,25 +136,23 @@ private:
     DWORD dwLength = 0;
     PTOKEN_GROUPS ptg = NULL;
 
-    // Verify the parameter passed in is not NULL.
-    if (NULL == ppsid)
+    if (NULL == ppsid) {
       goto Cleanup;
+    }
 
     // Get required buffer size and allocate the TOKEN_GROUPS buffer.
-
     if (!GetTokenInformation(
       hToken,         // handle to the access token
       TokenGroups,    // get information about the token's groups 
-      (LPVOID)ptg,   // pointer to TOKEN_GROUPS buffer
+      (LPVOID)ptg,    // pointer to TOKEN_GROUPS buffer
       0,              // size of buffer
       &dwLength       // receives required buffer size
     )) {
-      if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+      if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
         goto Cleanup;
+      }
 
-      ptg = (PTOKEN_GROUPS)HeapAlloc(GetProcessHeap(),
-        HEAP_ZERO_MEMORY, dwLength);
-
+      ptg = (PTOKEN_GROUPS)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwLength);
       if (ptg == NULL)
         goto Cleanup;
     }
@@ -164,7 +162,7 @@ private:
     if (!GetTokenInformation(
       hToken,         // handle to the access token
       TokenGroups,    // get information about the token's groups 
-      (LPVOID)ptg,   // pointer to TOKEN_GROUPS buffer
+      (LPVOID)ptg,    // pointer to TOKEN_GROUPS buffer
       dwLength,       // size of buffer
       &dwLength       // receives required buffer size
     )) {
@@ -172,32 +170,33 @@ private:
     }
 
     // Loop through the groups to find the logon SID.
+    if (ptg != nullptr) {
+      for (dwIndex = 0; dwIndex < ptg->GroupCount; dwIndex++)
+        if ((ptg->Groups[dwIndex].Attributes & SE_GROUP_LOGON_ID) == SE_GROUP_LOGON_ID) {
+          // Found the logon SID; make a copy of it.
+          dwLength = GetLengthSid(ptg->Groups[dwIndex].Sid);
 
-    for (dwIndex = 0; dwIndex < ptg->GroupCount; dwIndex++)
-      if ((ptg->Groups[dwIndex].Attributes & SE_GROUP_LOGON_ID)
-        == SE_GROUP_LOGON_ID) {
-        // Found the logon SID; make a copy of it.
+          *ppsid = (PSID)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwLength);
+          if (*ppsid == NULL) {
+            goto Cleanup;
+          }
+          
+          if (!CopySid(dwLength, *ppsid, ptg->Groups[dwIndex].Sid)) {
+            HeapFree(GetProcessHeap(), 0, (LPVOID)*ppsid);
+            goto Cleanup;
+          }
 
-        dwLength = GetLengthSid(ptg->Groups[dwIndex].Sid);
-        *ppsid = (PSID)HeapAlloc(GetProcessHeap(),
-          HEAP_ZERO_MEMORY, dwLength);
-        if (*ppsid == NULL)
-          goto Cleanup;
-        if (!CopySid(dwLength, *ppsid, ptg->Groups[dwIndex].Sid)) {
-          HeapFree(GetProcessHeap(), 0, (LPVOID)*ppsid);
-          goto Cleanup;
+          break;
         }
-        break;
-      }
 
-    bSuccess = TRUE;
-
+      bSuccess = TRUE;
+    }
   Cleanup:
 
     // Free the buffer for the token groups.
-
-    if (ptg != NULL)
+    if (ptg != NULL) {
       HeapFree(GetProcessHeap(), 0, (LPVOID)ptg);
+    }
 
     return bSuccess;
   }
@@ -206,7 +205,6 @@ private:
     // From https://docs.microsoft.com/en-us/previous-versions/aa446670(v=vs.85)
     HeapFree(GetProcessHeap(), 0, (LPVOID)*ppsid);
   }
-
 
   int change_pipe_security_allow_restricted_token(HANDLE handle, HANDLE token) {
     PACL old_dacl, new_dacl;
@@ -275,13 +273,16 @@ private:
     SAFER_LEVEL_HANDLE level_handle = NULL;
     DWORD sid_size = SECURITY_MAX_SID_SIZE;
     BYTE medium_sid[SECURITY_MAX_SID_SIZE];
+
     if (!SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER, SAFER_LEVEL_OPEN, &level_handle, NULL)) {
       return NULL;
     }
+    
     if (!SaferComputeTokenFromLevel(level_handle, NULL, &restricted_token_handle, 0, NULL)) {
       SaferCloseLevel(level_handle);
       return NULL;
     }
+    
     SaferCloseLevel(level_handle);
 
     if (!CreateWellKnownSid(WinMediumLabelSid, nullptr, medium_sid, &sid_size)) {
@@ -313,7 +314,9 @@ private:
     std::list<std::vector<uint8_t>> message_parts;
 
     if (input_pipe_handle == NULL) {
-      if (pchRequest != NULL) HeapFree(hHeap, 0, pchRequest);
+      if (pchRequest != NULL) {
+        HeapFree(hHeap, 0, pchRequest);
+      }
       return;
     }
 
@@ -326,6 +329,7 @@ private:
       // Read client requests from the pipe. This simplistic code only allows messages
       // up to BUFSIZE characters in length.
       ZeroMemory(pchRequest, BUFSIZE * sizeof(uint8_t));
+
       fSuccess = ReadFile(
         input_pipe_handle,          // handle to pipe 
         pchRequest,                 // buffer to receive data 
@@ -336,6 +340,7 @@ private:
       if (!fSuccess && GetLastError() != ERROR_MORE_DATA) {
         break;
       }
+
       std::vector<uint8_t> part_vector;
       part_vector.reserve(cbBytesRead);
       std::copy(pchRequest, pchRequest + cbBytesRead, std::back_inserter(part_vector));
@@ -361,7 +366,6 @@ private:
     // Flush the pipe to allow the client to read the pipe's contents 
     // before disconnecting. Then disconnect the pipe, and close the 
     // handle to this pipe instance. 
-
     FlushFileBuffers(input_pipe_handle);
     DisconnectNamedPipe(input_pipe_handle);
     CloseHandle(input_pipe_handle);
