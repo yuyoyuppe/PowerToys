@@ -15,7 +15,7 @@
 
 using namespace web;
 
-TwoWayPipeMessageIPC* current_settings_ipc = NULL;
+TwoWayPipeMessageIPC* msg_pipe = NULL;
 
 json::value get_power_toys_settings() {
   json::value result = json::value::object();
@@ -69,21 +69,21 @@ void dispatch_received_json(const std::wstring &json_to_parse) {
       apply_general_settings(base_element.second);
       std::wstringstream ws;
       ws << get_all_settings();
-      if (current_settings_ipc != NULL) {
-        current_settings_ipc->send(ws.str());
+      if (msg_pipe != NULL) {
+        msg_pipe->send(ws.str());
       }
     } else if (base_element.first == L"powertoys") {
       dispatch_json_config_to_modules(base_element.second);
       std::wstringstream ws;
       ws << get_all_settings();
-      if (current_settings_ipc != NULL) {
-        current_settings_ipc->send(ws.str());
+      if (msg_pipe != NULL) {
+        msg_pipe->send(ws.str());
       }
     } else if (base_element.first == L"refresh") {
       std::wstringstream ws;
       ws << get_all_settings();
-      if (current_settings_ipc != NULL) {
-        current_settings_ipc->send(ws.str());
+      if (msg_pipe != NULL) {
+        msg_pipe->send(ws.str());
       }
     } else if (base_element.first == L"action") {
       dispatch_json_action_to_module(base_element.second);
@@ -208,8 +208,8 @@ void run_settings_window() {
   if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
     goto LExit;
   }
-  current_settings_ipc = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
-  current_settings_ipc->start(hToken);
+  msg_pipe = new TwoWayPipeMessageIPC(powertoys_pipe_name, settings_pipe_name, receive_json_send_to_main_thread);
+  msg_pipe->start(hToken);
   g_settings_process_id = process_info.dwProcessId;
 
   WaitForSingleObject(process_info.hProcess, INFINITE);
@@ -235,10 +235,10 @@ LExit:
     CloseHandle(process);
   }
 
-  if (current_settings_ipc) {
-    current_settings_ipc->end();
-    delete current_settings_ipc;
-    current_settings_ipc = NULL;
+  if (msg_pipe) {
+    msg_pipe->end();
+    delete msg_pipe;
+    msg_pipe = NULL;
   }
 
   if (hToken) {
