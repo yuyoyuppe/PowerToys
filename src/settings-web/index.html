@@ -3,17 +3,37 @@
   <head>
     <script>
       window.output_from_webview = function(arg) {
-        if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
+        if (('external' in window) && ('notify' in window.external)) {
+          // WebView
           window.external.notify(arg);
+        } else if (('chrome' in window) && ('webview' in window.chrome)) {
+          // WebView2
+          window.chrome.webview.postMessage(arg);
         }
       }
+      
+      // Used by WebView1
       function receive_from_settings_app(arg) {
         window.react_app_component.receive_config_msg(JSON.parse(arg));
         return '';
       }
+
+      // Used by WebView1
       function exit_settings_app() {
         window.react_app_component.receive_exit_request();
         return '';
+      }
+
+      // Used by WebView2
+      function msg_handler(event) {
+        window.react_app_component.receive_config_msg(event.data);
+      }
+
+      // Used by WebView2
+      window.init_message_handler = function() {
+        if (('chrome' in window) && ('webview' in window.chrome)) {
+          window.chrome.webview.addEventListener('message', msg_handler);
+        }
       }
     </script>
     <title>PowerToys Settings</title>

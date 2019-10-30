@@ -1,5 +1,4 @@
 #pragma once
-
 #include "StreamUriResolverFromFile.h"
 #include <common/two_way_pipe_message_ipc.h>
 
@@ -22,7 +21,7 @@ public:
     InitializeWebView();
   }
 
-  void PostData(wchar_t* json_message);
+  void PostData(const wchar_t* json_message);
   void ProcessExit();
   void Resize();
 
@@ -37,6 +36,8 @@ private:
   PostMessageCallback m_PostMessageCallback;
 
   void InitializeWebView();
+  void NavigateToSettingsWebPage(_In_ LPCWSTR uri_as_string);
+#ifdef _DEBUG
   void NavigateToLocalhostReactServer();
-  void NavigateToUri(_In_ LPCWSTR uri_as_string);
+#endif
 };

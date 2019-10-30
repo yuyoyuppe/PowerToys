@@ -7,7 +7,17 @@
 #include "resource.h"
 #include <common/dpi_aware.h>
 #include <common/common.h>
-#include "WebView1.h"
+
+using namespace winrt;
+
+#define USE_WEBVIEW2
+
+#ifdef USE_WEBVIEW1
+#include "WebView_1.h"
+#else
+#include "WebView_2.h"
+#endif
+
 #include "WindowUserMessages.h"
 
 #pragma comment(lib, "shlwapi.lib")
@@ -27,7 +37,12 @@
 
 HINSTANCE g_hinst = nullptr;
 HWND g_hwnd = nullptr;
+
+#ifdef USE_WEBVIEW1
 WebView1Controller* g_webview_controller = nullptr;
+#else
+WebView2Controller* g_webview_controller = nullptr;
+#endif
 
 // Message pipe to send/receive messages to/from the Powertoys runner.
 TwoWayPipeMessageIPC* g_message_pipe = nullptr;
@@ -37,8 +52,6 @@ bool g_waiting_for_exit_confirmation = false;
 
 // Is the setting window to be started in dark mode
 bool g_start_in_dark_mode = false;
-
-#define SEND_TO_WEBVIEW_MSG 1
 
 // message_pipe_callback reveives the messages sent by the PowerToys runner and
 // dispatches them to the WebView control.
@@ -55,7 +68,7 @@ void message_pipe_callback(const std::wstring& msg) {
     wchar_t* buffer = new wchar_t[buff_size];
 
     wcscpy_s(buffer, buff_size, msg.c_str());
-    message->dwData = SEND_TO_WEBVIEW_MSG;
+    message->dwData = 0;
     message->cbData = buff_size * sizeof(wchar_t);
     message->lpData = (PVOID)buffer;
     WINRT_VERIFY(PostMessage(g_hwnd, WM_USER_POST_TO_WEBVIEW, (WPARAM)g_hwnd, (LPARAM)message));
@@ -145,13 +158,11 @@ LRESULT CALLBACK wnd_proc_static(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
   case WM_USER_POST_TO_WEBVIEW:
   {
     PCOPYDATASTRUCT msg = (PCOPYDATASTRUCT)lParam;
-    if (msg->dwData == SEND_TO_WEBVIEW_MSG) {
-      wchar_t* json_message = (wchar_t*)(msg->lpData);
-      if (g_webview_controller != nullptr) {
-        g_webview_controller->PostData(json_message);
-      }
-      delete[] json_message;
+    wchar_t* json_message = (wchar_t*)(msg->lpData);
+    if (g_webview_controller != nullptr) {
+      g_webview_controller->PostData(json_message);
     }
+    delete[] json_message;
     // wnd_proc_static is responsible for freeing memory.
     delete msg;
   }
@@ -258,7 +269,11 @@ void parse_args() {
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
-  CoInitialize(nullptr);
+#ifdef USE_WEBVIEW1
+  winrt::init_apartment(apartment_type::single_threaded);
+#else
+  winrt::init_apartment(apartment_type::multi_threaded);
+#endif
 
   if (is_process_elevated()) {
     if (!drop_elevated_privileges()) {
@@ -275,7 +290,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     MessageBox(NULL, L"Failed to create main window.\nPlease report the bug to https://github.com/microsoft/PowerToys/issues", L"PowerToys Settings Error", MB_OK);
     exit(1);
   }
+
+#ifdef USE_WEBVIEW1
   g_webview_controller = new WebView1Controller(g_hwnd, nShowCmd, g_message_pipe, g_start_in_dark_mode, webview_message_callback);
+#else
+  g_webview_controller = new WebView2Controller(g_hwnd, nShowCmd, g_message_pipe, g_start_in_dark_mode, webview_message_callback);
+  ShowWindow(g_hwnd, nShowCmd);
+#endif
 
   // Main message loop.
   MSG msg;

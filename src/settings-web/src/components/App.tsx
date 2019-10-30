@@ -25,6 +25,7 @@ export class App extends React.Component <any, any> {
   }
 
   public componentDidMount() {
+    (window as any).init_message_handler();
     this.send_message_to_application(JSON.stringify({'refresh':true}));
   }
 

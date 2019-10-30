@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "WebView1.h"
+#include "WebView_1.h"
 #include <Commdlg.h>
 #include "StreamUriResolverFromFile.h"
 #include <Shellapi.h>
@@ -20,7 +20,7 @@ void WebView1Controller::NavigateToLocalhostReactServer() {
 }
 #endif
 
-void WebView1Controller::NavigateToUri(_In_ LPCWSTR uri_as_string) {
+void WebView1Controller::NavigateToSettingsWebPage(_In_ LPCWSTR uri_as_string) {
   // initialize the base_path for the html content relative to the executable.
   WINRT_VERIFY(GetModuleFileName(nullptr, m_LocalUriResolver.base_path, MAX_PATH));
   WINRT_VERIFY(PathRemoveFileSpec(m_LocalUriResolver.base_path));
@@ -50,15 +50,13 @@ void WebView1Controller::Resize() {
   webViewControlSite.Bounds(bounds);
 }
 
-void WebView1Controller::PostData(wchar_t* json_message) {
+void WebView1Controller::PostData(const wchar_t* json_message) {
   const auto _ = m_WebView.InvokeScriptAsync(hstring(L"receive_from_settings_app"), { hstring(json_message) });
 }
 
 void WebView1Controller::ProcessExit() {
   const auto _ = m_WebView.InvokeScriptAsync(hstring(L"exit_settings_app"), {});
 }
-
-extern void process_message_from_webview(const std::wstring& msg);
 
 void WebView1Controller::InitializeWebView() {
   try {
@@ -107,7 +105,7 @@ void WebView1Controller::InitializeWebView() {
         NavigateToLocalhostReactServer();
 #else
         // Navigates to settings-html/index.html or index-dark.html
-        NavigateToUri(m_DarkMode ? INDEX_DARK : INDEX_LIGHT);
+        NavigateToSettingsWebPage(m_DarkMode ? INDEX_DARK : INDEX_LIGHT);
 #endif
       } else if (status == AsyncStatus::Error) {
         MessageBox(NULL, L"Failed to create the WebView control.\nPlease report the bug to https://github.com/microsoft/PowerToys/issues", L"PowerToys Settings Error", MB_OK);

@@ -27,13 +27,13 @@
     <ClInclude Include="DebugData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WebView2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WebView1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WindowUserMessages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebView_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebView_1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,10 +47,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WebView1.cpp">
+    <ClCompile Include="WebView_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WebView2.cpp">
+    <ClCompile Include="WebView_2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
