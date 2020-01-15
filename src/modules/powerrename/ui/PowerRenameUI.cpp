@@ -512,6 +512,23 @@ HRESULT CPowerRenameUI::_DoModal(__in_opt HWND hwnd)
     return hr;
 }
 
+
+bool CPowerRenameUI::try_bring_to_front()
+{
+  HWND hCurWnd = ::GetForegroundWindow();
+  DWORD dwMyID = ::GetCurrentThreadId();
+  DWORD dwCurID = ::GetWindowThreadProcessId(hCurWnd, NULL);
+  ::AttachThreadInput(dwCurID, dwMyID, TRUE);
+  ::SetWindowPos(m_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+  ::SetWindowPos(m_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+  bool result = false;
+  result = TRUE == SetForegroundWindow(m_hwnd);
+  ::AttachThreadInput(dwCurID, dwMyID, FALSE);
+  ::SetFocus(m_hwnd);
+  ::SetActiveWindow(m_hwnd);
+  return result;
+}
+
 HRESULT CPowerRenameUI::_DoModeless(__in_opt HWND hwnd)
 {
     m_modeless = true;
@@ -519,14 +536,12 @@ HRESULT CPowerRenameUI::_DoModeless(__in_opt HWND hwnd)
     if (NULL != CreateDialogParam(g_hInst, MAKEINTRESOURCE(IDD_MAIN), hwnd, s_DlgProc, (LPARAM)this))
     {
         ShowWindow(m_hwnd, SW_SHOWNORMAL);
-        if (SetForegroundWindow(m_hwnd) == FALSE)
-        {
-            SetWindowPos(m_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-        }
-        
+        bool in_front = try_bring_to_front();
         MSG msg;
         while (GetMessage(&msg, NULL, 0, 0))
         {
+            if(!in_front)
+              in_front = try_bring_to_front();
             if (!IsDialogMessage(m_hwnd, &msg))
             {
                 TranslateMessage(&msg);

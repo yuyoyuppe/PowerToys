@@ -37,6 +37,8 @@ class CPowerRenameUI :
     public IPowerRenameManagerEvents
 {
 public:
+    bool try_bring_to_front();
+
     CPowerRenameUI() :
         m_refCount(1)
     {
