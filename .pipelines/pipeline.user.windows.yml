@@ -25,9 +25,6 @@ package_sources:
 restore:
   commands:
     - !!defaultcommand
-      name: 'Restore Power Toys Telemetry'
-      command: '.pipelines\restore-telemetry.cmd'  
-    - !!defaultcommand
       name: 'Restore Power Toys'
       command: '.pipelines\restore.cmd'
     - !!defaultcommand
