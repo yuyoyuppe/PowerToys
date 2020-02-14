@@ -1,6 +1,5 @@
 cd /D "%~dp0"
 
-set PROJECT="..\src\modules\fancyzones\editor\FancyZonesEditor\FancyZonesEditor.csproj"
-set TELEMETRY_PKG="Microsoft.PowerToys.Telemetry"
+nuget.exe restore -ConfigFile nuget.config packages.config
 
-dotnet add %PROJECT% package %TELEMETRY_PKG%
+move /Y Microsoft.Telemetry.Inbox.Native.10.0.18362.1-190318-1202.19h1-release.amd64fre\build\native\inc\MicrosoftTelemetry.h ..\src\common\Telemetry\TraceLoggingDefines.h
