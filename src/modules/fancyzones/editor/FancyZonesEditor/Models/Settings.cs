@@ -131,7 +131,7 @@ namespace FancyZonesEditor
             }
         }
 
-        private int _zoneCount;
+        private int _zoneCount = 3;
 
         // Spacing - how much space in between zones of the grid do you want
         public int Spacing
@@ -151,7 +151,7 @@ namespace FancyZonesEditor
             }
         }
 
-        private int _spacing;
+        private int _spacing = 16;
 
         // ShowSpacing - is the Spacing value used or ignored?
         public bool ShowSpacing
@@ -171,7 +171,7 @@ namespace FancyZonesEditor
             }
         }
 
-        private bool _showSpacing;
+        private bool _showSpacing = true;
 
         // IsShiftKeyPressed - is the shift key currently being held down
         public bool IsShiftKeyPressed
@@ -226,7 +226,7 @@ namespace FancyZonesEditor
 
         public static string ActiveZoneSetUUid { get; private set; }
 
-        public static LayoutType ActiveZoneSetLayoutType { get; private set; }
+        public static LayoutType ActiveZoneSetLayoutType { get; private set; } = LayoutType.Focus;
 
         public static string ActiveZoneSetTmpFile
         {
@@ -259,6 +259,7 @@ namespace FancyZonesEditor
             _focusModel.Zones.Clear();
 
             Int32Rect focusZoneRect = new Int32Rect((int)(_focusModel.ReferenceWidth * 0.1), (int)(_focusModel.ReferenceHeight * 0.1), (int)(_focusModel.ReferenceWidth * 0.6), (int)(_focusModel.ReferenceHeight * 0.6));
+            // TODO: ZoneCount should always be >= 1, so we need to change those checks to ZoneCount == 1
             int focusRectXIncrement = (ZoneCount <= 1) ? 0 : (int)(_focusModel.ReferenceWidth * 0.2) / (ZoneCount - 1);
             int focusRectYIncrement = (ZoneCount <= 1) ? 0 : (int)(_focusModel.ReferenceHeight * 0.2) / (ZoneCount - 1);
 
@@ -355,15 +356,7 @@ namespace FancyZonesEditor
             ActiveZoneSetUUid = jsonObject.GetProperty("active-zoneset").GetProperty("uuid").GetString();
             string layoutType = jsonObject.GetProperty("active-zoneset").GetProperty("type").GetString();
 
-            if (ActiveZoneSetUUid == "null" || layoutType == "blank")
-            {
-                // Default selection is Focus
-                ActiveZoneSetLayoutType = LayoutType.Focus;
-                _showSpacing = true;
-                _spacing = 16;
-                _zoneCount = 3;
-            }
-            else
+            if (ActiveZoneSetUUid != "null" && layoutType != "blank")
             {
                 switch (layoutType)
                 {
@@ -390,6 +383,9 @@ namespace FancyZonesEditor
                 _showSpacing = jsonObject.GetProperty("editor-show-spacing").GetBoolean();
                 _spacing = jsonObject.GetProperty("editor-spacing").GetInt32();
                 _zoneCount = jsonObject.GetProperty("editor-zone-count").GetInt32();
+
+                _zoneCount = Math.Max(1, _zoneCount);
+                _spacing = Math.Max(0, _spacing);
             }
         }
 
