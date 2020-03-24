@@ -25,6 +25,7 @@
 #if _DEBUG && _WIN64
 #include "unhandled_exception_handler.h"
 #endif
+#include <common/notifications/fancyzones_notifications.h>
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -39,6 +40,38 @@ namespace
 {
     const wchar_t MSI_VERSION_MUTEX_NAME[] = L"Local\\PowerToyRunMutex";
     const wchar_t MSIX_VERSION_MUTEX_NAME[] = L"Local\\PowerToyMSIXRunMutex";
+
+    const wchar_t PT_URI_PROTOCOL_SCHEME[] = L"powertoys://";
+
+    const wchar_t PT_REMOTE_QUIT_EVENT[] = L"PowerToysRemoteQuitSignalEvent";
+}
+
+static DWORD main_thread_id;
+
+void listen_for_remote_quit_signal()
+{
+    wil::unique_event_nothrow remote_quit_event{
+        CreateEventW(nullptr, FALSE, FALSE, PT_REMOTE_QUIT_EVENT)
+    };
+    if (!remote_quit_event)
+    {
+        return;
+    }
+    remote_quit_event.wait();
+    PostThreadMessage(main_thread_id, WM_QUIT, 0, 0);
+}
+
+void signal_remote_quit_event()
+{
+    wil::unique_event_nothrow remote_quit_event{
+        OpenEventW(EVENT_MODIFY_STATE, FALSE, PT_REMOTE_QUIT_EVENT)
+    };
+    if (remote_quit_event)
+    {
+        remote_quit_event.SetEvent();
+        // Let the other PT process exit
+        Sleep(300);
+    }
 }
 
 void chdir_current_executable()
@@ -116,7 +149,7 @@ std::future<void> check_github_updates()
     std::wstring contents = GITHUB_NEW_VERSION_AVAILABLE_OFFER_VISIT;
     contents += new_version->version_string;
     contents += L'.';
-    notifications::show_toast_with_activations(contents, {}, { notifications::link_button{ GITHUB_NEW_VERSION_AGREE, new_version->release_page_uri.ToString() } });
+    notifications::show_toast_with_activations(std::move(contents), {}, { notifications::link_button{ GITHUB_NEW_VERSION_AGREE, new_version->release_page_uri.ToString().c_str() } });
 }
 
 void github_update_checking_worker()
@@ -169,6 +202,10 @@ int runner(bool isProcessElevated)
     {
         std::thread{ [] {
             github_update_checking_worker();
+        } }.detach();
+
+        std::thread{ [] {
+            listen_for_remote_quit_signal();
         } }.detach();
 
         if (winstore::running_as_packaged())
@@ -228,17 +265,22 @@ int runner(bool isProcessElevated)
 enum class SpecialMode
 {
     None,
-    Win32ToastNotificationCOMServer
+    Win32ToastNotificationCOMServer,
+    ToastNotificationHandler
 };
 
-SpecialMode should_run_in_special_mode()
+SpecialMode should_run_in_special_mode(const int n_cmd_args, LPWSTR* cmd_arg_list)
 {
-    int nArgs;
-    LPWSTR* szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-    for (size_t i = 1; i < nArgs; ++i)
+    for (size_t i = 1; i < n_cmd_args; ++i)
     {
-        if (!wcscmp(notifications::TOAST_ACTIVATED_LAUNCH_ARG, szArglist[i]))
+        if (!wcscmp(notifications::TOAST_ACTIVATED_LAUNCH_ARG, cmd_arg_list[i]))
+        {
             return SpecialMode::Win32ToastNotificationCOMServer;
+        }
+        else if (n_cmd_args == 2 && !wcsncmp(PT_URI_PROTOCOL_SCHEME, cmd_arg_list[i], wcslen(PT_URI_PROTOCOL_SCHEME)))
+        {
+            return SpecialMode::ToastNotificationHandler;
+        }
     }
 
     return SpecialMode::None;
@@ -250,14 +292,53 @@ int win32_toast_notification_COM_server_mode()
     return 0;
 }
 
+enum class toast_notification_handler_result
+{
+    exit_success,
+    exit_error,
+    restart_elevated
+};
+
+toast_notification_handler_result toast_notification_handler(const std::wstring_view param)
+{
+    if (param == L"cant_drag_elevated_disable/")
+    {
+        return disable_cant_drag_elevated_warning() ? toast_notification_handler_result::exit_success : toast_notification_handler_result::exit_error;
+    }
+    else if (param == L"cant_drag_elevated_restart/")
+    {
+        return toast_notification_handler_result::restart_elevated;
+    }
+    else
+    {
+        return toast_notification_handler_result::exit_error;
+    }
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     winrt::init_apartment();
+    main_thread_id = GetCurrentThreadId();
 
-    switch (should_run_in_special_mode())
+    int n_cmd_args = 0;
+    LPWSTR* cmd_arg_list = CommandLineToArgvW(GetCommandLineW(), &n_cmd_args);
+    bool must_restart_elevated = false;
+    switch (should_run_in_special_mode(n_cmd_args, cmd_arg_list))
     {
     case SpecialMode::Win32ToastNotificationCOMServer:
         return win32_toast_notification_COM_server_mode();
+    case SpecialMode::ToastNotificationHandler:
+        switch (toast_notification_handler(cmd_arg_list[1] + wcslen(PT_URI_PROTOCOL_SCHEME)))
+        {
+        case toast_notification_handler_result::exit_error:
+            return 1;
+        case toast_notification_handler_result::exit_success:
+            return 0;
+        case toast_notification_handler_result::restart_elevated:
+            signal_remote_quit_event();
+            must_restart_elevated = true;
+            break;
+        }
     case SpecialMode::None:
         // continue as usual
         break;
@@ -339,12 +420,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
         auto general_settings = load_general_settings();
         int rvalue = 0;
-        bool isProcessElevated = is_process_elevated();
-        if (isProcessElevated ||
-            general_settings.GetNamedBoolean(L"run_elevated", false) == false ||
-            strcmp(lpCmdLine, "--dont-elevate") == 0)
+        const bool elevated = is_process_elevated();
+        if (!must_restart_elevated && (elevated ||
+                                       general_settings.GetNamedBoolean(L"run_elevated", false) == false ||
+                                       strcmp(lpCmdLine, "--dont-elevate") == 0))
         {
-            result = runner(isProcessElevated);
+            result = runner(elevated);
         }
         else
         {

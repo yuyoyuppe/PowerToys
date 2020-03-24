@@ -26,6 +26,12 @@ BEGIN
     IDS_SETTING_EXCLCUDED_APPS_DESCRIPTION                     "To exclude an application from snapping to zones add its name here (one per line). Excluded apps will react to the Windows Snap regardless of all other settings."
     IDS_SETTINGS_HIGHLIGHT_OPACITY                             "Zone opacity (%)" 
     IDS_FANCYZONES                                             L"FancyZones" 
+    IDS_CANT_DRAG_ELEVATED                                     L"We've detected an application launched as admin. This will block some functionality in PowerToys. Relaunch as Admin?"
+    IDS_CANT_DRAG_ELEVATED_CONFIRM_RESTART_ELEVATED            L"Yes"
+    IDS_CANT_DRAG_ELEVATED_LEARN_MORE                          L"Learn more"
+    IDS_CANT_DRAG_ELEVATED_DIALOG_DONT_SHOW_AGAIN              L"Don't show again"
+    IDS_CANT_DRAG_ELEVATED_SNOOZE_1DAY                         L"24 hours"
+
 END
 
 1 VERSIONINFO

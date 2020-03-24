@@ -12,8 +12,12 @@
 
 #include <functional>
 #include <common/common.h>
-#include <lib\util.h>
+#include <common/window_helpers.h>
+#include <common/notifications.h>
+#include <lib/util.h>
 #include <unordered_set>
+
+#include <common/notifications/fancyzones_notifications.h>
 
 enum class DisplayChangeType
 {
@@ -23,6 +27,8 @@ enum class DisplayChangeType
     Editor,
     Initialization
 };
+
+extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 namespace std
 {
@@ -176,7 +182,7 @@ private:
     bool IsInterestingWindow(HWND window) noexcept;
     void UpdateZoneWindows() noexcept;
     void MoveWindowsOnDisplayChange() noexcept;
-    void UpdateDragState(require_write_lock) noexcept;
+    void UpdateDragState(HWND window, require_write_lock) noexcept;
     void CycleActiveZoneSet(DWORD vkCode) noexcept;
     bool OnSnapHotkey(DWORD vkCode) noexcept;
     void MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT const& ptScreen, require_write_lock) noexcept;
@@ -806,7 +812,7 @@ void FancyZones::MoveWindowsOnDisplayChange() noexcept
     EnumWindows(callback, reinterpret_cast<LPARAM>(this));
 }
 
-void FancyZones::UpdateDragState(require_write_lock) noexcept
+void FancyZones::UpdateDragState(HWND window, require_write_lock) noexcept
 {
     const bool shift = GetAsyncKeyState(VK_SHIFT) & 0x8000;
     const bool mouseL = GetAsyncKeyState(VK_LBUTTON) & 0x8000;
@@ -834,6 +840,25 @@ void FancyZones::UpdateDragState(require_write_lock) noexcept
     else
     {
         m_dragEnabled = !(shift | mouse);
+    }
+
+    const bool windowElevated = IsProcessOfWindowElevated(window);
+    static const bool meElevated = is_process_elevated();
+    static bool warning_shown = false;
+    if (windowElevated && !meElevated)
+    {
+        m_dragEnabled = false;
+        if (!warning_shown && !is_cant_drag_elevated_warning_disabled())
+        {
+            std::vector<notifications::action_t> actions = {
+                notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_CONFIRM_RESTART_ELEVATED), L"powertoys://cant_drag_elevated_restart/" },
+                notifications::snooze_button{ { { .label = GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_SNOOZE_1DAY), .minutes = 1 } } },
+                notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_LEARN_MORE), L"https://aka.ms/powertoysDetectedElevatedHelp", true },
+                notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_DIALOG_DONT_SHOW_AGAIN), L"powertoys://cant_drag_elevated_disable/", true }
+            };
+            notifications::show_toast_with_activations(GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED), {}, std::move(actions), notifications::toast_params{ .tag = { L"CantDragElevated" }, .resend_if_scheduled = false });
+            warning_shown = true;
+        }
     }
 }
 
@@ -935,7 +960,7 @@ void FancyZones::MoveSizeStartInternal(HWND window, HMONITOR monitor, POINT cons
     m_windowMoveSize = window;
 
     // This updates m_dragEnabled depending on if the shift key is being held down.
-    UpdateDragState(writeLock);
+    UpdateDragState(window, writeLock);
 
     if (m_dragEnabled)
     {
@@ -1018,7 +1043,7 @@ void FancyZones::MoveSizeUpdateInternal(HMONITOR monitor, POINT const& ptScreen,
     if (m_inMoveSize)
     {
         // This updates m_dragEnabled depending on if the shift key is being held down.
-        UpdateDragState(writeLock);
+        UpdateDragState(m_windowMoveSize, writeLock);
 
         if (m_zoneWindowMoveSize)
         {
