@@ -851,7 +851,7 @@ void FancyZones::UpdateDragState(HWND window, require_write_lock) noexcept
         if (!warning_shown && !is_cant_drag_elevated_warning_disabled())
         {
             std::vector<notifications::action_t> actions = {
-                notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_CONFIRM_RESTART_ELEVATED), L"powertoys://cant_drag_elevated_restart/" },
+                notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_CONFIRM_OPEN_SETTINGS), L"powertoys://cant_drag_elevated_open_settings/" },
                 notifications::snooze_button{ { { .label = GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_SNOOZE_1DAY), .minutes = 1 } } },
                 notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_LEARN_MORE), L"https://aka.ms/powertoysDetectedElevatedHelp", true },
                 notifications::link_button{ GET_RESOURCE_STRING(IDS_CANT_DRAG_ELEVATED_DIALOG_DONT_SHOW_AGAIN), L"powertoys://cant_drag_elevated_disable/", true }

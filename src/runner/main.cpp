@@ -43,34 +43,32 @@ namespace
 
     const wchar_t PT_URI_PROTOCOL_SCHEME[] = L"powertoys://";
 
-    const wchar_t PT_REMOTE_QUIT_EVENT[] = L"PowerToysRemoteQuitSignalEvent";
+    const wchar_t PT_REMOTE_OPEN_SETTINGS_EVENT[] = L"PowerToysRemoteOpenSettingsSignalEvent";
 }
 
 static DWORD main_thread_id;
 
-void listen_for_remote_quit_signal()
+void listen_for_remote_open_settings_signal()
 {
-    wil::unique_event_nothrow remote_quit_event{
-        CreateEventW(nullptr, FALSE, FALSE, PT_REMOTE_QUIT_EVENT)
+    wil::unique_event_nothrow remote_open_settings_event{
+        CreateEventW(nullptr, FALSE, FALSE, PT_REMOTE_OPEN_SETTINGS_EVENT)
     };
-    if (!remote_quit_event)
+    if (!remote_open_settings_event)
     {
         return;
     }
-    remote_quit_event.wait();
-    PostThreadMessage(main_thread_id, WM_QUIT, 0, 0);
+    remote_open_settings_event.wait();
+    open_settings_window();
 }
 
-void signal_remote_quit_event()
+void signal_remote_open_settings_event()
 {
-    wil::unique_event_nothrow remote_quit_event{
-        OpenEventW(EVENT_MODIFY_STATE, FALSE, PT_REMOTE_QUIT_EVENT)
+    wil::unique_event_nothrow remote_open_settings_event{
+        OpenEventW(EVENT_MODIFY_STATE, FALSE, PT_REMOTE_OPEN_SETTINGS_EVENT)
     };
-    if (remote_quit_event)
+    if (remote_open_settings_event)
     {
-        remote_quit_event.SetEvent();
-        // Let the other PT process exit
-        Sleep(300);
+        remote_open_settings_event.SetEvent();
     }
 }
 
@@ -196,7 +194,6 @@ int runner(bool isProcessElevated)
 #endif
     Trace::RegisterProvider();
     start_tray_icon();
-
     int result = -1;
     try
     {
@@ -205,7 +202,7 @@ int runner(bool isProcessElevated)
         } }.detach();
 
         std::thread{ [] {
-            listen_for_remote_quit_signal();
+            listen_for_remote_open_settings_signal();
         } }.detach();
 
         if (winstore::running_as_packaged())
@@ -296,7 +293,7 @@ enum class toast_notification_handler_result
 {
     exit_success,
     exit_error,
-    restart_elevated
+    open_settings
 };
 
 toast_notification_handler_result toast_notification_handler(const std::wstring_view param)
@@ -305,9 +302,9 @@ toast_notification_handler_result toast_notification_handler(const std::wstring_
     {
         return disable_cant_drag_elevated_warning() ? toast_notification_handler_result::exit_success : toast_notification_handler_result::exit_error;
     }
-    else if (param == L"cant_drag_elevated_restart/")
+    else if (param == L"cant_drag_elevated_open_settings/")
     {
-        return toast_notification_handler_result::restart_elevated;
+        return toast_notification_handler_result::open_settings;
     }
     else
     {
@@ -322,7 +319,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     int n_cmd_args = 0;
     LPWSTR* cmd_arg_list = CommandLineToArgvW(GetCommandLineW(), &n_cmd_args);
-    bool must_restart_elevated = false;
     switch (should_run_in_special_mode(n_cmd_args, cmd_arg_list))
     {
     case SpecialMode::Win32ToastNotificationCOMServer:
@@ -334,10 +330,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             return 1;
         case toast_notification_handler_result::exit_success:
             return 0;
-        case toast_notification_handler_result::restart_elevated:
-            signal_remote_quit_event();
-            must_restart_elevated = true;
-            break;
+        case toast_notification_handler_result::open_settings:
+            signal_remote_open_settings_event();
+            return 0;
         }
     case SpecialMode::None:
         // continue as usual
@@ -421,9 +416,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         auto general_settings = load_general_settings();
         int rvalue = 0;
         const bool elevated = is_process_elevated();
-        if (!must_restart_elevated && (elevated ||
-                                       general_settings.GetNamedBoolean(L"run_elevated", false) == false ||
-                                       strcmp(lpCmdLine, "--dont-elevate") == 0))
+        if ((elevated ||
+             general_settings.GetNamedBoolean(L"run_elevated", false) == false ||
+             strcmp(lpCmdLine, "--dont-elevate") == 0))
         {
             result = runner(elevated);
         }
