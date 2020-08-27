@@ -29,9 +29,19 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public VideoConferenceViewModel(Func<string, int> ipcMSGCallBackFunc, string configFileSubfolder = "")
         {
+            SendConfigMSG = ipcMSGCallBackFunc;
+
             _settingsConfigFileFolder = configFileSubfolder;
 
-            Settings = SettingsUtils.GetOrCreateSettings<VideoConferenceSettings>(ModuleName);
+            try
+            {
+                Settings = SettingsUtils.GetSettings<VideoConferenceSettings>(powertoy: GetSettingsSubPath());
+            }
+            catch
+            {
+                Settings = new VideoConferenceSettings();
+                SettingsUtils.SaveSettings(Settings.ToJsonString(), GetSettingsSubPath());
+            }
 
             CameraNames = Task.Run(() => GetAllCameras()).Result.Select(di => di.Name).ToList();
 
@@ -51,12 +61,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             GeneralSettings generalSettings;
             try
             {
-                generalSettings = SettingsUtils.GetSettings<GeneralSettings>(GetSettingsSubPath());
+                generalSettings = SettingsUtils.GetSettings<GeneralSettings>(string.Empty);
             }
             catch
             {
                 generalSettings = new GeneralSettings();
-                SettingsUtils.SaveSettings(generalSettings.ToJsonString(), GetSettingsSubPath());
+                SettingsUtils.SaveSettings(generalSettings.ToJsonString(), string.Empty);
             }
 
             this._isEnabled = generalSettings.Enabled.VideoConference;
