@@ -87,7 +87,7 @@
       <Custom Action="RegisterPowerToysSchTask" After="InstallFiles">
         NOT Installed and CREATESCHEDULEDTASK = 1
       </Custom>
-<?if $(var.Configuration)="Release" ?>
+<?if $(var.HasWDK)="true" ?>
         <Custom Action="SetCertifyVirtualCameraDriverParam" After="RegisterPowerToysSchTask"/>
         <Custom Action="CertifyVirtualCameraDriver" After="SetCertifyVirtualCameraDriverParam" >
         	NOT Installed
@@ -218,7 +218,7 @@
                   DllEntry="DetectPrevInstallPathCA"
                   />
 
-<?if $(var.Configuration)="Release" ?>
+<?if $(var.HasWDK)="true" ?>
     <CustomAction Id="SetCertifyVirtualCameraDriverParam"
     		Property="CertifyVirtualCameraDriver"
     		Value="[#VideoConferenceVirtualDriver.cer]" />
@@ -292,7 +292,7 @@
             </Directory>
             <Directory Id="PowerRenameInstallFolder" Name="$(var.PowerRenameProjectName)"/>
             <Directory Id="ShortcutGuideInstallFolder" Name="$(var.ShortcutGuideProjectName)"/>
-<?if $(var.Configuration)="Release" ?>
+<?if $(var.HasWDK)="true" ?>
               <Directory Id="VideoConferenceInstallFolder" Name="$(var.VideoConferenceProjectName)">
                <Directory Id="VideoConferenceIconsFolder" Name="Icons" />
               </Directory>
@@ -670,7 +670,7 @@
       </Component>
     </DirectoryRef>
 	  
-<?if $(var.Configuration)="Release" ?>
+<?if $(var.HasWDK)="true" ?>
     <DirectoryRef Id="VideoConferenceInstallFolder" FileSource="$(var.BinX64Dir)modules\$(var.VideoConferenceProjectName)\">
      <Component Id="Module_VideoConference" Guid="5996527a-40fc-432e-b3ac-abc0b4bd3887" Win64="yes">
       <File Source="$(var.BinX64Dir)modules\$(var.VideoConferenceProjectName)\VideoConferenceModule.dll" KeyPath="yes" />
@@ -880,7 +880,7 @@
       <ComponentRef Id="vcredist_dlls" />
       <ComponentRef Id="PowerToysSvgs" />
       <ComponentRef Id="Module_ShortcutGuide" />
-<?if $(var.Configuration)="Release" ?>
+<?if $(var.HasWDK)="true" ?>
       <ComponentRef Id="Module_VideoConference" />
       <ComponentRef Id="Module_VideoConferenceIcons" />
 <?endif?>
