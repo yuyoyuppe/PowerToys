@@ -560,7 +560,7 @@ SimpleMediaStream::Shutdown()
     if (_settingsUpdateChannel.has_value())
     {
         _settingsUpdateChannel->access([this](auto settingsMemory) {
-            auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory.data());
+            auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory._data);
 
             settings->cameraInUse = false;
 
@@ -686,7 +686,7 @@ SimpleMediaStream::SyncedSettings SimpleMediaStream::SyncCurrentSettings()
         return result;
     }
     _settingsUpdateChannel->access([this, &result](auto settingsMemory) {
-        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory.data());
+        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory._data);
         bool cameraNameUpdated = false;
         result.webcamDisabled = settings->useOverlayImage;
 
@@ -716,7 +716,7 @@ SimpleMediaStream::SyncedSettings SimpleMediaStream::SyncCurrentSettings()
                 return;
             }
             imageChannel->access([this, settings, &result](auto imageMemory) {
-                result.overlayImage = SHCreateMemStream(imageMemory.data(), static_cast<UINT>(imageMemory.size()));
+                result.overlayImage = SHCreateMemStream(imageMemory._data, static_cast<UINT>(imageMemory._size));
                 if (!result.overlayImage)
                 {
                     return;

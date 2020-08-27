@@ -2,7 +2,7 @@
 
 inline char* SerializedSharedMemory::lock_flag_addr() noexcept
 {
-    return reinterpret_cast<char*>(_memory.data() + _memory.size());
+    return reinterpret_cast<char*>(_memory._data + _memory._size);
 }
 
 inline void SerializedSharedMemory::lock() noexcept
@@ -39,9 +39,9 @@ SerializedSharedMemory::SerializedSharedMemory(std::array<wil::unique_handle, 2>
 
 SerializedSharedMemory::~SerializedSharedMemory() noexcept
 {
-    if (!_memory.empty())
+    if (_memory._data)
     {
-        UnmapViewOfFile(_memory.data());
+        UnmapViewOfFile(_memory._data);
     }
 }
 

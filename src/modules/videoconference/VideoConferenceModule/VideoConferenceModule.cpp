@@ -125,7 +125,7 @@ void VideoConferenceModule::reverseVirtualCameraMuteState()
         return;
     }
     instance->_settingsUpdateChannel->access([](auto settingsMemory) {
-        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory.data());
+        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory._data);
         settings->useOverlayImage = !settings->useOverlayImage;
     });
 }
@@ -138,7 +138,7 @@ bool VideoConferenceModule::getVirtualCameraMuteState()
         return disabled;
     }
     instance->_settingsUpdateChannel->access([&disabled](auto settingsMemory) {
-        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory.data());
+        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory._data);
         disabled = settings->useOverlayImage;
     });
     return disabled;
@@ -152,7 +152,7 @@ bool VideoConferenceModule::getVirtualCameraInUse()
         return inUse;
     }
     instance->_settingsUpdateChannel->access([&inUse](auto settingsMemory) {
-        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory.data());
+        auto settings = reinterpret_cast<CameraSettingsUpdateChannel*>(settingsMemory._data);
         inUse = settings->cameraInUse;
     });
     return inUse;
@@ -199,7 +199,7 @@ VideoConferenceModule::VideoConferenceModule()
     if (_settingsUpdateChannel)
     {
         _settingsUpdateChannel->access([](auto memory) {
-            auto updatesChannel = new (memory.data()) CameraSettingsUpdateChannel{};
+            auto updatesChannel = new (memory._data) CameraSettingsUpdateChannel{};
         });
     }
     sendSourceCameraNameUpdate();
@@ -410,7 +410,7 @@ void VideoConferenceModule::sendSourceCameraNameUpdate()
         return;
     }
     _settingsUpdateChannel->access([](auto memory) {
-        auto updatesChannel = reinterpret_cast<CameraSettingsUpdateChannel*>(memory.data());
+        auto updatesChannel = reinterpret_cast<CameraSettingsUpdateChannel*>(memory._data);
         updatesChannel->sourceCameraName.emplace();
         std::copy(begin(selectedCamera), end(selectedCamera), begin(*updatesChannel->sourceCameraName));
     });
@@ -437,7 +437,7 @@ void VideoConferenceModule::sendOverlayImageUpdate()
 
     const size_t imageSize = _imageOverlayChannel->size();
     _settingsUpdateChannel->access([imageSize](auto memory) {
-        auto updatesChannel = reinterpret_cast<CameraSettingsUpdateChannel*>(memory.data());
+        auto updatesChannel = reinterpret_cast<CameraSettingsUpdateChannel*>(memory._data);
         updatesChannel->overlayImageSize.emplace(imageSize);
         updatesChannel->newOverlayImagePosted = true;
     });

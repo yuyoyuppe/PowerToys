@@ -7,7 +7,6 @@
 #include <string>
 #include <optional>
 #include <wil/resource.h>
-#include <span>
 #include <functional>
 #include <array>
 
@@ -16,7 +15,11 @@
 class SerializedSharedMemory
 {
 public:
-    using memory_t = std::span<uint8_t>;
+    struct memory_t
+    {
+      uint8_t * _data = nullptr;
+      size_t _size = 0;
+    };
 
     static std::optional<SerializedSharedMemory> create(const std::wstring_view object_name,
                                                         const size_t size,
@@ -31,7 +34,7 @@ public:
                                                       const bool read_only) noexcept;
 
     void access(std::function<void(memory_t)> access_routine) noexcept;
-    inline size_t size() const noexcept { return _memory.size_bytes(); }
+    inline size_t size() const noexcept { return _memory._size; }
 
     ~SerializedSharedMemory() noexcept;
     SerializedSharedMemory(SerializedSharedMemory&&) noexcept;
