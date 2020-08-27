@@ -35,7 +35,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             try
             {
-                Settings = SettingsUtils.GetSettings<VideoConferenceSettings>(powertoy: GetSettingsSubPath());
+                Settings = SettingsUtils.GetSettings<VideoConferenceSettings>(GetSettingsSubPath());
             }
             catch
             {
@@ -210,7 +210,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     generalSettings.Enabled.VideoConference = value;
                     OutGoingGeneralSettings snd = new OutGoingGeneralSettings(generalSettings);
 
-                    // ShellPage.DefaultSndMSGCallback(snd.ToString());
+                    SendConfigMSG(snd.ToString());
                     OnPropertyChanged("IsEnabled");
                 }
             }
