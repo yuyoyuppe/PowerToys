@@ -51,12 +51,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             GeneralSettings generalSettings;
             try
             {
-                generalSettings = SettingsUtils.GetSettings<GeneralSettings>(string.Empty);
+                generalSettings = SettingsUtils.GetSettings<GeneralSettings>(GetSettingsSubPath());
             }
             catch
             {
                 generalSettings = new GeneralSettings();
-                SettingsUtils.SaveSettings(generalSettings.ToJsonString(), string.Empty);
+                SettingsUtils.SaveSettings(generalSettings.ToJsonString(), GetSettingsSubPath());
             }
 
             this._isEnabled = generalSettings.Enabled.VideoConference;
@@ -354,13 +354,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public string GetSettingsSubPath()
+        {
+            return _settingsConfigFileFolder + "\\" + ModuleName;
+        }
+
         public void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
             OnPropertyChanged(propertyName);
             SndVideoConferenceSettings outsettings = new SndVideoConferenceSettings(Settings);
             SndModuleSettings<SndVideoConferenceSettings> ipcMessage = new SndModuleSettings<SndVideoConferenceSettings>(outsettings);
 
-            // SendConfigMSG(ipcMessage.ToJsonString());
+            SendConfigMSG(ipcMessage.ToJsonString());
         }
     }
 
