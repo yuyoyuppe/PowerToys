@@ -4,7 +4,7 @@
     "SignBatches": [
         {
             "MatchedPath": [
-                "!(ModernWpf)*.resources.dll",
+                "!ModernWpf*.resources.dll",
 
                 "PowerToysSetupCustomActions.dll",
 
