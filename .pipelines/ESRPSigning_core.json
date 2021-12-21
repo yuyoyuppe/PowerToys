@@ -1,10 +1,10 @@
 {
     "Version": "1.0.0",
-    "UseMinimatch": true,
+    "UseMinimatch": false,
     "SignBatches": [
         {
             "MatchedPath": [
-                "!ModernWpf*.resources.dll",
+                "*.resources.dll",
 
                 "PowerToysSetupCustomActions.dll",
 
