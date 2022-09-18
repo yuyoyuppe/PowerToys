@@ -243,12 +243,14 @@ void DrawMeasureToolTick(const CommonState& commonState,
 
     OverlayBoxText text;
 
+    const float dpiCompensation = commonState.dpiCompensation ? d2dState.dpiScale : 1.f;
     const auto [crossSymbolPos, measureStringBufLen] =
         measuredEdges.Print(text.buffer.data(),
                             text.buffer.size(),
                             drawHorizontalCrossLine,
                             drawVerticalCrossLine,
-                            commonState.units);
+                            commonState.units,
+                            dpiCompensation);
 
     commonState.overlayBoxText.Access([&](OverlayBoxText& v) {
         v = text;

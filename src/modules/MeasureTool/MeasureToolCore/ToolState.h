@@ -30,6 +30,7 @@ struct CommonState
     Box toolbarBoundingBox;
 
     Measurement::Unit units = Measurement::Unit::Pixel;
+    bool dpiCompensation = false;
 
     mutable Serialized<OverlayBoxText> overlayBoxText;
     POINT cursorPosSystemSpace = {}; // updated atomically

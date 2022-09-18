@@ -67,7 +67,7 @@
                         </controls:Setting.ActionContent>
                     </controls:Setting>
 
-                    <!--<controls:Setting x:Uid="MeasureTool_UnitsOfMeasure" Icon="&#xECC6;">
+                    <controls:Setting x:Uid="MeasureTool_UnitsOfMeasure" Icon="&#xECC6;">
                         <controls:Setting.ActionContent>
                             <ComboBox SelectedIndex="{x:Bind Path=ViewModel.UnitsOfMeasure, Mode=TwoWay}" MinWidth="{StaticResource SettingActionControlMinWidth}">
                                 <ComboBoxItem x:Uid="MeasureTool_UnitsOfMeasure_Pixels" />
@@ -75,7 +75,20 @@
                                 <ComboBoxItem x:Uid="MeasureTool_UnitsOfMeasure_Centimeters" />
                             </ComboBox>
                         </controls:Setting.ActionContent>
-                    </controls:Setting>-->
+                    </controls:Setting>
+                    <muxc:InfoBar
+                        Severity="Warning"
+                        x:Uid="MeasureTool_UnitsOfMeasure_Information"
+                        IsOpen="{x:Bind Mode=OneWay, Path=ViewModel.ShowUnitsOfMeasureWarning}"
+                        IsTabStop="{x:Bind Mode=OneWay, Path=ViewModel.ShowUnitsOfMeasureWarning}"
+                        IsClosable="False" />
+
+
+                    <controls:Setting x:Uid="MeasureTool_DpiCompensation" Icon="&#xE7FB;">
+                        <controls:Setting.ActionContent>
+                            <ToggleSwitch IsOn="{x:Bind ViewModel.DpiCompensation, Mode=TwoWay}" x:Uid="MeasureTool_DpiCompensation_ToggleSwitch" />
+                        </controls:Setting.ActionContent>
+                    </controls:Setting>                    
 
                     <controls:Setting x:Uid="MeasureTool_DrawFeetOnCross">
                         <controls:Setting.ActionContent>

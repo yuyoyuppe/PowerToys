@@ -227,7 +227,8 @@ namespace
                          const CommonState& commonState,
                          HWND window,
                          const D2DState& d2dState,
-                         std::optional<D2D_POINT_2F> textBoxCenter)
+                         std::optional<D2D_POINT_2F> textBoxCenter,
+                         const float dpiCompensation)
     {
         const bool screenQuadrantAware = textBoxCenter.has_value();
         d2dState.ToggleAliasedLinesMode(true);
@@ -240,7 +241,8 @@ namespace
                               text.buffer.size(),
                               true,
                               true,
-                              commonState.units);
+                              commonState.units,
+                              dpiCompensation);
 
         commonState.overlayBoxText.Access([&](OverlayBoxText& v) {
             v = text;
@@ -275,15 +277,17 @@ void DrawBoundsToolTick(const CommonState& commonState,
 
     d2dState.dxgiWindowState.rt->Clear();
 
+    const float dpiCompensation = commonState.dpiCompensation ? d2dState.dpiScale : 1.f;
+
     const auto& perScreen = it->second;
     for (const auto& measure : perScreen.measurements)
-        DrawMeasurement(measure, commonState, window, d2dState, {});
+        DrawMeasurement(measure, commonState, window, d2dState, {}, dpiCompensation);
 
     if (perScreen.currentBounds.has_value())
     {
         D2D1_RECT_F rect;
         std::tie(rect.left, rect.right) = std::minmax(perScreen.currentBounds->startPos.x, perScreen.currentBounds->currentPos.x);
         std::tie(rect.top, rect.bottom) = std::minmax(perScreen.currentBounds->startPos.y, perScreen.currentBounds->currentPos.y);
-        DrawMeasurement(Measurement{ rect }, commonState, window, d2dState, perScreen.currentBounds->currentPos);
+        DrawMeasurement(Measurement{ rect }, commonState, window, d2dState, perScreen.currentBounds->currentPos, dpiCompensation);
     }
 }

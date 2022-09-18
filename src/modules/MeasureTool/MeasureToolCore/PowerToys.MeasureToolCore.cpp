@@ -82,6 +82,7 @@ namespace winrt::PowerToys::MeasureToolCore::implementation
 
         _settings = Settings::LoadFromFile();
 
+        _commonState.dpiCompensation = _settings.dpiCompensation;
         _commonState.units = _settings.units;
         _commonState.lineColor.r = _settings.lineColor[0] / 255.f;
         _commonState.lineColor.g = _settings.lineColor[1] / 255.f;

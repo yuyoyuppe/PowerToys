@@ -34,5 +34,6 @@ struct Measurement
                       const size_t bufSize,
                       const bool printWidth,
                       const bool printHeight,
-                      const Unit units) const;
+                      const Unit units,
+                      const float dpiCompensation) const;
 };

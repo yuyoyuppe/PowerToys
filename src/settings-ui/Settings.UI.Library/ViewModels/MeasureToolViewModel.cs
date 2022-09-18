@@ -55,6 +55,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.ViewModels
 
                     NotifyPropertyChanged();
                     NotifyPropertyChanged(nameof(ShowContinuousCaptureWarning));
+                    NotifyPropertyChanged(nameof(ShowUnitsOfMeasureWarning));
                 }
             }
         }
@@ -142,6 +143,24 @@ namespace Microsoft.PowerToys.Settings.UI.Library.ViewModels
                 {
                     Settings.Properties.UnitsOfMeasure.Value = value;
                     NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(ShowUnitsOfMeasureWarning));
+                }
+            }
+        }
+
+        public bool DpiCompensation
+        {
+            get
+            {
+                return Settings.Properties.DpiCompensation;
+            }
+
+            set
+            {
+                if (Settings.Properties.DpiCompensation != value)
+                {
+                    Settings.Properties.DpiCompensation = value;
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -202,6 +221,11 @@ namespace Microsoft.PowerToys.Settings.UI.Library.ViewModels
         public bool ShowContinuousCaptureWarning
         {
             get => IsEnabled && ContinuousCapture;
+        }
+
+        public bool ShowUnitsOfMeasureWarning
+        {
+            get => IsEnabled && (UnitsOfMeasure != 0);
         }
 
         private Func<string, int> SendConfigMSG { get; }

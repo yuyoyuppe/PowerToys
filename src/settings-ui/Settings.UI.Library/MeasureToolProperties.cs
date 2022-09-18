@@ -13,6 +13,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         {
             ActivationShortcut = new HotkeySettings(true, false, false, true, 0x4D);
             UnitsOfMeasure = new IntProperty(0);
+            DpiCompensation = false;
             PixelTolerance = new IntProperty(30);
             ContinuousCapture = false;
             DrawFeetOnCross = true;
@@ -32,6 +33,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public bool PerColorChannelEdgeDetection { get; set; }
 
         public IntProperty UnitsOfMeasure { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool DpiCompensation { get; set; }
 
         public IntProperty PixelTolerance { get; set; }
 

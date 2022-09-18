@@ -47,7 +47,8 @@ Measurement::PrintResult Measurement::Print(wchar_t* buf,
                                             const size_t bufSize,
                                             const bool printWidth,
                                             const bool printHeight,
-                                            const Unit units) const
+                                            const Unit units,
+                                            const float dpiCompensation) const
 {
     PrintResult result;
     if (printWidth)
@@ -55,7 +56,7 @@ Measurement::PrintResult Measurement::Print(wchar_t* buf,
         result.strLen += swprintf_s(buf,
                                     bufSize,
                                     L"%g",
-                                    Width(units));
+                                    Width(units) / dpiCompensation);
         if (printHeight)
         {
             result.crossSymbolPos = result.strLen + 1;
@@ -70,7 +71,7 @@ Measurement::PrintResult Measurement::Print(wchar_t* buf,
         result.strLen += swprintf_s(buf + result.strLen,
                                     bufSize - result.strLen,
                                     L"%g",
-                                    Height(units));
+                                    Height(units) / dpiCompensation);
     }
 
     switch (units)

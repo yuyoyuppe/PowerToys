@@ -177,19 +177,25 @@
     <value>Capture screen continuously during measuring</value>
   </data>
   <data name="MeasureTool_ContinuousCapture.Description" xml:space="preserve">
-    <value>Refresh screen contexts in real-time instead of making a screenshot once. </value>
+    <value>Refresh screen contexts in real-time instead of making a screenshot once</value>
   </data>
   <data name="MeasureTool_PerColorChannelEdgeDetection.Header" xml:space="preserve">
     <value>Per color channel edge detection</value>
   </data>
   <data name="MeasureTool_PerColorChannelEdgeDetection.Description" xml:space="preserve">
-    <value>If enabled, test that all color channels are within a tolerance distance from each other. Otherwise, check that the sum of all color channels differences is smaller than the tolerance.</value>
+    <value>If enabled, test that all color channels are within a tolerance distance from each other. Otherwise, check that the sum of all color channels differences is smaller than the tolerance</value>
   </data>
   <data name="MeasureTool_DrawFeetOnCross.Header" xml:space="preserve">
     <value>Draw feet on cross</value>
   </data>
   <data name="MeasureTool_DrawFeetOnCross.Description" xml:space="preserve">
-    <value>Adds feet to the end of cross lines.</value>
+    <value>Adds feet to the end of cross lines</value>
+  </data>
+  <data name="MeasureTool_DpiCompensation.Header" xml:space="preserve">
+    <value>DPI compensation</value>
+  </data>
+  <data name="MeasureTool_DpiCompensation.Description" xml:space="preserve">
+    <value>Adjust measurements as if they were made on a screen with 100% scaling</value>
   </data>
   <data name="MeasureTool_EnableMeasureTool.Header" xml:space="preserve">
     <value>Enable Screen Ruler</value>
@@ -2399,4 +2405,7 @@ Activate by holding the key for the character you want to add an accent to, then
     <value>The continuous capture mode will consume more resources when in use. Also, measurements will be excluded from screenshots and screen capture.</value>
     <comment>pointer as in mouse pointer. Resources refer to things like CPU, GPU, RAM</comment>
   </data>
+  <data name="MeasureTool_UnitsOfMeasure_Information.Title" xml:space="preserve">
+    <value>Convertion from pixels to other units might be inaccurate.</value>
+  </data>  
 </root>
