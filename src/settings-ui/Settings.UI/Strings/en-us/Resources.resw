@@ -195,6 +195,126 @@
     <value>Enable Screen Ruler</value>
     <comment>"Screen Ruler" is the name of the utility</comment>
   </data>
+  <data name="MouseWithoutBorders_ActivationSettings.Header" xml:space="preserve">
+    <value>Activation</value>
+  </data>
+  <data name="MouseWithoutBorders_DeviceLayoutSettings.Header" xml:space="preserve">
+    <value>Device layout</value>
+  </data>
+  <data name="MouseWithoutBorders_KeySettings.Header" xml:space="preserve">
+    <value>Encryption Key</value>
+  </data>
+  <data name="MouseWithoutBorders_SecurityKey.Header" xml:space="preserve">
+    <value>Security key</value>
+  </data>
+  <data name="MouseWithoutBorders_SecurityKey.Description" xml:space="preserve">
+    <value>The key must be auto generated in one machine by click on New Key, then typed in other machines</value>
+  </data>
+  <data name="MouseWithoutBorders_NewKey.Content" xml:space="preserve">
+    <value>New key</value>
+  </data>
+  <data name="MouseWithoutBorders_Settings.Header" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="MouseWithoutBorders_Toggle_Enable.Header" xml:space="preserve">
+    <value>Enable Mouse Without Borders</value>
+  </data>
+  <data name="MouseWithoutBorders.SecondaryLinksHeader" xml:space="preserve">
+    <value>Attribution</value>
+    <comment>giving credit to the projects this utility was based on</comment>
+  </data>
+  <data name="MouseWithoutBorders.ModuleDescription" xml:space="preserve">
+    <value>Mouse Without Borders is a quick and easy way to move your cursor across multiple devices.</value>
+    <comment>"Mouse Without Borders" is the name of the utility</comment>
+  </data>
+  <data name="MouseWithoutBorders.ModuleTitle" xml:space="preserve">
+    <value>Mouse Without Borders</value>
+    <comment>"Mouse Without Borders" is the name of the utility</comment>
+  </data>
+  <data name="MouseWithoutBorders_WrapMouse.Header" xml:space="preserve">
+    <value>Wrap mouse</value>
+  </data>
+  <data name="MouseWithoutBorders_ShareClipboard.Header" xml:space="preserve">
+    <value>Share clipboard</value>
+  </data>
+  <data name="MouseWithoutBorders_TransferFile.Header" xml:space="preserve">
+    <value>Transfer file</value>
+  </data>
+  <data name="MouseWithoutBorders_HideMouseAtScreenEdge.Header" xml:space="preserve">
+    <value>Hide mouse at screenEdge</value>
+  </data>
+  <data name="MouseWithoutBorders_DrawMouseCursor.Header" xml:space="preserve">
+    <value>Draw mouse cursor</value>
+  </data>
+  <data name="MouseWithoutBorders_ValidateRemoteMachineIP.Header" xml:space="preserve">
+    <value>Validate remote machine IP</value>
+  </data>
+  <data name="MouseWithoutBorders_SameSubnetOnly.Header" xml:space="preserve">
+    <value>Same subnet only</value>
+  </data>
+  <data name="MouseWithoutBorders_BlockScreenSaverOnOtherMachines.Header" xml:space="preserve">
+    <value>Block screen saver on other machines</value>
+  </data>
+  <data name="MouseWithoutBorders_MoveMouseRelatively.Header" xml:space="preserve">
+    <value>Move mouse relatively</value>
+  </data>
+  <data name="MouseWithoutBorders_BlockMouseAtScreenCorners.Header" xml:space="preserve">
+    <value>Block mouse at screen corners</value>
+  </data>
+  <data name="MouseWithoutBorders_UseKeyMappings.Header" xml:space="preserve">
+    <value>Use key mappings</value>
+  </data>
+  <data name="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages.Header" xml:space="preserve">
+    <value>Show clipboard and network status messages</value>
+  </data>
+  <data name="MouseWithoutBorders_WrapMouse.Description"
+      xml:space="preserve">
+      <value>Move control back to the first machine when mouse moves passing the last one</value>
+  </data>
+  <data name="MouseWithoutBorders_ShareClipboard.Description"
+      xml:space="preserve">
+      <value>If share clipboard stops working, Ctrl+Alt+Del then Esc may solve the problem.</value>
+  </data>
+  <data name="MouseWithoutBorders_TransferFile.Description"
+      xml:space="preserve">
+      <value>If a file (&lt;100MB) is copied, it will be transferred to the remote machine clipboard</value>
+  </data>
+  <data name="MouseWithoutBorders_HideMouseAtScreenEdge.Description"
+      xml:space="preserve">
+      <value>Hide the mouse cursor at the top edge of the screen when switching to other machine. This option also steals the focus from any full-screen app to ensure the keyboard input is redirected.</value>
+  </data>
+  <data name="MouseWithoutBorders_DrawMouseCursor.Description"
+      xml:space="preserve">
+      <value>Mouse cursor may not be visible in Windows 8 and later versions of Windows when there is no physical mouse attached.</value>
+  </data>
+  <data name="MouseWithoutBorders_ValidateRemoteMachineIP.Description"
+      xml:space="preserve">
+      <value>Reverse DNS lookup to validate machine IP Address (Advanced option, click Help for any question)</value>
+  </data>
+  <data name="MouseWithoutBorders_SameSubnetOnly.Description"
+      xml:space="preserve">
+      <value>Only connect to machines in the same intranet NNN.NNN.*.* (only works when both machines have IPv4 enabled)</value>
+  </data>
+  <data name="MouseWithoutBorders_BlockScreenSaverOnOtherMachines.Description"
+      xml:space="preserve">
+      <value>Prevent screen saver from starting on other machines when user is actively working on this machine.</value>
+  </data>
+  <data name="MouseWithoutBorders_MoveMouseRelatively.Description"
+      xml:space="preserve">
+      <value>Use this option when remote machine's monitor settings are different, or remote machine has multiple monitors.</value>
+  </data>
+  <data name="MouseWithoutBorders_BlockMouseAtScreenCorners.Description"
+      xml:space="preserve">
+      <value>To avoid accident machine-switch at screen corners.</value>
+  </data>
+  <data name="MouseWithoutBorders_UseKeyMappings.Description"
+      xml:space="preserve">
+      <value>Use key mappings to translate your key presses.</value>
+  </data>
+  <data name="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages.Description"
+      xml:space="preserve">
+      <value>Show clipboard activities and network status in systen tray notifications</value>
+  </data>
   <data name="VideoConference_Enable.Header" xml:space="preserve">
     <value>Enable Video Conference Mute</value>
   </data>
@@ -342,6 +462,10 @@
   <data name="Shell_KeyboardManager.Content" xml:space="preserve">
     <value>Keyboard Manager</value>
     <comment>Product name: Navigation view item name for Keyboard Manager</comment>
+  </data>
+  <data name="Shell_MouseWithoutBorders.Content" xml:space="preserve">
+    <value>Mouse Without Borders</value>
+    <comment>Product name: Navigation view item name for Mouse Without Borders</comment>
   </data>
   <data name="Shell_MouseUtilities.Content" xml:space="preserve">
     <value>Mouse utilities</value>

@@ -145,6 +145,7 @@ namespace Microsoft.PowerToys.Settings.UI
                         case "ImageResizer": StartupPage = typeof(Views.ImageResizerPage); break;
                         case "KBM": StartupPage = typeof(Views.KeyboardManagerPage); break;
                         case "MouseUtils": StartupPage = typeof(Views.MouseUtilsPage); break;
+                        case "MouseWithoutBorders": StartupPage = typeof(Views.MouseWithoutBordersPage); break;
                         case "PowerRename": StartupPage = typeof(Views.PowerRenamePage); break;
                         case "QuickAccent": StartupPage = typeof(Views.PowerAccentPage); break;
                         case "FileExplorer": StartupPage = typeof(Views.PowerPreviewPage); break;

@@ -54,3 +54,14 @@ using System.Diagnostics.CodeAnalysis;
 
 // Code quality
 [assembly: SuppressMessage("CodeQuality", "IDE0076:Invalid global 'SuppressMessageAttribute'", Justification = "Affect predefined suppressions.")]
+
+// Dotnet port
+[assembly: SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "<Dotnet port with style preservation>", Scope = "type", Target = "~T:MouseWithoutBorders.PackageType")]
+
+[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "<Dotnet port with style preservation>", Scope = "module")]
+
+[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "<Dotnet port with style preservation>", Scope = "module")]
+
+[assembly: SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification = "<Dotnet port with style preservation>", Scope = "module")]
+
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:File name should match first type name", Justification = "<Dotnet port with style preservation>", Scope = "module")]
