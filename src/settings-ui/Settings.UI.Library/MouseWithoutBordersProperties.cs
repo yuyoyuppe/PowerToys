@@ -1,0 +1,138 @@
+﻿// Copyright (c) Microsoft Corporation
+// The Microsoft Corporation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
+
+namespace Microsoft.PowerToys.Settings.UI.Library
+{
+    public class MouseWithoutBordersProperties
+    {
+        public StringProperty SecurityKey { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool WrapMouse { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool ShareClipboard { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool TransferFile { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool HideMouseAtScreenEdge { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool DrawMouseCursor { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool ValidateRemoteMachineIP { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool SameSubnetOnly { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool BlockScreenSaverOnOtherMachines { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool MoveMouseRelatively { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool BlockMouseAtScreenCorners { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool UseKeyMappings { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool ShowClipboardAndNetworkStatusMessages { get; set; }
+
+        public List<string> DeviceNames { get; set; }
+
+        public StringProperty MachinePool { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool MatrixOneRow { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool MatrixCircle { get; set; }
+
+        public IntProperty EasyMouse { get; set; }
+
+        public IntProperty MachineID { get; set; }
+
+        public IntProperty LastX { get; set; }
+
+        public IntProperty LastY { get; set; }
+
+        public IntProperty PackageID { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool FirstRun { get; set; }
+
+        public IntProperty HotkeySwitchMachine { get; set; }
+
+        public IntProperty TCPPort { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool DrawMouseEx { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool ReverseLookup { get; set; }
+
+        public StringProperty Name2IP { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool UseVKMap { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool FisrtCtrlShiftS { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool StealFocusWhenSwitchingMachine { get; set; }
+
+        public StringProperty DeviceID { get; set; }
+
+        [JsonConverter(typeof(BoolPropertyJsonConverter))]
+        public bool ShowClipNetStatus { get; set; }
+
+        public MouseWithoutBordersProperties()
+        {
+            SecurityKey = new StringProperty(string.Empty);
+            WrapMouse = false;
+            ShareClipboard = true;
+            TransferFile = true;
+            HideMouseAtScreenEdge = true;
+            DrawMouseCursor = true;
+            ValidateRemoteMachineIP = false;
+            SameSubnetOnly = false;
+            BlockScreenSaverOnOtherMachines = true;
+            MoveMouseRelatively = false;
+            BlockMouseAtScreenCorners = false;
+            UseKeyMappings = false;
+            ShowClipboardAndNetworkStatusMessages = false;
+            EasyMouse = 1;
+
+            // TODO(yuyoyuppe): edit hotkey from settings page
+            HotkeySwitchMachine = 0x70; // VK.F1
+
+            // These are internal, i.e. cannot be edited directly from UI
+            MachinePool = ":,:,:,:";
+            MatrixOneRow = false;
+            MatrixCircle = false;
+            MachineID = new IntProperty(0);
+            LastX = new IntProperty(0);
+            LastY = new IntProperty(0);
+            PackageID = new IntProperty(0);
+            FirstRun = true;
+            TCPPort = new IntProperty(15100);
+            DrawMouseEx = true;
+            Name2IP = new StringProperty(string.Empty);
+            UseVKMap = false;
+            FisrtCtrlShiftS = false;
+            StealFocusWhenSwitchingMachine = false;
+            ShowClipNetStatus = true;
+        }
+    }
+}
