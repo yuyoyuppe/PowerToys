@@ -63,7 +63,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
-            deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames);
+            deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames ?? new List<string>());
         }
 
         public bool IsEnabled
