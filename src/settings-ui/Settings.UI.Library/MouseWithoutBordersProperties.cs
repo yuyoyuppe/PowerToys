@@ -113,7 +113,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             UseKeyMappings = false;
             ShowClipboardAndNetworkStatusMessages = false;
             EasyMouse = new IntProperty(1);
-
+            DeviceNames = new List<string>();
             DeviceID = new StringProperty(string.Empty);
 
             // TODO(yuyoyuppe): edit hotkey from settings page

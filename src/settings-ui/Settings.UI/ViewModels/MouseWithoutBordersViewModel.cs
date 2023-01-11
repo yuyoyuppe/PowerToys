@@ -63,9 +63,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
-            /* TODO: This is crashing the Settings page
-             * deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames);
-             */
+            deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames);
         }
 
         public bool IsEnabled
