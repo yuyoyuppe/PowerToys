@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+  xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+  <?include $(sys.CURRENTDIR)\Common.wxi?>
+
+  <?define MouseWithoutBordersFiles=Ijwhost.dll;Microsoft.Bcl.AsyncInterfaces.dll;Microsoft.Extensions.ObjectPool.dll;Microsoft.Windows.SDK.NET.dll;PowerToys.ManagedCommon.dll;PowerToys.ManagedTelemetry.dll;PowerToys.MouseWithoutBorders.deps.json;PowerToys.MouseWithoutBorders.dll;PowerToys.MouseWithoutBorders.exe;PowerToys.MouseWithoutBorders.runtimeconfig.json;PowerToys.MouseWithoutBordersModuleInterface.dll;PowerToys.Settings.UI.Lib.dll;sni.dll;System.ComponentModel.Composition.dll;System.ComponentModel.Composition.Registration.dll;System.Data.Odbc.dll;System.Data.OleDb.dll;System.Data.SqlClient.dll;System.DirectoryServices.AccountManagement.dll;System.DirectoryServices.Protocols.dll;System.IO.Abstractions.dll;System.IO.Ports.dll;System.Management.dll;System.Private.ServiceModel.dll;System.Reflection.Context.dll;System.Runtime.Caching.dll;System.ServiceModel.dll;System.ServiceModel.Duplex.dll;System.ServiceModel.Http.dll;System.ServiceModel.NetTcp.dll;System.ServiceModel.Primitives.dll;System.ServiceModel.Security.dll;System.ServiceModel.Syndication.dll;System.ServiceProcess.ServiceController.dll;System.Speech.dll;System.Text.Json.dll;System.Web.Services.Description.dll;WindowsBase.dll;WinRT.Runtime.dll?>
+
+  <Fragment>
+    <!-- Mouse Without Borders -->
+    <DirectoryRef Id="MouseWithoutBordersInstallFolder"
+      FileSource="$(var.BinDir)modules\$(var.MouseWithoutBordersProjectName)">
+      <?foreach File in $(var.MouseWithoutBordersFiles)?>
+      <Component Id="MWB_$(var.File)"
+        Win64="yes">
+        <File Id="MWB_$(var.File)"
+          Source="$(var.BinDir)modules\$(var.MouseWithoutBordersProjectName)\$(var.File)" />
+      </Component>
+      <?endforeach?>
+    </DirectoryRef>
+
+    <ComponentGroup Id="MouseWithoutBordersComponentGroup"
+      Directory="INSTALLFOLDER">
+      <?foreach File in $(var.MouseWithoutBordersFiles)?>
+        <ComponentRef Id="MWB_$(var.File)" />
+      <?endforeach?>
+    </ComponentGroup>
+
+  </Fragment>
+</Wix>

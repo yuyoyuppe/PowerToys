@@ -1069,6 +1069,7 @@ const std::wstring PTInteropConsumers[] =
     L"modules\\FileLocksmith",
     L"modules\\Hosts",
     L"modules\\FileExplorerPreview",
+    L"modules\\MouseWithoutBorders",
     L"modules\\MouseUtils\\MouseJumpUI",
     L"modules\\RegistryPreview",
 };
@@ -1115,7 +1116,7 @@ UINT __stdcall CreateDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
     UINT er = ERROR_SUCCESS;
     std::wstring installationFolder, dotnetRuntimeFilesSrcDir, colorPickerDir, powerOCRDir, launcherDir, fancyZonesDir,
       imageResizerDir, settingsDir, awakeDir, measureToolDir, powerAccentDir, fileExplorerAddOnsDir, hostsDir, fileLocksmithDir,
-      mouseJumpDir, registryPreviewDir;
+      mwbDir, mouseJumpDir, registryPreviewDir;
 
     hr = WcaInitialize(hInstall, "CreateDotnetRuntimeHardlinksCA");
     ExitOnFailure(hr, "Failed to initialize");
@@ -1136,6 +1137,7 @@ UINT __stdcall CreateDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
     fileExplorerAddOnsDir = installationFolder + L"modules\\FileExplorerPreview\\";
     hostsDir = installationFolder + L"modules\\Hosts\\";
     fileLocksmithDir = installationFolder + L"modules\\FileLocksmith\\";
+    mwbDir = installationFolder + L"modules\\MouseWithoutBorders\\";
     mouseJumpDir = installationFolder + L"modules\\MouseUtils\\MouseJumpUI\\";
     registryPreviewDir = installationFolder + L"modules\\RegistryPreview\\";
 
@@ -1154,6 +1156,7 @@ UINT __stdcall CreateDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
         std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (fileExplorerAddOnsDir + file).c_str(), ec);
         std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (hostsDir + file).c_str(), ec);
         std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (fileLocksmithDir + file).c_str(), ec);
+        std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (mwbDir + file).c_str(), ec);
         std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (mouseJumpDir + file).c_str(), ec);
         std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (registryPreviewDir + file).c_str(), ec);
 
@@ -1179,6 +1182,7 @@ UINT __stdcall CreateDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
       std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (powerAccentDir + file).c_str(), ec);
       std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (fileExplorerAddOnsDir + file).c_str(), ec);
       std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (hostsDir + file).c_str(), ec);
+      std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (mwbDir + file).c_str(), ec);
       std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (mouseJumpDir + file).c_str(), ec);
       std::filesystem::create_hard_link((dotnetRuntimeFilesSrcDir + file).c_str(), (registryPreviewDir + file).c_str(), ec);
 
@@ -1275,7 +1279,7 @@ UINT __stdcall DeleteDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
     UINT er = ERROR_SUCCESS;
     std::wstring installationFolder, colorPickerDir, powerOCRDir, launcherDir, fancyZonesDir,
       imageResizerDir, settingsDir, awakeDir, measureToolDir, powerAccentDir, fileExplorerAddOnsDir,
-      hostsDir, fileLocksmithDir, mouseJumpDir, registryPreviewDir;
+      hostsDir, fileLocksmithDir, mwbDir, mouseJumpDir, registryPreviewDir;
 
     hr = WcaInitialize(hInstall, "DeleteDotnetRuntimeHardlinksCA");
     ExitOnFailure(hr, "Failed to initialize");
@@ -1295,6 +1299,7 @@ UINT __stdcall DeleteDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
     fileExplorerAddOnsDir = installationFolder + L"modules\\FileExplorerPreview\\";
     hostsDir = installationFolder + L"modules\\Hosts\\";
     fileLocksmithDir = installationFolder + L"modules\\FileLocksmith\\";
+    mwbDir = installationFolder + L"modules\\MouseWithoutBorders\\";
     mouseJumpDir = installationFolder + L"modules\\MouseUtils\\MouseJumpUI\\";
     registryPreviewDir = installationFolder + L"modules\\RegistryPreview\\";
 
@@ -1314,6 +1319,7 @@ UINT __stdcall DeleteDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
           DeleteFile((fileExplorerAddOnsDir + file).c_str());
           DeleteFile((hostsDir + file).c_str());
           DeleteFile((fileLocksmithDir + file).c_str());
+          DeleteFile((mwbDir + file).c_str());
           DeleteFile((mouseJumpDir + file).c_str());
           DeleteFile((registryPreviewDir + file).c_str());
         }
@@ -1329,6 +1335,7 @@ UINT __stdcall DeleteDotnetRuntimeHardlinksCA(MSIHANDLE hInstall)
           DeleteFile((powerAccentDir + file).c_str());
           DeleteFile((fileExplorerAddOnsDir + file).c_str());
           DeleteFile((hostsDir + file).c_str());
+          DeleteFile((mwbDir + file).c_str());
           DeleteFile((mouseJumpDir + file).c_str());
           DeleteFile((registryPreviewDir + file).c_str());
         }
@@ -1376,6 +1383,7 @@ UINT __stdcall TerminateProcessesCA(MSIHANDLE hInstall)
         L"PowerToys.AlwaysOnTop.exe",
         L"PowerToys.exe",
         L"PowerToys.RegistryPreview.exe",
+        L"PowerToys.MouseWithoutBorders.exe"
     };
 
     for (const auto procID : processes)
