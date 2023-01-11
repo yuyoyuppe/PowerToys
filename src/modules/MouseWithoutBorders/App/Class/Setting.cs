@@ -90,7 +90,7 @@ namespace MouseWithoutBorders.Class
             {
                 if (!value.Equals(machinePoolString, StringComparison.OrdinalIgnoreCase))
                 {
-                    _properties.MachinePool = value;
+                    _properties.MachinePool.Value = value;
                 }
             }
         }
@@ -130,7 +130,7 @@ namespace MouseWithoutBorders.Class
         {
             get => _properties.EasyMouse.Value;
 
-            set => _properties.EasyMouse = value;
+            set => _properties.EasyMouse.Value = value;
         }
 
         internal bool BlockMouseAtConrners
@@ -168,7 +168,7 @@ namespace MouseWithoutBorders.Class
         {
             get
             {
-                if (_properties.SecurityKey.Value.Length == 0)
+                if (_properties.SecurityKey.Value.Length != 0)
                 {
                     Common.Log("GETSECKEY: Key was already loaded/set: " + _properties.SecurityKey.Value);
                     return _properties.SecurityKey.Value;
@@ -184,7 +184,7 @@ namespace MouseWithoutBorders.Class
 
             set
             {
-                _properties.SecurityKey = value;
+                _properties.SecurityKey.Value = value;
             }
         }
 
@@ -243,7 +243,7 @@ namespace MouseWithoutBorders.Class
         {
             get => (uint)_properties.MachineID.Value;
 
-            set => _properties.MachineID = value;
+            set => _properties.MachineID.Value = (int)value;
         }
 
         internal int LastX
@@ -253,7 +253,7 @@ namespace MouseWithoutBorders.Class
             set
             {
                 Common.LastX = value;
-                _properties.LastX = value;
+                _properties.LastX.Value = value;
             }
         }
 
@@ -264,7 +264,7 @@ namespace MouseWithoutBorders.Class
             set
             {
                 Common.LastY = value;
-                _properties.LastY = value;
+                _properties.LastY.Value = value;
             }
         }
 
@@ -291,7 +291,7 @@ namespace MouseWithoutBorders.Class
 
             set
             {
-                _properties.HotkeySwitchMachine = value;
+                _properties.HotkeySwitchMachine.Value = value;
             }
         }
 
