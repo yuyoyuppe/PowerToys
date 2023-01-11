@@ -16,10 +16,10 @@
                         IsTabStop="{x:Bind Mode=OneWay, Path=ViewModel.IsEnabledGpoConfigured}"
                         Severity="Informational" />
                 <controls:SettingsGroup
-                        x:Uid="MouseWithoutBorders_ActivationSettings"
-                        IsEnabled="{x:Bind Mode=OneWay, Path=ViewModel.IsEnabled}">
+                        x:Uid="MouseWithoutBorders_ActivationSettings">
                     <labs:SettingsCard x:Uid="MouseWithoutBorders_Toggle_Enable"
-                            HeaderIcon="{ui:BitmapIcon Source=/Assets/FluentIcons/FluentIconsMouseWithoutBorders.png}" >
+                            HeaderIcon="{ui:BitmapIcon Source=/Assets/FluentIcons/FluentIconsMouseWithoutBorders.png}"
+                            IsEnabled="{x:Bind Mode=OneWay, Path=ViewModel.IsEnabledGpoConfigured, Converter={StaticResource BoolNegationConverter}}" >
                         <ToggleSwitch x:Uid="ToggleSwitch"
                                 IsOn="{x:Bind Mode=TwoWay, Path=ViewModel.IsEnabled}" />
                     </labs:SettingsCard>
