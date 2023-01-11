@@ -7,6 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <AssemblyName>PowerToys.MouseWithoutBorders</AssemblyName>    
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>    
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)\modules\MouseWithoutBorders</OutputPath>
