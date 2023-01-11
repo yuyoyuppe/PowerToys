@@ -67,6 +67,7 @@ namespace MouseWithoutBorders.Class
         {
             _settingsUtils = new SettingsUtils();
             _watcher = Helper.GetFileWatcher("MouseWithoutBorders", "settings.json", () => UpdateSettingsFromJson());
+            UpdateSettingsFromJson();
         }
 
         internal string Username { get; set; }
