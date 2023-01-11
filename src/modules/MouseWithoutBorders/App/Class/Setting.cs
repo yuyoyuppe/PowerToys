@@ -40,6 +40,7 @@ namespace MouseWithoutBorders.Class
         private readonly IFileSystemWatcher _watcher;
 
         private MouseWithoutBordersProperties _properties;
+        private MouseWithoutBordersSettings _settings;
 
         private void UpdateSettingsFromJson()
         {
@@ -54,12 +55,28 @@ namespace MouseWithoutBorders.Class
                 var settings = _settingsUtils.GetSettingsOrDefault<MouseWithoutBordersSettings>("MouseWithoutBorders");
                 if (settings != null)
                 {
-                    _properties = settings.Properties;
+                    _settings = settings;
+                    _properties = _settings.Properties;
                 }
             }
             catch (IOException ex)
             {
                 Logger.LogEvent($"Failed to read settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
+            }
+        }
+
+        private void SaveSettingsToJson()
+        {
+            lock (_loadingSettingsLock)
+            {
+                try
+                {
+                    _settings.Save(_settingsUtils);
+                }
+                catch (IOException ex)
+                {
+                    Logger.LogEvent($"Failed to write settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
+                }
             }
         }
 
@@ -76,21 +93,45 @@ namespace MouseWithoutBorders.Class
 
         internal string MachineMatrixString
         {
-            get => string.Join(",", _properties.DeviceNames);
-            set => _properties.DeviceNames = new List<string>(value.Split(","));
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return string.Join(",", _properties.DeviceNames);
+                }
+            }
+
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.DeviceNames = new List<string>(value.Split(","));
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         private string machinePoolString = string.Empty;
 
         internal string MachinePoolString
         {
-            get => _properties.MachinePool.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.MachinePool.Value;
+                }
+            }
 
             set
             {
-                if (!value.Equals(machinePoolString, StringComparison.OrdinalIgnoreCase))
+                lock (_loadingSettingsLock)
                 {
-                    _properties.MachinePool.Value = value;
+                    if (!value.Equals(machinePoolString, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _properties.MachinePool.Value = value;
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -101,43 +142,122 @@ namespace MouseWithoutBorders.Class
 
         internal bool ShareClipboard
         {
-            get => _properties.ShareClipboard;
-            set => _properties.ShareClipboard = value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.ShareClipboard;
+                }
+            }
+
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.ShareClipboard = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool TransferFile
         {
-            get => _properties.TransferFile;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.TransferFile;
+                }
+            }
 
-            set => _properties.TransferFile = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.TransferFile = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool MatrixOneRow
         {
-            get => _properties.MatrixOneRow;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.MatrixOneRow;
+                }
+            }
 
-            set => _properties.MatrixOneRow = true;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.MatrixOneRow = true;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool MatrixCircle
         {
-            get => _properties.MatrixCircle;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.MatrixCircle;
+                }
+            }
 
-            set => _properties.MatrixCircle = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.MatrixCircle = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal int EasyMouse
         {
-            get => _properties.EasyMouse.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.EasyMouse.Value;
+                }
+            }
 
-            set => _properties.EasyMouse.Value = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    SaveSettingsToJson();
+                    _properties.EasyMouse.Value = value;
+                }
+            }
         }
 
         internal bool BlockMouseAtConrners
         {
-            get => _properties.BlockMouseAtScreenCorners;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.BlockMouseAtScreenCorners;
+                }
+            }
 
-            set => _properties.BlockMouseAtScreenCorners = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.BlockMouseAtScreenCorners = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal string Enc(string st, bool dec, DataProtectionScope psc)
@@ -168,23 +288,30 @@ namespace MouseWithoutBorders.Class
         {
             get
             {
-                if (_properties.SecurityKey.Value.Length != 0)
+                lock (_loadingSettingsLock)
                 {
-                    Common.Log("GETSECKEY: Key was already loaded/set: " + _properties.SecurityKey.Value);
-                    return _properties.SecurityKey.Value;
-                }
-                else
-                {
-                    string randomKey = Common.CreateDefaultKey();
-                    _properties.SecurityKey.Value = randomKey;
+                    if (_properties.SecurityKey.Value.Length != 0)
+                    {
+                        Common.Log("GETSECKEY: Key was already loaded/set: " + _properties.SecurityKey.Value);
+                        return _properties.SecurityKey.Value;
+                    }
+                    else
+                    {
+                        string randomKey = Common.CreateDefaultKey();
+                        _properties.SecurityKey.Value = randomKey;
 
-                    return randomKey;
+                        return randomKey;
+                    }
                 }
             }
 
             set
             {
-                _properties.SecurityKey.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.SecurityKey.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
@@ -192,151 +319,313 @@ namespace MouseWithoutBorders.Class
         {
             get
             {
-                return int.MinValue;
+                lock (_loadingSettingsLock)
+                {
+                    return int.MaxValue; // TODO(@yuyoyuppe): do we still need expiration mechanics now?
+                }
             }
         }
 
         internal bool DisableCAD
         {
-            get => false;
+            get
+            {
+                return false;
+            }
         }
 
         internal bool HideLogonLogo
         {
-            get => false;
+            get
+            {
+                return false;
+            }
         }
 
         internal bool HideMouse
         {
-            get => _properties.HideMouseAtScreenEdge;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.HideMouseAtScreenEdge;
+                }
+            }
 
-            set => _properties.HideMouseAtScreenEdge = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.HideMouseAtScreenEdge = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool BlockScreenSaver
         {
-            get => _properties.BlockScreenSaverOnOtherMachines;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.BlockScreenSaverOnOtherMachines;
+                }
+            }
 
-            set => _properties.BlockScreenSaverOnOtherMachines = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.BlockScreenSaverOnOtherMachines = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool BlockScreenSaverEx
         {
-            get => _properties.BlockScreenSaverOnOtherMachines;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.BlockScreenSaverOnOtherMachines;
+                }
+            }
 
-            set => _properties.BlockScreenSaverOnOtherMachines = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.BlockScreenSaverOnOtherMachines = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool MoveMouseRelatively
         {
-            get => _properties.MoveMouseRelatively;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.MoveMouseRelatively;
+                }
+            }
 
-            set => _properties.MoveMouseRelatively = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.MoveMouseRelatively = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal string LastPersonalizeLogonScr
         {
-            get => string.Empty;
+            get
+            {
+                return string.Empty;
+            }
         }
 
         internal uint DesMachineID
         {
-            get => (uint)_properties.MachineID.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return (uint)_properties.MachineID.Value;
+                }
+            }
 
-            set => _properties.MachineID.Value = (int)value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.MachineID.Value = (int)value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal int LastX
         {
-            get => _properties.LastX.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.LastX.Value;
+                }
+            }
 
             set
             {
-                Common.LastX = value;
-                _properties.LastX.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    Common.LastX = value;
+                    _properties.LastX.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal int LastY
         {
-            get => _properties.LastY.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.LastY.Value;
+                }
+            }
 
             set
             {
-                Common.LastY = value;
-                _properties.LastY.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    Common.LastY = value;
+                    _properties.LastY.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal int PackageID
         {
-            get => _properties.PackageID.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.PackageID.Value;
+                }
+            }
 
-            set => _properties.PackageID.Value = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.PackageID.Value = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool FirstRun
         {
-            get => _properties.FirstRun;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.FirstRun;
+                }
+            }
 
             set
             {
-                _properties.FirstRun = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.FirstRun = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal int HotKeySwitchMachine
         {
-            get => _properties.HotkeySwitchMachine.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.HotkeySwitchMachine.Value;
+                }
+            }
 
             set
             {
-                _properties.HotkeySwitchMachine.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.HotkeySwitchMachine.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal int HotKeyToggleEasyMouse
         {
-            get => _properties.EasyMouse.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.EasyMouse.Value;
+                }
+            }
 
             set
             {
-                _properties.EasyMouse.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.EasyMouse.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal int HotKeyLockMachine
         {
-            get => 'L';
+            get
+            {
+                return 'L';
+            }
         }
 
         internal int HotKeyReconnect
         {
-            get => 'R';
+            get
+            {
+                return 'R';
+            }
         }
 
         internal int HotKeyCaptureScreen
         {
-            get => 'S';
+            get
+            {
+                return 'S';
+            }
         }
 
         internal int HotKeyExitMM
         {
-            get => 'Q';
+            get
+            {
+                return 'Q';
+            }
         }
 
         internal int HotKeySwitch2AllPC
         {
-            get => 0;
+            get
+            {
+                return 0;
+            }
         }
 
         private int switchCount = 0;
 
         internal int SwitchCount
         {
-            get => switchCount;
+            get
+            {
+                return switchCount;
+            }
 
-            set => switchCount = value;
+            set
+            {
+                switchCount = value;
+                SaveSettingsToJson();
+            }
         }
 
         internal int DumpObjectsLevel => 6;
@@ -345,62 +634,150 @@ namespace MouseWithoutBorders.Class
 
         internal bool DrawMouse
         {
-            get => _properties.DrawMouseCursor;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.DrawMouseCursor;
+                }
+            }
 
-            set => _properties.DrawMouseCursor = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.DrawMouseCursor = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool DrawMouseEx
         {
-            get => _properties.DrawMouseEx;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.DrawMouseEx;
+                }
+            }
 
-            set => _properties.DrawMouseEx = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.DrawMouseEx = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool ReverseLookup
         {
-            get => _properties.ReverseLookup;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.ReverseLookup;
+                }
+            }
 
-            set => _properties.ReverseLookup = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.ReverseLookup = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool SameSubNetOnly
         {
-            get => _properties.SameSubnetOnly;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.SameSubnetOnly;
+                }
+            }
 
-            set => _properties.SameSubnetOnly = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.SameSubnetOnly = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal string Name2IP
         {
-            get => _properties.Name2IP.Value;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.Name2IP.Value;
+                }
+            }
 
             set
             {
-                _properties.Name2IP.Value = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.Name2IP.Value = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal bool UseVKMap
         {
-            get => _properties.UseVKMap;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.UseVKMap;
+                }
+            }
 
             set
             {
-                _properties.UseVKMap = value;
+                lock (_loadingSettingsLock)
+                {
+                    _properties.UseVKMap = value;
+                    SaveSettingsToJson();
+                }
             }
         }
 
         internal bool FisrtCtrlShiftS
         {
-            get => _properties.FisrtCtrlShiftS;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.FisrtCtrlShiftS;
+                }
+            }
 
-            set => _properties.FisrtCtrlShiftS = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.FisrtCtrlShiftS = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal Hashtable VKMap
         {
-            get => new Hashtable();
+            get
+            {
+                return new Hashtable();
+            }
         }
 
         internal bool StealFocusWhenSwitchingMachine => _properties.StealFocusWhenSwitchingMachine;
@@ -416,12 +793,15 @@ namespace MouseWithoutBorders.Class
                 if (deviceId == null || deviceId.Length != newGuid.Length)
                 {
                     string defaultId = newGuid;
-                    _properties.DeviceID = defaultId;
-                    deviceId = _properties.DeviceID.Value;
-
-                    if (deviceId.Equals(defaultId, StringComparison.OrdinalIgnoreCase))
+                    lock (_loadingSettingsLock)
                     {
-                        return _properties.DeviceID.Value;
+                        _properties.DeviceID = defaultId;
+                        deviceId = _properties.DeviceID.Value;
+
+                        if (deviceId.Equals(defaultId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return _properties.DeviceID.Value;
+                        }
                     }
                 }
 
@@ -435,18 +815,28 @@ namespace MouseWithoutBorders.Class
         {
             get
             {
-                machineId ??= (machineId = _properties.MachineID.Value).Value;
-
-                if (machineId == 0)
+                lock (_loadingSettingsLock)
                 {
-                    _properties.MachineID.Value = Common.Ran.Next();
-                    machineId = _properties.MachineID.Value;
+                    machineId ??= (machineId = _properties.MachineID.Value).Value;
+
+                    if (machineId == 0)
+                    {
+                        _properties.MachineID.Value = Common.Ran.Next();
+                        machineId = _properties.MachineID.Value;
+                    }
                 }
 
                 return machineId.Value;
             }
 
-            set => _properties.MachineID.Value = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.MachineID.Value = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool OneWayControlMode => false;
@@ -455,14 +845,30 @@ namespace MouseWithoutBorders.Class
 
         internal bool ShowClipNetStatus
         {
-            get => _properties.ShowClipNetStatus;
+            get
+            {
+                lock (_loadingSettingsLock)
+                {
+                    return _properties.ShowClipNetStatus;
+                }
+            }
 
-            set => _properties.ShowClipNetStatus = value;
+            set
+            {
+                lock (_loadingSettingsLock)
+                {
+                    _properties.ShowClipNetStatus = value;
+                    SaveSettingsToJson();
+                }
+            }
         }
 
         internal bool SendErrorLogV2
         {
-            get => false;
+            get
+            {
+                return false;
+            }
         }
 
         internal void ForceUpdateValuesFromRegistry()

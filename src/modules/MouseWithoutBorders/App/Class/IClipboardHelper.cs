@@ -128,7 +128,7 @@ namespace MouseWithoutBorders
 
     internal static class Logger
     {
-        private const string EventSourceName = "MouseWithoutBordersHelper";
+        private const string EventSourceName = "MouseWithoutBorders";
 
         internal static void LogEvent(string message, EventLogEntryType logType = EventLogEntryType.Information)
         {
