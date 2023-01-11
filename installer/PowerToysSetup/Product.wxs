@@ -73,7 +73,8 @@
       <ComponentGroupRef Id="ShortcutGuideComponentGroup" />
       <ComponentGroupRef Id="TextExtractorComponentGroup" />
       <ComponentGroupRef Id="VideoConferenceComponentGroup" />
-
+      <ComponentGroupRef Id="MouseWithoutBordersComponentGroup" />
+        
       <ComponentGroupRef Id="ResourcesComponentGroup" />
       <ComponentGroupRef Id="WindowsAppSDKComponentGroup" />
       <ComponentGroupRef Id="ToolComponentGroup" />
@@ -502,7 +503,11 @@
                 <Directory Id="HostsMicrosoftUIXamlAssetsInstallFolder" Name="Assets" />
               </Directory>
             </Directory>
-            
+
+            <!-- MouseWithoutBorders -->
+            <Directory Id="MouseWithoutBordersInstallFolder" Name="$(var.MouseWithoutBordersProjectName)">
+            </Directory>
+
             <!-- Launcher -->
             <Directory Id="LauncherInstallFolder" Name="launcher">
               <Directory Id="LauncherImagesFolder" Name="Images" />
