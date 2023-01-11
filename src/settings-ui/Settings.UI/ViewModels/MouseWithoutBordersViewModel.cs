@@ -105,20 +105,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        public int ComputerMatrix
-        {
-            get => Settings.Properties.ComputerMatrix.Value;
-
-            set
-            {
-                if (value != Settings.Properties.ComputerMatrix.Value)
-                {
-                    Settings.Properties.ComputerMatrix.Value = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
         public bool WrapMouse
         {
             get
