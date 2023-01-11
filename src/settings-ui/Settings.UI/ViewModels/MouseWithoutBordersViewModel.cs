@@ -57,13 +57,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
             else
             {
-                _isEnabled = GeneralSettingsConfig.Enabled.AlwaysOnTop;
+                _isEnabled = GeneralSettingsConfig.Enabled.MouseWithoutBorders;
             }
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
-            deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames);
+            /* TODO: This is crashing the Settings page
+             * deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames);
+             */
         }
 
         public bool IsEnabled
