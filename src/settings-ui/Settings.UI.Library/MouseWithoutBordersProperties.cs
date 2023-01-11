@@ -112,10 +112,12 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             BlockMouseAtScreenCorners = false;
             UseKeyMappings = false;
             ShowClipboardAndNetworkStatusMessages = false;
-            EasyMouse = 1;
+            EasyMouse = new IntProperty(1);
+
+            DeviceID = new StringProperty(string.Empty);
 
             // TODO(yuyoyuppe): edit hotkey from settings page
-            HotkeySwitchMachine = 0x70; // VK.F1
+            HotkeySwitchMachine = new IntProperty(0x70); // VK.F1
 
             // These are internal, i.e. cannot be edited directly from UI
             MachinePool = ":,:,:,:";
