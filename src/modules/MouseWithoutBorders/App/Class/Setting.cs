@@ -206,7 +206,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    return _properties.MatrixCircle;
+                    return _properties.WrapMouse;
                 }
             }
 
@@ -214,7 +214,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    _properties.MatrixCircle = value;
+                    _properties.WrapMouse = value;
                     SaveSettingsToJson();
                 }
             }
@@ -678,7 +678,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    return _properties.ReverseLookup;
+                    return _properties.ValidateRemoteMachineIP;
                 }
             }
 
@@ -686,7 +686,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    _properties.ReverseLookup = value;
+                    _properties.ValidateRemoteMachineIP = value;
                     SaveSettingsToJson();
                 }
             }
@@ -849,7 +849,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    return _properties.ShowClipNetStatus;
+                    return _properties.ShowClipboardAndNetworkStatusMessages;
                 }
             }
 
@@ -857,7 +857,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    _properties.ShowClipNetStatus = value;
+                    _properties.ShowClipboardAndNetworkStatusMessages = value;
                     SaveSettingsToJson();
                 }
             }

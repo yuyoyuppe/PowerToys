@@ -138,12 +138,6 @@
                                 IsOn="{x:Bind ViewModel.BlockMouseAtScreenCorners, Mode=TwoWay}" />
                     </labs:SettingsCard>
                     <labs:SettingsCard
-                            x:Uid="MouseWithoutBorders_UseKeyMappings">
-                        <ToggleSwitch
-                                x:Uid="MouseWithoutBorders_UseKeyMappings_ToggleSwitch"
-                                IsOn="{x:Bind ViewModel.UseKeyMappings, Mode=TwoWay}" />
-                    </labs:SettingsCard>
-                    <labs:SettingsCard
                             x:Uid="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages">
                         <ToggleSwitch
                                 x:Uid="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages_ToggleSwitch"
