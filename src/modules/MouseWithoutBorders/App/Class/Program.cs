@@ -49,7 +49,8 @@ namespace MouseWithoutBorders.Class
                 User = WindowsIdentity.GetCurrent().Name;
                 Common.Log("*** Started as " + User);
 
-                Common.RunWithNoAdminRight = !Common.RunElevated();
+                // NOTE(yuyoyuppe): unified logic between elevated/non-elevated scenarios
+                Common.RunWithNoAdminRight = true;
 
                 Common.Log(Environment.CommandLine);
 
