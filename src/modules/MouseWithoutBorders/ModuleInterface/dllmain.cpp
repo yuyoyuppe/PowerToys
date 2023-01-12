@@ -51,10 +51,12 @@ private:
     void launch_process()
     {
         Logger::trace(L"Launching PowerToys MouseWithoutBorders process");
-        std::wstring application_path = L"modules\\MouseWithoutBorders\\PowerToys.MouseWithoutBorders.exe";
+        const std::wstring application_path = L"modules\\MouseWithoutBorders\\PowerToys.MouseWithoutBorders.exe";
         STARTUPINFO info = { sizeof(info) };
+        const unsigned long powertoys_pid = GetCurrentProcessId();
+        std::wstring full_command_path = application_path + L" " + std::to_wstring(powertoys_pid);
 
-        if (!CreateProcessW(application_path.c_str(), application_path.data(), NULL, NULL, true, NULL, NULL, NULL, &info, &p_info))
+        if (!CreateProcessW(application_path.c_str(), full_command_path.data(), NULL, NULL, true, NULL, NULL, NULL, &info, &p_info))
         {
             DWORD error = GetLastError();
             std::wstring message = L"PowerToys MouseWithoutBorders failed to start with error: ";
@@ -81,6 +83,7 @@ public:
 
     virtual void destroy() override
     {
+        TerminateProcess(p_info.hProcess, 1);
         delete this;
     }
 
@@ -140,27 +143,10 @@ public:
             ResetEvent(send_telemetry_event);
             ResetEvent(m_hInvokeEvent);
 
-            auto exitEvent = CreateEvent(nullptr, false, false, CommonSharedConstants::AWAKE_EXIT_EVENT);
-            if (!exitEvent)
-            {
-                Logger::warn(L"Failed to create exit event for PowerToys MouseWithoutBorders. {}", get_last_error_or_default(GetLastError()));
-            }
-            else
-            {
-                Logger::trace(L"Signaled exit event for PowerToys MouseWithoutBorders.");
-                if (!SetEvent(exitEvent))
-                {
-                    Logger::warn(L"Failed to signal exit event for PowerToys MouseWithoutBorders. {}", get_last_error_or_default(GetLastError()));
+            Logger::trace(L"Signaled exit event for PowerToys MouseWithoutBorders.");
+            TerminateProcess(p_info.hProcess, 1);
 
-                    // For some reason, we couldn't process the signal correctly, so we still
-                    // need to terminate the MouseWithoutBorders process.
-                    TerminateProcess(p_info.hProcess, 1);
-                }
-
-                ResetEvent(exitEvent);
-                CloseHandle(exitEvent);
-                CloseHandle(p_info.hProcess);
-            }
+            CloseHandle(p_info.hProcess);
         }
 
         m_enabled = false;

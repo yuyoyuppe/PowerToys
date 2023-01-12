@@ -17,6 +17,7 @@ using System.IO;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
+using ManagedCommon;
 
 [module: SuppressMessage("Microsoft.MSInternal", "CA904:DeclareTypesInMicrosoftOrSystemNamespace", Scope = "namespace", Target = "MouseWithoutBorders", Justification = "Dotnet port with style preservation")]
 [module: SuppressMessage("Microsoft.Design", "CA1014:MarkAssembliesWithClsCompliant", Justification = "Dotnet port with style preservation")]
@@ -45,6 +46,8 @@ namespace MouseWithoutBorders.Class
             try
             {
                 string[] args = Environment.GetCommandLineArgs();
+
+                var parentPid = 0;
 
                 User = WindowsIdentity.GetCurrent().Name;
                 Common.Log("*** Started as " + User);
@@ -83,11 +86,9 @@ namespace MouseWithoutBorders.Class
                             Setting.Values.LastX = Common.JUST_GOT_BACK_FROM_SCREENSAVER;
                         }
                     }
-                    else if (!Common.RunWithNoAdminRight)
+                    else
                     {
-                        Common.Log("*** Executed by user, start the service then return...");
-                        StartService();
-                        return;
+                        int.TryParse(args[1], out parentPid);
                     }
                 }
                 else
@@ -164,7 +165,18 @@ namespace MouseWithoutBorders.Class
 
                 Common.Init();
                 Common.WndProcCounter++;
-                Application.Run(new FrmScreen());
+
+                var formScreen = new FrmScreen();
+                if (parentPid != 0)
+                {
+                    RunnerHelper.WaitForPowerToysRunner(parentPid, () =>
+                    {
+                        formScreen.Quit(true, false);
+                        Application.Exit();
+                    });
+                }
+
+                Application.Run(formScreen);
             }
             catch (Exception e)
             {
