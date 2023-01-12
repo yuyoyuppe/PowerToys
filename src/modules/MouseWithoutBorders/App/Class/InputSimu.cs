@@ -64,6 +64,8 @@ namespace MouseWithoutBorders.Class
                 else
                 {
                     NativeMethods.INPUT64[] inputs = { input64 };
+
+                    // mouse click simulation
                     rv = NativeMethods.SendInput64(1, inputs, Marshal.SizeOf(input64));
                 }
             }
@@ -125,6 +127,7 @@ namespace MouseWithoutBorders.Class
 
                 Common.DoSomthingInTheInputSimulationThread(() =>
                 {
+                    // key press simulation
                     SendInputEx(structInput);
                 });
 
