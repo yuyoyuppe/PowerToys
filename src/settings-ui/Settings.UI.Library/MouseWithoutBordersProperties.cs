@@ -43,9 +43,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public bool BlockMouseAtScreenCorners { get; set; }
 
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
-        public bool UseKeyMappings { get; set; }
-
-        [JsonConverter(typeof(BoolPropertyJsonConverter))]
         public bool ShowClipboardAndNetworkStatusMessages { get; set; }
 
         public List<string> DeviceNames { get; set; }
@@ -54,9 +51,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
         public bool MatrixOneRow { get; set; }
-
-        [JsonConverter(typeof(BoolPropertyJsonConverter))]
-        public bool MatrixCircle { get; set; }
 
         public IntProperty EasyMouse { get; set; }
 
@@ -78,9 +72,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
         public bool DrawMouseEx { get; set; }
 
-        [JsonConverter(typeof(BoolPropertyJsonConverter))]
-        public bool ReverseLookup { get; set; }
-
         public StringProperty Name2IP { get; set; }
 
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
@@ -93,9 +84,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         public bool StealFocusWhenSwitchingMachine { get; set; }
 
         public StringProperty DeviceID { get; set; }
-
-        [JsonConverter(typeof(BoolPropertyJsonConverter))]
-        public bool ShowClipNetStatus { get; set; }
 
         public MouseWithoutBordersProperties()
         {
@@ -110,7 +98,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             BlockScreenSaverOnOtherMachines = true;
             MoveMouseRelatively = false;
             BlockMouseAtScreenCorners = false;
-            UseKeyMappings = false;
             ShowClipboardAndNetworkStatusMessages = false;
             EasyMouse = new IntProperty(1);
             DeviceNames = new List<string>();
@@ -122,7 +109,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             // These are internal, i.e. cannot be edited directly from UI
             MachinePool = ":,:,:,:";
             MatrixOneRow = false;
-            MatrixCircle = false;
             MachineID = new IntProperty(0);
             LastX = new IntProperty(0);
             LastY = new IntProperty(0);
@@ -134,7 +120,6 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             UseVKMap = false;
             FisrtCtrlShiftS = false;
             StealFocusWhenSwitchingMachine = false;
-            ShowClipNetStatus = true;
         }
     }
 }

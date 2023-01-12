@@ -261,9 +261,6 @@
   <data name="MouseWithoutBorders_BlockMouseAtScreenCorners.Header" xml:space="preserve">
     <value>Block mouse at screen corners</value>
   </data>
-  <data name="MouseWithoutBorders_UseKeyMappings.Header" xml:space="preserve">
-    <value>Use key mappings</value>
-  </data>
   <data name="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages.Header" xml:space="preserve">
     <value>Show clipboard and network status messages</value>
   </data>
@@ -306,10 +303,6 @@
   <data name="MouseWithoutBorders_BlockMouseAtScreenCorners.Description"
       xml:space="preserve">
       <value>To avoid accident machine-switch at screen corners.</value>
-  </data>
-  <data name="MouseWithoutBorders_UseKeyMappings.Description"
-      xml:space="preserve">
-      <value>Use key mappings to translate your key presses.</value>
   </data>
   <data name="MouseWithoutBorders_ShowClipboardAndNetworkStatusMessages.Description"
       xml:space="preserve">

@@ -288,23 +288,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        public bool UseKeyMappings
-        {
-            get
-            {
-                return Settings.Properties.UseKeyMappings;
-            }
-
-            set
-            {
-                if (Settings.Properties.UseKeyMappings != value)
-                {
-                    Settings.Properties.UseKeyMappings = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
         public bool ShowClipboardAndNetworkStatusMessages
         {
             get
