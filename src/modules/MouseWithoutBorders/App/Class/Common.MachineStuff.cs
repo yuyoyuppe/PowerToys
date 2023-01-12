@@ -1040,11 +1040,6 @@ namespace MouseWithoutBorders
 
             if ((h = NativeMethods.FindWindow(null, Setting.Values.MyID)) > 0)
             {
-                if (sendMessage && !Common.RunOnLogonDesktop && !Common.RunOnScrSaverDesktop)
-                {
-                    _ = NativeMethods.SendMessage((IntPtr)h, NativeMethods.WM_SHOW_SETTINGS_FORM, IntPtr.Zero, IntPtr.Zero);
-                }
-
                 return true;
             }
 
