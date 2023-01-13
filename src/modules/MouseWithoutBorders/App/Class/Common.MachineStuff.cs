@@ -226,7 +226,7 @@ namespace MouseWithoutBorders
                 return Point.Empty;
             }
 
-            if (Setting.Values.BlockMouseAtConrners)
+            if (Setting.Values.BlockMouseAtCorners)
             {
                 lock (SensitivePoints)
                 {

@@ -371,8 +371,6 @@ namespace MouseWithoutBorders
                                 return;
                             }
 
-                            Setting.Values.ForceUpdateValuesFromRegistry(); // Forcing to read values from reg when switching between desktops
-
                             if (myDesktopNotActive)
                             {
                                 myDesktopNotActive = false;
