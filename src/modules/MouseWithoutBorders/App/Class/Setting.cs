@@ -56,6 +56,21 @@ namespace MouseWithoutBorders.Class
                 if (settings != null)
                 {
                     _settings = settings;
+                    if (_properties != null)
+                    {
+                        // Same as in CheckBoxCircle_CheckedChanged
+                        if (_properties.WrapMouse != _settings.Properties.WrapMouse)
+                        {
+                            Common.SendMachineMatrix();
+                        }
+
+                        // Same as CheckBoxDrawMouse_CheckedChanged
+                        if (_properties.DrawMouseCursor != _settings.Properties.DrawMouseCursor && !_settings.Properties.DrawMouseCursor)
+                        {
+                            CustomCursor.ShowFakeMouseCursor(int.MinValue, int.MinValue);
+                        }
+                    }
+
                     _properties = _settings.Properties;
                 }
             }
@@ -240,7 +255,7 @@ namespace MouseWithoutBorders.Class
             }
         }
 
-        internal bool BlockMouseAtConrners
+        internal bool BlockMouseAtCorners
         {
             get
             {
@@ -869,17 +884,6 @@ namespace MouseWithoutBorders.Class
             {
                 return false;
             }
-        }
-
-        internal void ForceUpdateValuesFromRegistry()
-        {
-        }
-
-        private void RegenerateKey(Exception e)
-        {
-            Common.Log(e);
-            Common.KeyCorrupted = true;
-            MyKey = Common.MyKey = Common.CreateRandomKey();
         }
     }
 

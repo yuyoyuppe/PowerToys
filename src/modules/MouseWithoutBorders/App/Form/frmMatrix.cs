@@ -723,7 +723,7 @@ namespace MouseWithoutBorders
         {
             checkBoxCircle.Checked = Setting.Values.MatrixCircle;
             checkBoxTwoRow.Checked = !matrixOneRow;
-            checkBoxBlockMouseAtCorners.Checked = Setting.Values.BlockMouseAtConrners;
+            checkBoxBlockMouseAtCorners.Checked = Setting.Values.BlockMouseAtCorners;
             checkBoxDrawMouse.Checked = Setting.Values.DrawMouse;
             checkBoxReserseLookup.Checked = Setting.Values.ReverseLookup;
             checkBoxSameSubNet.Checked = Setting.Values.SameSubNetOnly;
@@ -950,7 +950,7 @@ namespace MouseWithoutBorders
 
         private void CheckBoxBlockMouseAtCorners_CheckedChanged(object sender, EventArgs e)
         {
-            Setting.Values.BlockMouseAtConrners = checkBoxBlockMouseAtCorners.Checked;
+            Setting.Values.BlockMouseAtCorners = checkBoxBlockMouseAtCorners.Checked;
             ShowUpdateMessage();
         }
 
@@ -1089,7 +1089,6 @@ namespace MouseWithoutBorders
                 Setting.Values.FirstRun = true;
                 Setting.Values.EasyMouse = (int)EasyMouseOption.Enable;
                 Common.ClearComputerMatrix();
-                Setting.Values.ForceUpdateValuesFromRegistry();
                 Common.ShowSetupForm(true);
             }
         }
