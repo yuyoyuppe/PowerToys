@@ -216,6 +216,9 @@
   <data name="MouseWithoutBorders_NewKey.Content" xml:space="preserve">
     <value>New key</value>
   </data>
+  <data name="MouseWithoutBorders_Connect.Content" xml:space="preserve">
+    <value>Connect</value>
+  </data>
   <data name="MouseWithoutBorders_Settings.Header" xml:space="preserve">
     <value>Behavior</value>
   </data>

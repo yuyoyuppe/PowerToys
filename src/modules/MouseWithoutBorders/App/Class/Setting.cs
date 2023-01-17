@@ -69,6 +69,22 @@ namespace MouseWithoutBorders.Class
                         {
                             CustomCursor.ShowFakeMouseCursor(int.MinValue, int.MinValue);
                         }
+
+                        if (_properties.PendingConnectionRequest != null)
+                        {
+                            var pcName = _properties.PendingConnectionRequest.PCName;
+                            var securityKey = _properties.PendingConnectionRequest.SecurityKey;
+                            _properties.PendingConnectionRequest = null;
+                            SaveSettingsToJson();
+
+                            Common.MyKey = securityKey;
+                            Common.MachineMatrix = new string[Common.MAX_MACHINE] { pcName.Trim().ToUpper(CultureInfo.CurrentCulture), Common.MachineName.Trim(), string.Empty, string.Empty };
+
+                            string[] machines = Common.MachineMatrix;
+                            Common.MachinePool.Initialize(machines);
+
+                            Common.UpdateMachinePoolStringSetting();
+                        }
                     }
 
                     _properties = _settings.Properties;
@@ -126,8 +142,6 @@ namespace MouseWithoutBorders.Class
             }
         }
 
-        private string machinePoolString = string.Empty;
-
         internal string MachinePoolString
         {
             get
@@ -142,7 +156,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    if (!value.Equals(machinePoolString, StringComparison.OrdinalIgnoreCase))
+                    if (!value.Equals(_properties.MachinePool.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         _properties.MachinePool.Value = value;
                         SaveSettingsToJson();
