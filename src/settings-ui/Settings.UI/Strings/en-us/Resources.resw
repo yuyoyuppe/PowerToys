@@ -201,6 +201,9 @@
   <data name="MouseWithoutBorders_DeviceLayoutSettings.Header" xml:space="preserve">
     <value>Device layout</value>
   </data>
+  <data name="MouseWithoutBorders_DeviceLayoutSettings.Description" xml:space="preserve">
+    <value>Drag to position the devices</value>
+  </data>
   <data name="MouseWithoutBorders_KeySettings.Header" xml:space="preserve">
     <value>Encryption Key</value>
   </data>

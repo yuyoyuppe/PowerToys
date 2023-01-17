@@ -52,14 +52,17 @@
                                     <!--TODO: colors?-->
                                     <!--BorderBrush="#DFDFDF"
                                             Background="#d4d4d4"-->
-                                    <Border BorderBrush="#202020"
-                                            Background="#2b2b2b" Width="90"
+                                    <Border BorderBrush="{ThemeResource SubtleButtonForegroundDisabled}"
+                                            Background="{ThemeResource SubtleButtonBackgroundDisabled}"
+                                            Width="90"
                                             Height="90" BorderThickness="2"
+                                            Margin="3,0,3,0"
                                             CanDrag="True" AllowDrop="True"
                                             CornerRadius="4"
                                             DragStarting="Device_DragStarting"
                                             DragOver="Device_DragOver"
                                             DataContext="{Binding}"
+                                            ToolTipService.ToolTip="{Binding Item, Mode=OneWay}"
                                             Drop="Device_Drop">
                                         <StackPanel VerticalAlignment="Center"
                                                 Orientation="Vertical"
