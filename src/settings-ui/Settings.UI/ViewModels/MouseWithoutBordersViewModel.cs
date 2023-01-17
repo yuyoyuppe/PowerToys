@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -63,7 +64,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
-            deviceNames = new ObservableCollection<string>(Settings.Properties.DeviceNames ?? new List<string>());
+            deviceNames = new IndexedObservableCollection<string>(Settings.Properties.DeviceNames ?? new List<string>());
         }
 
         public bool IsEnabled
@@ -275,15 +276,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private ObservableCollection<string> deviceNames;
+        private IndexedObservableCollection<string> deviceNames;
 
-        public ObservableCollection<string> DeviceNames
+        public IndexedObservableCollection<string> DeviceNames
         {
             get => deviceNames;
             set
             {
                 deviceNames = value;
-                Settings.Properties.DeviceNames = new List<string>(value);
+                Settings.Properties.DeviceNames = new List<string>(value.ToEnumerable());
                 NotifyPropertyChanged();
             }
         }

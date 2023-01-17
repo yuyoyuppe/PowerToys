@@ -59,6 +59,7 @@
                                             CornerRadius="4"
                                             DragStarting="Device_DragStarting"
                                             DragOver="Device_DragOver"
+                                            DataContext="{Binding}"
                                             Drop="Device_Drop">
                                         <StackPanel VerticalAlignment="Center"
                                                 Orientation="Vertical"
@@ -69,7 +70,7 @@
                                                     Glyph="&#xE7F4;" />
                                             <TextBlock Tag="DeviceName"
                                                     HorizontalAlignment="Center"
-                                                    Text="{Binding}" />
+                                                    Text="{Binding Item}" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>

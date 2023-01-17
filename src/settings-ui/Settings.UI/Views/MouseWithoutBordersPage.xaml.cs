@@ -5,12 +5,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.ApplicationModel.DataTransfer;
+using WinRT;
 
 namespace Microsoft.PowerToys.Settings.UI.Views
 {
@@ -53,33 +55,24 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             return null;
         }
 
-        private string GetDeviceName(Border b)
+        private int GetDeviceIndex(Border b)
         {
-            return GetChildOfType<TextBlock>(b, "DeviceName").Text;
-        }
-
-        private void SetDeviceName(Border b, string newName)
-        {
-            GetChildOfType<TextBlock>(b, "DeviceName").Text = newName;
+            return b.DataContext.As<IndexedItem<string>>().Index;
         }
 
         private void Device_DragStarting(UIElement sender, DragStartingEventArgs args)
         {
             args.Data.RequestedOperation = DataPackageOperation.Move;
-            args.Data.Properties.Add("name", GetDeviceName((Border)sender));
+            args.Data.Properties.Add("index", GetDeviceIndex((Border)sender));
         }
 
         private void Device_Drop(object sender, DragEventArgs e)
         {
-            e.DataView.Properties.TryGetValue("name", out object boxName);
-            var draggedDeviceName = (string)boxName;
-            var targetDeviceName = GetDeviceName((Border)e.OriginalSource);
+            e.DataView.Properties.TryGetValue("index", out object boxIndex);
+            var draggedDeviceIndex = (int)boxIndex;
+            var targetDeviceIndex = GetDeviceIndex((Border)e.OriginalSource);
 
-            var draggedIndex = ViewModel.DeviceNames.IndexOf(draggedDeviceName);
-            var targetIndex = ViewModel.DeviceNames.IndexOf(targetDeviceName);
-
-            ViewModel.DeviceNames.RemoveAt(draggedIndex);
-            ViewModel.DeviceNames.Insert(targetIndex, draggedDeviceName);
+            ViewModel.DeviceNames.Swap(draggedDeviceIndex, targetDeviceIndex);
 
             var itemsControl = (ItemsControl)FindName("DevicesItemsControl");
             var binding = itemsControl.GetBindingExpression(ItemsControl.ItemsSourceProperty);
