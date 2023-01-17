@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using CommunityToolkit.Labs.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.ViewModels;
@@ -107,6 +109,36 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         private void Device_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Move;
+        }
+
+        public ICommand ShowConnectFieldsCommand => new RelayCommand(ShowConnectFields);
+
+        public ICommand ConnectCommand => new RelayCommand(Connect);
+
+        public ICommand GenerateNewKeyCommand => new RelayCommand(GenerateNewKey);
+
+        private void ShowConnectFields()
+        {
+            ViewModel.ConnectFieldsVisible = true;
+        }
+
+        private void GenerateNewKey()
+        {
+            ViewModel.SubmitNewKeyRequest();
+        }
+
+        private void Connect()
+        {
+            if (ConnectPCNameTextBox.Text.Length != 0 && ConnectSecurityKeyTextBox.Text.Length != 0)
+            {
+                string pcName = ConnectPCNameTextBox.Text;
+                string securityKey = ConnectSecurityKeyTextBox.Text;
+
+                ConnectPCNameTextBox.Text = string.Empty;
+                ConnectSecurityKeyTextBox.Text = string.Empty;
+
+                ViewModel.SubmitConnectionRequest(pcName, securityKey);
+            }
         }
     }
 }

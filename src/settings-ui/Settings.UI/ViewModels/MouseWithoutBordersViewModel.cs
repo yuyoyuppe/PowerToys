@@ -16,6 +16,54 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
     public class MouseWithoutBordersViewModel : Observable
     {
+        private bool _connectFieldsVisible;
+
+        public bool ConnectFieldsVisible
+        {
+            get => _connectFieldsVisible;
+
+            set
+            {
+                if (_connectFieldsVisible != value)
+                {
+                    _connectFieldsVisible = value;
+                    OnPropertyChanged(nameof(ConnectFieldsVisible));
+                }
+            }
+        }
+
+        private string _connectSecurityKey;
+
+        public string ConnectSecurityKey
+        {
+            get => _connectSecurityKey;
+
+            set
+            {
+                if (_connectSecurityKey != value)
+                {
+                    _connectSecurityKey = value;
+                    OnPropertyChanged(nameof(ConnectSecurityKey));
+                }
+            }
+        }
+
+        private string _connectPCName;
+
+        public string ConnectPCName
+        {
+            get => _connectPCName;
+
+            set
+            {
+                if (_connectPCName != value)
+                {
+                    _connectPCName = value;
+                    OnPropertyChanged(nameof(ConnectPCName));
+                }
+            }
+        }
+
         private ISettingsUtils SettingsUtils { get; set; }
 
         private GeneralSettings GeneralSettingsConfig { get; set; }
@@ -27,6 +75,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         public bool IsEnabledGpoConfigured
         {
             get => _enabledStateIsGPOConfigured;
+        }
+
+        public void SubmitNewKeyRequest()
+        {
+            Settings.Properties.PendingKeyGenerationRequest = new NewKeyGenerationRequest();
+            Settings.Save(SettingsUtils);
+        }
+
+        public void SubmitConnectionRequest(string pcName, string securityKey)
+        {
+            Settings.Properties.PendingConnectionRequest = new ConnectionRequest { PCName = pcName, SecurityKey = securityKey };
+            Settings.Save(SettingsUtils);
         }
 
         private MouseWithoutBordersSettings Settings { get; set; }

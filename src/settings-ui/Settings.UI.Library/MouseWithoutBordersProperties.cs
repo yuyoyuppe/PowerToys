@@ -8,6 +8,16 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
+    public class ConnectionRequest
+    {
+        public string PCName;
+        public string SecurityKey;
+    }
+
+    public class NewKeyGenerationRequest
+    {
+    }
+
     public class MouseWithoutBordersProperties
     {
         public StringProperty SecurityKey { get; set; }
@@ -85,6 +95,10 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public StringProperty DeviceID { get; set; }
 
+        public ConnectionRequest PendingConnectionRequest { get; set; }
+
+        public NewKeyGenerationRequest PendingKeyGenerationRequest { get; set; }
+
         public MouseWithoutBordersProperties()
         {
             SecurityKey = new StringProperty(string.Empty);
@@ -102,6 +116,10 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             EasyMouse = new IntProperty(1);
             DeviceNames = new List<string>();
             DeviceID = new StringProperty(string.Empty);
+
+            // Set by the Settings UI when we want to reinitialize the logic to connect to another PC.
+            PendingConnectionRequest = null;
+            PendingKeyGenerationRequest = null;
 
             // TODO(yuyoyuppe): edit hotkey from settings page
             HotkeySwitchMachine = new IntProperty(0x70); // VK.F1
