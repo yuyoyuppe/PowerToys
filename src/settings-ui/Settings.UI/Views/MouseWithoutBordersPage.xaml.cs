@@ -18,6 +18,8 @@ namespace Microsoft.PowerToys.Settings.UI.Views
 {
     public sealed partial class MouseWithoutBordersPage : Page
     {
+        private const string MouseWithoutBordersDragDropCheckString = "MWB Device Drag Drop";
+
         private MouseWithoutBordersViewModel ViewModel { get; set; }
 
         public MouseWithoutBordersPage()
@@ -63,17 +65,40 @@ namespace Microsoft.PowerToys.Settings.UI.Views
         private void Device_DragStarting(UIElement sender, DragStartingEventArgs args)
         {
             args.Data.RequestedOperation = DataPackageOperation.Move;
+            args.Data.Properties.Add("check-usage", MouseWithoutBordersDragDropCheckString);
             args.Data.Properties.Add("index", GetDeviceIndex((Border)sender));
         }
 
         private void Device_Drop(object sender, DragEventArgs e)
         {
-            e.DataView.Properties.TryGetValue("index", out object boxIndex);
+            if (e.DataView.Properties.TryGetValue("check-usage", out object checkUsage))
+            {
+                // Guard against values dragged from somewhere else
+                if (!((string)checkUsage).Equals(MouseWithoutBordersDragDropCheckString))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            if (!e.DataView.Properties.TryGetValue("index", out object boxIndex))
+            {
+                return;
+            }
+
             var draggedDeviceIndex = (int)boxIndex;
+
+            if (draggedDeviceIndex < 0 || draggedDeviceIndex >= ViewModel.DeviceNames.Count)
+            {
+                return;
+            }
+
             var targetDeviceIndex = GetDeviceIndex((Border)e.OriginalSource);
 
             ViewModel.DeviceNames.Swap(draggedDeviceIndex, targetDeviceIndex);
-
             var itemsControl = (ItemsControl)FindName("DevicesItemsControl");
             var binding = itemsControl.GetBindingExpression(ItemsControl.ItemsSourceProperty);
             binding.UpdateSource();
