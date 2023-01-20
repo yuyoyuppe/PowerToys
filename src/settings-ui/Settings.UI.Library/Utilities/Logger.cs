@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO.Abstractions;
 
+// #define DEBUG_BREAK
 namespace Microsoft.PowerToys.Settings.UI.Library.Utilities
 {
     public static class Logger
@@ -40,7 +41,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Utilities
         public static void LogError(string message)
         {
             Log(message, "ERROR");
-#if DEBUG
+#if DEBUG && DEBUG_BREAK
             Debugger.Break();
 #endif
         }
@@ -55,7 +56,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library.Utilities
                 "Stack trace: " + Environment.NewLine +
                 e?.StackTrace,
                 "ERROR");
-#if DEBUG
+#if DEBUG && DEBUG_BREAK
             Debugger.Break();
 #endif
         }

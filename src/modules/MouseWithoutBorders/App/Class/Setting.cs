@@ -72,18 +72,35 @@ namespace MouseWithoutBorders.Class
 
                         if (_properties.PendingConnectionRequest != null)
                         {
-                            var pcName = _properties.PendingConnectionRequest.PCName;
-                            var securityKey = _properties.PendingConnectionRequest.SecurityKey;
+                            var pcName = _properties.PendingConnectionRequest.Value.PCName;
+                            var securityKey = _properties.PendingConnectionRequest.Value.SecurityKey;
                             _properties.PendingConnectionRequest = null;
+
+                            if (pcName != null && securityKey != null)
+                            {
+                                Common.MyKey = securityKey;
+                                Common.MachineMatrix = new string[Common.MAX_MACHINE] { pcName.Trim().ToUpper(CultureInfo.CurrentCulture), Common.MachineName.Trim(), string.Empty, string.Empty };
+
+                                string[] machines = Common.MachineMatrix;
+                                Common.MachinePool.Initialize(machines);
+
+                                Common.UpdateMachinePoolStringSetting();
+                            }
+
                             SaveSettingsToJson();
+                        }
 
-                            Common.MyKey = securityKey;
-                            Common.MachineMatrix = new string[Common.MAX_MACHINE] { pcName.Trim().ToUpper(CultureInfo.CurrentCulture), Common.MachineName.Trim(), string.Empty, string.Empty };
+                        if (_properties.PendingKeyGenerationRequest != null)
+                        {
+                            _properties.PendingKeyGenerationRequest = null;
+                            Setting.Values.FirstRun = true;
+                            Setting.Values.EasyMouse = (int)EasyMouseOption.Enable;
+                            Common.ClearComputerMatrix();
+                            Setting.Values.MyKey = Common.MyKey = Common.CreateRandomKey();
+                            Common.GeneratedKey = true;
+                            Setting.Values.FirstRun = false;
 
-                            string[] machines = Common.MachineMatrix;
-                            Common.MachinePool.Initialize(machines);
-
-                            Common.UpdateMachinePoolStringSetting();
+                            SaveSettingsToJson();
                         }
                     }
 
@@ -102,6 +119,7 @@ namespace MouseWithoutBorders.Class
             {
                 try
                 {
+                    _settings.Properties = _properties;
                     _settings.Save(_settingsUtils);
                 }
                 catch (IOException ex)

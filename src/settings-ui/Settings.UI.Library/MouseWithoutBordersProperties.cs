@@ -8,13 +8,13 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
-    public class ConnectionRequest
+    public struct ConnectionRequest
     {
         public string PCName;
         public string SecurityKey;
     }
 
-    public class NewKeyGenerationRequest
+    public struct NewKeyGenerationRequest
     {
     }
 
@@ -95,9 +95,9 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         public StringProperty DeviceID { get; set; }
 
-        public ConnectionRequest PendingConnectionRequest { get; set; }
+        public ConnectionRequest? PendingConnectionRequest { get; set; }
 
-        public NewKeyGenerationRequest PendingKeyGenerationRequest { get; set; }
+        public NewKeyGenerationRequest? PendingKeyGenerationRequest { get; set; }
 
         public MouseWithoutBordersProperties()
         {

@@ -40,6 +40,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
+                MaxDepth = 0,
+                IncludeFields = true,
             };
 
             if (settingsUtils == null)
