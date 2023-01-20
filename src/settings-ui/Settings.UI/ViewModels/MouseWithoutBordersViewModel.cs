@@ -79,7 +79,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public void SubmitNewKeyRequest()
         {
-            Settings.Properties.PendingKeyGenerationRequest = new NewKeyGenerationRequest();
+            Settings.Properties.PendingKeyGenerationRequest = default(NewKeyGenerationRequest);
             Settings.Save(SettingsUtils);
         }
 
