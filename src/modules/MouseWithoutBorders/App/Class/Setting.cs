@@ -87,6 +87,10 @@ namespace MouseWithoutBorders.Class
                                 Common.UpdateMachinePoolStringSetting();
                             }
 
+                            Common.ReopenSocketDueToReadError = true;
+                            Common.ReopenSockets(true);
+                            Common.SendMachineMatrix();
+
                             SaveSettingsToJson();
                         }
 
