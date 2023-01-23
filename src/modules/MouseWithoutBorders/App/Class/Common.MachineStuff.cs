@@ -762,6 +762,22 @@ namespace MouseWithoutBorders
                 Common.UpdateMachinePoolStringSetting();
             }
 
+            // NOTE(yuyoyuppe): automatically active "bidirectional" control between the machines.
+            string[] st = new string[Common.MAX_MACHINE];
+            Array.Fill(st, string.Empty);
+            var machines = Common.MachinePool.ListAllMachines();
+            for (int i = 0; i < machines.Count; ++i)
+            {
+                if (machines[i].Id != ID.NONE && machines[i].Id != ID.ALL)
+                {
+                    st[i] = machines[i].Name;
+                }
+            }
+
+            Common.MachineMatrix = st;
+            Common.ReopenSockets(true);
+            Common.SendMachineMatrix();
+
             Log("Machine added: " + name + "/" + package.Src.ToString());
             UpdateClientSockets("AddToMachinePool");
             return name;

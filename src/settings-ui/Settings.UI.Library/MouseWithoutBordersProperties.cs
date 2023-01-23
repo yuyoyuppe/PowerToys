@@ -131,7 +131,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             LastX = new IntProperty(0);
             LastY = new IntProperty(0);
             PackageID = new IntProperty(0);
-            FirstRun = true;
+            FirstRun = false;
             TCPPort = new IntProperty(15100);
             DrawMouseEx = true;
             Name2IP = new StringProperty(string.Empty);
