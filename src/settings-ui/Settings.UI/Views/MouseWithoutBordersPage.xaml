@@ -68,7 +68,7 @@
                     <StackPanel HorizontalAlignment="Center"
                             Orientation="Horizontal">
                         <ItemsControl x:Name="DevicesItemsControl"
-                                ItemsSource="{Binding DeviceNames, Mode=TwoWay}">
+                                ItemsSource="{Binding MachineMatrixString, Mode=TwoWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <ItemsStackPanel Orientation="Horizontal" />

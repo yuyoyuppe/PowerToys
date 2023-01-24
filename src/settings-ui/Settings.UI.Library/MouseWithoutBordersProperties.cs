@@ -55,7 +55,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         [JsonConverter(typeof(BoolPropertyJsonConverter))]
         public bool ShowClipboardAndNetworkStatusMessages { get; set; }
 
-        public List<string> DeviceNames { get; set; }
+        public List<string> MachineMatrixString { get; set; }
 
         public StringProperty MachinePool { get; set; }
 
@@ -114,7 +114,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             BlockMouseAtScreenCorners = false;
             ShowClipboardAndNetworkStatusMessages = false;
             EasyMouse = new IntProperty(1);
-            DeviceNames = new List<string>();
+            MachineMatrixString = new List<string>();
             DeviceID = new StringProperty(string.Empty);
 
             // Set by the Settings UI when we want to reinitialize the logic to connect to another PC.

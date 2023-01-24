@@ -124,7 +124,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
-            deviceNames = new IndexedObservableCollection<string>(Settings.Properties.DeviceNames ?? new List<string>());
+            machineMatrixString = new IndexedObservableCollection<string>(Settings.Properties.MachineMatrixString ?? new List<string>());
         }
 
         public bool IsEnabled
@@ -336,15 +336,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        private IndexedObservableCollection<string> deviceNames;
+        private IndexedObservableCollection<string> machineMatrixString;
 
-        public IndexedObservableCollection<string> DeviceNames
+        public IndexedObservableCollection<string> MachineMatrixString
         {
-            get => deviceNames;
+            get => machineMatrixString;
             set
             {
-                deviceNames = value;
-                Settings.Properties.DeviceNames = new List<string>(value.ToEnumerable());
+                machineMatrixString = value;
+                Settings.Properties.MachineMatrixString = new List<string>(value.ToEnumerable());
                 NotifyPropertyChanged();
             }
         }

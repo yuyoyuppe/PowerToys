@@ -150,7 +150,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    return string.Join(",", _properties.DeviceNames);
+                    return string.Join(",", _properties.MachineMatrixString);
                 }
             }
 
@@ -158,7 +158,7 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    _properties.DeviceNames = new List<string>(value.Split(","));
+                    _properties.MachineMatrixString = new List<string>(value.Split(","));
                     SaveSettingsToJson();
                 }
             }
