@@ -237,6 +237,12 @@
     <value>Mouse Without Borders</value>
     <comment>"Mouse Without Borders" is the name of the utility</comment>
   </data>
+  <data name="MouseWithoutBorders_MatrixOneRow.Header" xml:space="preserve">
+    <value>Devices in a single row</value>
+  </data>
+  <data name="MouseWithoutBorders_MatrixOneRow.Description" xml:space="preserve">
+    <value>Sets whether the devices should are aligned on a single row. A two by two matrix is considered otherwise.</value>
+  </data>
   <data name="MouseWithoutBorders_WrapMouse.Header" xml:space="preserve">
     <value>Wrap mouse</value>
   </data>

@@ -6,10 +6,12 @@
         xmlns:labs="using:CommunityToolkit.Labs.WinUI" mc:Ignorable="d"
         xmlns:controls="using:Microsoft.PowerToys.Settings.UI.Controls"
         xmlns:converters="using:Microsoft.PowerToys.Settings.UI.Converters"
+        xmlns:toolkitConverters="using:CommunityToolkit.WinUI.UI.Converters"
         xmlns:ui="using:CommunityToolkit.WinUI.UI"
         AutomationProperties.LandmarkType="Main">
     <Page.Resources>
         <converters:NegativeBoolToVisibilityConverter x:Key="negativeBoolToVisibilityConverter" />
+        <toolkitConverters:BoolToObjectConverter x:Key="OneRowMatrixBoolToNumberOfRowsConverter" TrueValue="4" FalseValue="2" />
     </Page.Resources>
     <controls:SettingsPageControl x:Uid="MouseWithoutBorders"
             ModuleImageSource="ms-appx:///Assets/Modules/MouseWithoutBorders.png">
@@ -71,7 +73,7 @@
                                 ItemsSource="{Binding MachineMatrixString, Mode=TwoWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsStackPanel Orientation="Horizontal" />
+                                    <WrapGrid Orientation="Horizontal" MaximumRowsOrColumns="{Binding MatrixOneRow, Mode=OneWay, Converter={StaticResource OneRowMatrixBoolToNumberOfRowsConverter}}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
@@ -83,7 +85,7 @@
                                             Background="{ThemeResource SubtleButtonBackgroundDisabled}"
                                             Width="90"
                                             Height="90" BorderThickness="2"
-                                            Margin="3,0,3,0"
+                                            Margin="3"
                                             CanDrag="True" AllowDrop="True"
                                             CornerRadius="4"
                                             DragStarting="Device_DragStarting"
@@ -107,6 +109,11 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
+                    <labs:SettingsCard x:Uid="MouseWithoutBorders_MatrixOneRow">
+                        <ToggleSwitch
+                                x:Uid="MouseWithoutBorders_MatrixOneRow_ToggleSwitch"
+                                IsOn="{x:Bind ViewModel.MatrixOneRow, Mode=TwoWay}" />
+                    </labs:SettingsCard>
                 </controls:SettingsGroup>
                 <controls:SettingsGroup x:Uid="MouseWithoutBorders_Settings"
                         IsEnabled="{x:Bind Mode=OneWay, Path=ViewModel.IsEnabled}">

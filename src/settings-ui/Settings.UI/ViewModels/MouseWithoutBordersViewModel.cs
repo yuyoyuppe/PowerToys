@@ -243,6 +243,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public bool MatrixOneRow
+        {
+            get
+            {
+                return Settings.Properties.MatrixOneRow;
+            }
+
+            set
+            {
+                if (Settings.Properties.MatrixOneRow != value)
+                {
+                    Settings.Properties.MatrixOneRow = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
         public bool ShareClipboard
         {
             get
