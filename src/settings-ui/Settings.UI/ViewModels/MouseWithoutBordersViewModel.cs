@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
 using Microsoft.PowerToys.Settings.UI.Helpers;
@@ -121,10 +122,69 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 _isEnabled = GeneralSettingsConfig.Enabled.MouseWithoutBorders;
             }
 
+            LoadMachineMatrixString();
+
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
+        }
 
-            machineMatrixString = new IndexedObservableCollection<string>(Settings.Properties.MachineMatrixString ?? new List<string>());
+        // Loads the machine matrix, taking into account changes to the machine pool.
+        private void LoadMachineMatrixString()
+        {
+            List<string> loadMachineMatrixString = Settings.Properties.MachineMatrixString ?? new List<string>() { string.Empty, string.Empty, string.Empty, string.Empty };
+
+            if (loadMachineMatrixString.Count < 4)
+            {
+                // Current logic of MWB assumes there are always 4 slots. Any other configuration means data corruption here.
+                loadMachineMatrixString = new List<string>() { string.Empty, string.Empty, string.Empty, string.Empty };
+            }
+
+            bool editedTheMatrix = false; // keep track of changes to the matrix because of changes to the available machine pool.
+
+            if (!string.IsNullOrEmpty(Settings.Properties.MachinePool?.Value))
+            {
+                List<string> availableMachines = new List<string>();
+
+                // Format of this field is "NAME1:ID1,NAME2:ID2,..."
+                // Load the available machines
+                foreach (string availablMachineIdPair in Settings.Properties.MachinePool.Value.Split(","))
+                {
+                    string availablMachineName = availablMachineIdPair.Split(':')[0];
+                    availableMachines.Add(availablMachineName);
+                }
+
+                // Start by removing the machines from the matrix that are no longer available to pick.
+                for (int i = 0; i < loadMachineMatrixString.Count; i++)
+                {
+                    if (!availableMachines.Contains(loadMachineMatrixString[i]))
+                    {
+                        editedTheMatrix = true;
+                        loadMachineMatrixString[i] = string.Empty;
+                    }
+                }
+
+                // If an available machine is not in the matrix already, fill it in the first available spot.
+                foreach (string availableMachineName in availableMachines)
+                {
+                    if (!loadMachineMatrixString.Contains(availableMachineName))
+                    {
+                        int availableIndex = loadMachineMatrixString.FindIndex(name => string.IsNullOrEmpty(name));
+                        if (availableIndex >= 0)
+                        {
+                            loadMachineMatrixString[availableIndex] = availableMachineName;
+                            editedTheMatrix = true;
+                        }
+                    }
+                }
+            }
+
+            machineMatrixString = new IndexedObservableCollection<string>(loadMachineMatrixString);
+
+            if (editedTheMatrix)
+            {
+                // Set the property directly to save the new matrix right away with the new available machines.
+                MachineMatrixString = machineMatrixString;
+            }
         }
 
         public bool IsEnabled
