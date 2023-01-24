@@ -93,14 +93,14 @@ namespace Microsoft.PowerToys.Settings.UI.Views
 
             var draggedDeviceIndex = (int)boxIndex;
 
-            if (draggedDeviceIndex < 0 || draggedDeviceIndex >= ViewModel.DeviceNames.Count)
+            if (draggedDeviceIndex < 0 || draggedDeviceIndex >= ViewModel.MachineMatrixString.Count)
             {
                 return;
             }
 
             var targetDeviceIndex = GetDeviceIndex((Border)e.OriginalSource);
 
-            ViewModel.DeviceNames.Swap(draggedDeviceIndex, targetDeviceIndex);
+            ViewModel.MachineMatrixString.Swap(draggedDeviceIndex, targetDeviceIndex);
             var itemsControl = (ItemsControl)FindName("DevicesItemsControl");
             var binding = itemsControl.GetBindingExpression(ItemsControl.ItemsSourceProperty);
             binding.UpdateSource();
