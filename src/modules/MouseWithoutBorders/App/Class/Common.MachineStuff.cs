@@ -821,8 +821,9 @@ namespace MouseWithoutBorders
             }
             else
             {
-                settings.Hide();
+                settings.Close();
                 Common.MMSleep(0.3);
+                settings = new SettingsForm();
                 settings.Show();
             }
 
