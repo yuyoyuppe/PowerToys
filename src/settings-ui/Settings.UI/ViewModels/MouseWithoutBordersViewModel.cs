@@ -12,6 +12,7 @@ using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
+using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
@@ -92,7 +93,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private MouseWithoutBordersSettings Settings { get; set; }
 
-        public MouseWithoutBordersViewModel(ISettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<MouseWithoutBordersSettings> moduleSettings, Func<string, int> ipcMSGCallBackFunc)
+        public MouseWithoutBordersViewModel(ISettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, Func<string, int> ipcMSGCallBackFunc)
         {
             SettingsUtils = settingsUtils;
 
@@ -102,13 +103,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 throw new ArgumentNullException(nameof(settingsRepository));
             }
 
-            if (moduleSettings == null)
-            {
-                throw new ArgumentNullException(nameof(moduleSettings));
-            }
-
-            Settings = moduleSettings.SettingsConfig;
             GeneralSettingsConfig = settingsRepository.SettingsConfig;
+
+            // MouseWithoutBorders settings may be changed by the logic in the utility as machines connect. We need to get a fresh version everytime instead of using a repository.
+            MouseWithoutBordersSettings moduleSettings;
+            moduleSettings = SettingsUtils.GetSettingsOrDefault<MouseWithoutBordersSettings>("MouseWithoutBorders");
+
+            LoadViewModelFromSettings(moduleSettings);
 
             _enabledGpoRuleConfiguration = GPOWrapper.GetConfiguredAlwaysOnTopEnabledValue();
             if (_enabledGpoRuleConfiguration == GpoRuleConfigured.Disabled || _enabledGpoRuleConfiguration == GpoRuleConfigured.Enabled)
@@ -122,10 +123,19 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 _isEnabled = GeneralSettingsConfig.Enabled.MouseWithoutBorders;
             }
 
-            LoadMachineMatrixString();
-
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
+        }
+
+        private void LoadViewModelFromSettings(MouseWithoutBordersSettings moduleSettings)
+        {
+            if (moduleSettings == null)
+            {
+                throw new ArgumentNullException(nameof(moduleSettings));
+            }
+
+            Settings = moduleSettings;
+            LoadMachineMatrixString();
         }
 
         // Loads the machine matrix, taking into account changes to the machine pool.
@@ -147,10 +157,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                 // Format of this field is "NAME1:ID1,NAME2:ID2,..."
                 // Load the available machines
-                foreach (string availablMachineIdPair in Settings.Properties.MachinePool.Value.Split(","))
+                foreach (string availableMachineIdPair in Settings.Properties.MachinePool.Value.Split(","))
                 {
-                    string availablMachineName = availablMachineIdPair.Split(':')[0];
-                    availableMachines.Add(availablMachineName);
+                    string availableMachineName = availableMachineIdPair.Split(':')[0];
+                    availableMachines.Add(availableMachineName);
                 }
 
                 // Start by removing the machines from the matrix that are no longer available to pick.
@@ -441,6 +451,25 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     NotifyPropertyChanged();
                 }
             }
+        }
+
+        public bool LoadUpdatedSettings()
+        {
+            try
+            {
+                LoadViewModelFromSettings(SettingsUtils.GetSettings<MouseWithoutBordersSettings>("MouseWithoutBorders"));
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogError(ex.Message);
+                return false;
+            }
+        }
+
+        public void NotifyUpdatedSettings()
+        {
+            OnPropertyChanged(null); // Notify all properties might have changed.
         }
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = null)

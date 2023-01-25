@@ -5,10 +5,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Abstractions;
 using System.Windows.Input;
 using CommunityToolkit.Labs.WinUI;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
+using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 using Microsoft.PowerToys.Settings.UI.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -22,7 +24,11 @@ namespace Microsoft.PowerToys.Settings.UI.Views
     {
         private const string MouseWithoutBordersDragDropCheckString = "MWB Device Drag Drop";
 
+        private const string PowerToyName = "MouseWithoutBorders";
+
         private MouseWithoutBordersViewModel ViewModel { get; set; }
+
+        private readonly IFileSystemWatcher watcher;
 
         public MouseWithoutBordersPage()
         {
@@ -30,11 +36,28 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             ViewModel = new MouseWithoutBordersViewModel(
                 settingsUtils,
                 SettingsRepository<GeneralSettings>.GetInstance(settingsUtils),
-                SettingsRepository<MouseWithoutBordersSettings>.GetInstance(settingsUtils),
                 ShellPage.SendDefaultIPCMessage);
+
+            watcher = Helper.GetFileWatcher(
+                PowerToyName,
+                "settings.json",
+                OnConfigFileUpdate);
 
             DataContext = ViewModel;
             InitializeComponent();
+        }
+
+        private void OnConfigFileUpdate()
+        {
+            // Note: FileSystemWatcher raise notification multiple times for single update operation.
+            // Todo: Handle duplicate events either by somehow suppress them or re-read the configuration everytime since we will be updating the UI only if something is changed.
+            this.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ViewModel.LoadUpdatedSettings())
+                {
+                    ViewModel.NotifyUpdatedSettings();
+                }
+            });
         }
 
         private static T GetChildOfType<T>(DependencyObject depObj, string tag)
