@@ -41,6 +41,7 @@ namespace MouseWithoutBorders.Class
 
         private MouseWithoutBordersProperties _properties;
         private MouseWithoutBordersSettings _settings;
+        private bool _pause_instant_saving = false; // Avoid instantly saving every change to the file when updating properties.
 
         private void UpdateSettingsFromJson()
         {
@@ -55,19 +56,39 @@ namespace MouseWithoutBorders.Class
                 var settings = _settingsUtils.GetSettingsOrDefault<MouseWithoutBordersSettings>("MouseWithoutBorders");
                 if (settings != null)
                 {
+                    _pause_instant_saving = true;
+
+                    var last_properties = _properties;
+
                     _settings = settings;
-                    if (_properties != null)
+
+                    _properties = settings.Properties;
+
+                    // Keep track of the need to resend the machine matrix.
+                    bool shouldSendMachineMatrix = false;
+
+                    // Keep track of the need to save into the settings file.
+                    bool shouldSaveNewSettingsValues = false;
+
+                    if (last_properties != null)
                     {
                         // Same as in CheckBoxCircle_CheckedChanged
-                        if (_properties.WrapMouse != _settings.Properties.WrapMouse)
+                        if (last_properties.WrapMouse != _settings.Properties.WrapMouse)
                         {
-                            Common.SendMachineMatrix();
+                            shouldSendMachineMatrix = true;
                         }
 
                         // Same as CheckBoxDrawMouse_CheckedChanged
-                        if (_properties.DrawMouseCursor != _settings.Properties.DrawMouseCursor && !_settings.Properties.DrawMouseCursor)
+                        if (last_properties.DrawMouseCursor != _settings.Properties.DrawMouseCursor && !_settings.Properties.DrawMouseCursor)
                         {
                             CustomCursor.ShowFakeMouseCursor(int.MinValue, int.MinValue);
+                        }
+
+                        if (!Enumerable.SequenceEqual(last_properties.MachineMatrixString, _settings.Properties.MachineMatrixString))
+                        {
+                            _properties.MachineMatrixString = _settings.Properties.MachineMatrixString;
+                            Common.MachineMatrix = null; // Forces read next time it's needed.
+                            shouldSendMachineMatrix = true;
                         }
 
                         if (_properties.PendingConnectionRequest != null)
@@ -89,9 +110,9 @@ namespace MouseWithoutBorders.Class
 
                             Common.ReopenSocketDueToReadError = true;
                             Common.ReopenSockets(true);
-                            Common.SendMachineMatrix();
 
-                            SaveSettingsToJson();
+                            shouldSendMachineMatrix = true;
+                            shouldSaveNewSettingsValues = true;
                         }
 
                         if (_properties.PendingKeyGenerationRequest != null)
@@ -104,17 +125,28 @@ namespace MouseWithoutBorders.Class
                             Common.GeneratedKey = true;
                             Setting.Values.FirstRun = false;
 
+                            shouldSaveNewSettingsValues = true;
+                        }
+
+                        if (shouldSendMachineMatrix)
+                        {
+                            Common.SendMachineMatrix();
+                            shouldSaveNewSettingsValues = true;
+                        }
+
+                        if (shouldSaveNewSettingsValues)
+                        {
                             SaveSettingsToJson();
                         }
                     }
-
-                    _properties = _settings.Properties;
                 }
             }
             catch (IOException ex)
             {
                 Logger.LogEvent($"Failed to read settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
             }
+
+            _pause_instant_saving = false;
         }
 
         private void SaveSettingsToJson()
@@ -159,7 +191,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.MachineMatrixString = new List<string>(value.Split(","));
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -181,7 +216,10 @@ namespace MouseWithoutBorders.Class
                     if (!value.Equals(_properties.MachinePool.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         _properties.MachinePool.Value = value;
-                        SaveSettingsToJson();
+                        if (!_pause_instant_saving)
+                        {
+                            SaveSettingsToJson();
+                        }
                     }
                 }
             }
@@ -206,7 +244,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.ShareClipboard = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -226,7 +267,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.TransferFile = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -246,7 +290,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.MatrixOneRow = true;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -266,7 +313,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.WrapMouse = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -285,8 +335,11 @@ namespace MouseWithoutBorders.Class
             {
                 lock (_loadingSettingsLock)
                 {
-                    SaveSettingsToJson();
                     _properties.EasyMouse.Value = value;
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -306,7 +359,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.BlockMouseAtScreenCorners = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -361,7 +417,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.SecurityKey.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -408,7 +467,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.HideMouseAtScreenEdge = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -428,7 +490,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.BlockScreenSaverOnOtherMachines = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -448,7 +513,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.BlockScreenSaverOnOtherMachines = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -468,7 +536,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.MoveMouseRelatively = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -496,7 +567,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.MachineID.Value = (int)value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -517,7 +591,10 @@ namespace MouseWithoutBorders.Class
                 {
                     Common.LastX = value;
                     _properties.LastX.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -538,7 +615,10 @@ namespace MouseWithoutBorders.Class
                 {
                     Common.LastY = value;
                     _properties.LastY.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -558,7 +638,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.PackageID.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -578,7 +661,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.FirstRun = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -598,7 +684,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.HotkeySwitchMachine.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -618,7 +707,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.EasyMouse.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -675,7 +767,10 @@ namespace MouseWithoutBorders.Class
             set
             {
                 switchCount = value;
-                SaveSettingsToJson();
+                if (!_pause_instant_saving)
+                {
+                    SaveSettingsToJson();
+                }
             }
         }
 
@@ -698,7 +793,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.DrawMouseCursor = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -718,7 +816,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.DrawMouseEx = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -738,7 +839,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.ValidateRemoteMachineIP = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -758,7 +862,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.SameSubnetOnly = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -778,7 +885,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.Name2IP.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -798,7 +908,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.UseVKMap = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -818,7 +931,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.FisrtCtrlShiftS = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -885,7 +1001,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.MachineID.Value = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
@@ -909,7 +1028,10 @@ namespace MouseWithoutBorders.Class
                 lock (_loadingSettingsLock)
                 {
                     _properties.ShowClipboardAndNetworkStatusMessages = value;
-                    SaveSettingsToJson();
+                    if (!_pause_instant_saving)
+                    {
+                        SaveSettingsToJson();
+                    }
                 }
             }
         }
