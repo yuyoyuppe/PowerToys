@@ -1910,7 +1910,9 @@ namespace MouseWithoutBorders.Class
 
             lock (TcpSocketsLock)
             {
+#if ENABLE_LEGACY_DOS_PROTECTION
                 PreventDoS(TcpSockets);
+#endif
                 TcpSockets.Add(tcp);
             }
 
@@ -1924,7 +1926,9 @@ namespace MouseWithoutBorders.Class
 
             lock (TcpSocketsLock)
             {
+#if ENABLE_LEGACY_DOS_PROTECTION
                 PreventDoS(TcpSockets);
+#endif
                 TcpSockets.Add(tcp);
             }
 

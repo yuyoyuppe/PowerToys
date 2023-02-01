@@ -91,6 +91,7 @@ namespace MouseWithoutBorders.Class
                             shouldSendMachineMatrix = true;
                         }
 
+                        var shouldReopenSockets = false;
                         if (_properties.PendingConnectionRequest != null)
                         {
                             var pcName = _properties.PendingConnectionRequest.Value.PCName;
@@ -99,18 +100,18 @@ namespace MouseWithoutBorders.Class
 
                             if (pcName != null && securityKey != null)
                             {
+                                Common.ClearComputerMatrix();
                                 Common.MyKey = securityKey;
+                                Common.MagicNumber = Common.Get24BitHash(Common.MyKey);
+                                Common.GeneratedKey = false;
                                 Common.MachineMatrix = new string[Common.MAX_MACHINE] { pcName.Trim().ToUpper(CultureInfo.CurrentCulture), Common.MachineName.Trim(), string.Empty, string.Empty };
 
                                 string[] machines = Common.MachineMatrix;
                                 Common.MachinePool.Initialize(machines);
-
                                 Common.UpdateMachinePoolStringSetting();
                             }
 
-                            Common.ReopenSocketDueToReadError = true;
-                            Common.ReopenSockets(true);
-
+                            shouldReopenSockets = true;
                             shouldSendMachineMatrix = true;
                             shouldSaveNewSettingsValues = true;
                         }
@@ -125,7 +126,16 @@ namespace MouseWithoutBorders.Class
                             Common.GeneratedKey = true;
                             Setting.Values.FirstRun = false;
 
+                            shouldReopenSockets = true;
+                            shouldSendMachineMatrix = true;
                             shouldSaveNewSettingsValues = true;
+                        }
+
+                        if (shouldReopenSockets)
+                        {
+                            SocketStuff.InvalidKeyFound = false;
+                            Common.ReopenSocketDueToReadError = true;
+                            Common.ReopenSockets(true);
                         }
 
                         if (shouldSendMachineMatrix)
@@ -591,10 +601,6 @@ namespace MouseWithoutBorders.Class
                 {
                     Common.LastX = value;
                     _properties.LastX.Value = value;
-                    if (!_pause_instant_saving)
-                    {
-                        SaveSettingsToJson();
-                    }
                 }
             }
         }
@@ -615,10 +621,6 @@ namespace MouseWithoutBorders.Class
                 {
                     Common.LastY = value;
                     _properties.LastY.Value = value;
-                    if (!_pause_instant_saving)
-                    {
-                        SaveSettingsToJson();
-                    }
                 }
             }
         }

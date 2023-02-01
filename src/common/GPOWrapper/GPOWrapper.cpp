@@ -126,7 +126,7 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     }
     GpoRuleConfigured GPOWrapper::GetConfiguredMouseWithoutBordersEnabledValue()
     {
-        return (GpoRuleConfigured)powertoys_gpo::getConfiguredMouseWithoutBordersEnabledValue();
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMouseWithoutBordersEnabledValue());
     }
     GpoRuleConfigured GPOWrapper::GetDisableAutomaticUpdateDownloadValue()
     {

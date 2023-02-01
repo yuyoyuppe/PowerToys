@@ -121,6 +121,7 @@ call "..\..\..\publish.cmd" arm64
     <Compile Include="TextExtractor.wxs" />
     <Compile Include="Tools.wxs" />
     <Compile Include="VideoConference.wxs" />
+    <Compile Include="MouseWithoutBorders.wxs" />
 
     <Compile Include="MonacoSRC.wxs" />
 

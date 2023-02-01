@@ -306,6 +306,7 @@ namespace MouseWithoutBorders
                     {
                         case PackageType.Clipboardimg:
                         case PackageType.Clipboardtxt:
+                            m.Write(data.Bytes, dataStart, DATA_SIZE);
                             break;
 
                         case PackageType.Clipboarddataend:
