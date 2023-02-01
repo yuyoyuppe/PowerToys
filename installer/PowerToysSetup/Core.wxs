@@ -74,7 +74,7 @@
         <File Source="$(var.BinDir)Settings\$(var.File)" />
       <?endforeach?>
       <?foreach File in $(var.DotnetRuntimeWPFFiles)?>
-        <File Source="$(var.BinDir)\modules\\ColorPicker\$(var.File)" />
+        <File Source="$(var.BinDir)\modules\ColorPicker\$(var.File)" />
       <?endforeach?>
       </Component>
     </DirectoryRef>
