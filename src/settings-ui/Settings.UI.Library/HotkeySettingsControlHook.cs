@@ -60,7 +60,10 @@ namespace Microsoft.PowerToys.Settings.UI.Library
 
         private bool FilterKeyboardEvents(KeyboardEvent ev)
         {
-            return _filterKeyboardEvent(ev.key, (UIntPtr)ev.dwExtraInfo);
+            checked
+            {
+                return _filterKeyboardEvent(ev.key, (UIntPtr)ev.dwExtraInfo);
+            }
         }
 
         protected virtual void Dispose(bool disposing)

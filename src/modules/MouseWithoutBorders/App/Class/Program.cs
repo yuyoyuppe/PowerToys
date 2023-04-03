@@ -14,10 +14,13 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Principal;
+using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
 using ManagedCommon;
+using Microsoft.PowerToys.Settings.UI.Library.Utilities;
 
 [module: SuppressMessage("Microsoft.MSInternal", "CA904:DeclareTypesInMicrosoftOrSystemNamespace", Scope = "namespace", Target = "MouseWithoutBorders", Justification = "Dotnet port with style preservation")]
 [module: SuppressMessage("Microsoft.Design", "CA1014:MarkAssembliesWithClsCompliant", Justification = "Dotnet port with style preservation")]
@@ -28,6 +31,8 @@ namespace MouseWithoutBorders.Class
 {
     internal static class Program
     {
+        private static readonly string ServiceName = "Mouse Without Borders service";
+
         private static FormHelper formHelper;
 
         internal static FormHelper FormHelper => formHelper != null && !formHelper.IsDisposed ? formHelper : (formHelper = new FormHelper());
@@ -43,19 +48,27 @@ namespace MouseWithoutBorders.Class
             Thread.CurrentThread.Name = Application.ProductName + " main thread";
             Common.BinaryName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
 
+            WindowsIdentity currentUser = WindowsIdentity.GetCurrent();
+            SecurityIdentifier currentUserSID = currentUser.User;
+            SecurityIdentifier localSystemSID = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
+
+            bool runningAsSystem = currentUserSID.Equals(localSystemSID);
+            Common.RunWithNoAdminRight = !runningAsSystem;
             try
             {
                 string[] args = Environment.GetCommandLineArgs();
 
-                var parentPid = 0;
-
                 User = WindowsIdentity.GetCurrent().Name;
                 Common.Log("*** Started as " + User);
 
-                // NOTE(yuyoyuppe): unified logic between elevated/non-elevated scenarios
-                Common.RunWithNoAdminRight = true;
-
                 Common.Log(Environment.CommandLine);
+
+                if (!runningAsSystem)
+                {
+                    var sc = new ServiceController(ServiceName);
+                    sc.Start();
+                    return;
+                }
 
                 if (args.Length > 1 && args[1] != null)
                 {
@@ -66,7 +79,13 @@ namespace MouseWithoutBorders.Class
                     }
 
                     string myDesktop = Common.GetMyDesktop();
-                    string arg = args[1].Trim();
+                    var arg = args[1].Trim();
+
+                    if (args.Length > 2)
+                    {
+                        Helper.UserLocalAppDataPath = args[2].Trim();
+                    }
+
                     if (arg.Equals("winlogon", StringComparison.OrdinalIgnoreCase))
                     {
                         // Executed by service, running on logon desktop
@@ -86,22 +105,12 @@ namespace MouseWithoutBorders.Class
                             Setting.Values.LastX = Common.JUST_GOT_BACK_FROM_SCREENSAVER;
                         }
                     }
-                    else
-                    {
-                        int.TryParse(args[1], out parentPid);
-                    }
                 }
                 else
                 {
                     if (Common.CheckSecondInstance(true))
                     {
                         Common.Log("*** Second instance, exiting...");
-                        return;
-                    }
-
-                    if (!Common.RunWithNoAdminRight)
-                    {
-                        Common.StartMouseWithoutBordersService();
                         return;
                     }
                 }
@@ -167,6 +176,7 @@ namespace MouseWithoutBorders.Class
                 Common.WndProcCounter++;
 
                 var formScreen = new FrmScreen();
+                /*
                 if (parentPid != 0)
                 {
                     RunnerHelper.WaitForPowerToysRunner(parentPid, () =>
@@ -175,6 +185,7 @@ namespace MouseWithoutBorders.Class
                         Application.Exit();
                     });
                 }
+                */
 
                 Application.Run(formScreen);
             }

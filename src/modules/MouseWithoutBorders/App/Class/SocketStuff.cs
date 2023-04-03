@@ -230,11 +230,6 @@ namespace MouseWithoutBorders.Class
                     Common.SocketMutex = new Mutex(false, $"Global\\{Application.ProductName}-{FrmAbout.AssemblyVersion}-FF7CDABE-1015-0904-1103-24670FA5D16E");
                 }
 
-                if (!Common.IsMyDesktopActive() || Common.CurrentProcess.SessionId != NativeMethods.WTSGetActiveConsoleSessionId())
-                {
-                    throw new NotPhysicalConsoleException("No longer active session.");
-                }
-
                 Common.AcquireSocketMutex();
             }
             catch (AbandonedMutexException e)

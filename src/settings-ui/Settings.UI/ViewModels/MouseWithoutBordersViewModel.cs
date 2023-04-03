@@ -197,6 +197,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public bool CanBeEnabled
+        {
+            get
+            {
+                return !_enabledStateIsGPOConfigured && GeneralSettingsConfig.IsElevated;
+            }
+        }
+
         public bool IsEnabled
         {
             get => _isEnabled;

@@ -88,7 +88,7 @@ namespace MouseWithoutBorders
 
         // As user who runs explorer.exe
         {
-            if (!Program.User.ToLower().Contains("system"))
+            if (!Program.User.ToLower(CultureInfo.InvariantCulture).Contains("system"))
             {
                 ProcessStartInfo s = new(commandLine, arg);
                 s.WindowStyle = wShowWindow != 0 ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;

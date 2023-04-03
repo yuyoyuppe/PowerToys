@@ -152,9 +152,12 @@ namespace MouseWithoutBorders
 
         private static void CreateHelperThreads()
         {
+            // NOTE(@yuyoyuppe): service crashes while trying to obtain this info, disabling.
+            /*
             Thread watchDogThread = new(new ThreadStart(WatchDogThread), nameof(WatchDogThread));
             watchDogThread.Priority = ThreadPriority.Highest;
             watchDogThread.Start();
+            */
 
             helper = new Thread(new ThreadStart(HelperThread), "Helper Thread");
             helper.SetApartmentState(ApartmentState.STA);
