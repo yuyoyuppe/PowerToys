@@ -43,8 +43,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Resources\**" />
+        <Compile Remove="Service\**" />
     <EmbeddedResource Remove="Resources\**" />
+        <EmbeddedResource Remove="Service\**" />
+        <ExcludeFromStyleCop Remove="Service\**" />
     <None Remove="Resources\**" />
+        <None Remove="Service\**" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Control\ColorBorderField.cs">
@@ -202,6 +206,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" />
   </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\settings-ui\Settings.UI.Library\Settings.UI.Library.csproj" />
+    </ItemGroup>
   <ItemGroup>
     <Compile Remove="Control\Machine2.Designer.cs" />
     <Compile Remove="Control\MachineMatrix.Designer.cs" />
@@ -220,9 +227,6 @@
     <EmbeddedResource Remove="Form\Settings\SettingsPage2.resx" />
     <EmbeddedResource Remove="Form\Settings\SettingsPage3.resx" />
     <EmbeddedResource Remove="Form\Settings\SettingsPage4.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\settings-ui\Settings.UI.Library\Settings.UI.Library.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>

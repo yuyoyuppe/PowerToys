@@ -319,8 +319,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                             // the settings file needs to be updated, update the real one with non-excluded stuff...
                             Logger.LogInfo($"Settings file {currentFile.Key} is different and is getting updated from backup");
 
-                            var newCurrentSettingsFile = JsonMergeHelper.Merge(File.ReadAllText(currentSettingsFiles[currentFile.Key]), settingsToRestoreJson);
-                            File.WriteAllText(currentSettingsFiles[currentFile.Key], newCurrentSettingsFile);
+                            var newCurrentSettingsFile = JsonMergeHelper.Merge(File.ReadAllText(value), settingsToRestoreJson);
+                            File.WriteAllText(value, newCurrentSettingsFile);
                             anyFilesUpdated = true;
                         }
                     }

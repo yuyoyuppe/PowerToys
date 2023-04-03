@@ -15,7 +15,10 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+// Disable the warning to preserve original code
+#pragma warning disable CA1716
 namespace MouseWithoutBorders.Class
+#pragma warning restore CA1716
 {
     internal struct IconInfo
     {

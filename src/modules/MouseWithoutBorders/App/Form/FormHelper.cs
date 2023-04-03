@@ -162,8 +162,7 @@ namespace MouseWithoutBorders
         {
             try
             {
-                // TODO(@yuyoyuppe): doing it locally instead
-                // remoteClipboardHelper.SendLog(log);
+                Logger.LogEvent(log, EventLogEntryType.Warning);
             }
             catch (Exception e)
             {

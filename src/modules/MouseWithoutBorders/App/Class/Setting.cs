@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -41,7 +42,7 @@ namespace MouseWithoutBorders.Class
 
         private MouseWithoutBordersProperties _properties;
         private MouseWithoutBordersSettings _settings;
-        private bool _pause_instant_saving = false; // Avoid instantly saving every change to the file when updating properties.
+        private bool _pause_instant_saving; // Avoid instantly saving every change to the file when updating properties.
 
         private void UpdateSettingsFromJson()
         {
@@ -163,14 +164,29 @@ namespace MouseWithoutBorders.Class
         {
             lock (_loadingSettingsLock)
             {
-                try
+                bool saved = false;
+
+                for (int i = 0; i < 5; ++i)
                 {
-                    _settings.Properties = _properties;
-                    _settings.Save(_settingsUtils);
-                }
-                catch (IOException ex)
-                {
-                    Logger.LogEvent($"Failed to write settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
+                    try
+                    {
+                        _settings.Properties = _properties;
+                        _settings.Save(_settingsUtils);
+                        saved = true;
+                    }
+                    catch (IOException ex)
+                    {
+                        Logger.LogEvent($"Failed to write settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
+                    }
+
+                    if (!saved)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(1000);
+                    }
                 }
             }
         }
@@ -178,7 +194,19 @@ namespace MouseWithoutBorders.Class
         internal Settings()
         {
             _settingsUtils = new SettingsUtils();
-            _watcher = Helper.GetFileWatcher("MouseWithoutBorders", "settings.json", () => UpdateSettingsFromJson());
+
+            _watcher = Helper.GetFileWatcher("MouseWithoutBorders", "settings.json", () =>
+            {
+                try
+                {
+                    UpdateSettingsFromJson();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogEvent($"Failed to update settings: {ex.Message}", System.Diagnostics.EventLogEntryType.Error);
+                }
+            });
+
             UpdateSettingsFromJson();
         }
 
@@ -757,7 +785,7 @@ namespace MouseWithoutBorders.Class
             }
         }
 
-        private int switchCount = 0;
+        private int switchCount;
 
         internal int SwitchCount
         {

@@ -23,10 +23,12 @@
                         Severity="Informational" />
                 <controls:SettingsGroup
                         x:Uid="MouseWithoutBorders_ActivationSettings">
+                    
                     <labs:SettingsCard x:Uid="MouseWithoutBorders_Toggle_Enable"
                             HeaderIcon="{ui:BitmapIcon Source=/Assets/FluentIcons/FluentIconsMouseWithoutBorders.png}"
                             IsEnabled="{x:Bind Mode=OneWay, Path=ViewModel.IsEnabledGpoConfigured, Converter={StaticResource BoolNegationConverter}}">
                         <ToggleSwitch x:Uid="ToggleSwitch"
+                                IsEnabled="{x:Bind Mode=OneWay, Path=ViewModel.CanBeEnabled}"
                                 IsOn="{x:Bind Mode=TwoWay, Path=ViewModel.IsEnabled}" />
                     </labs:SettingsCard>
                 </controls:SettingsGroup>

@@ -99,7 +99,7 @@ namespace Microsoft.PowerToys.Settings.UI.Views
             if (e.DataView.Properties.TryGetValue("check-usage", out object checkUsage))
             {
                 // Guard against values dragged from somewhere else
-                if (!((string)checkUsage).Equals(MouseWithoutBordersDragDropCheckString))
+                if (!((string)checkUsage).Equals(MouseWithoutBordersDragDropCheckString, StringComparison.Ordinal))
                 {
                     return;
                 }

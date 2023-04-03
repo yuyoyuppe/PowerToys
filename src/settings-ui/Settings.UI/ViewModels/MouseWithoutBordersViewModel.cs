@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
@@ -194,6 +195,14 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 // Set the property directly to save the new matrix right away with the new available machines.
                 MachineMatrixString = machineMatrixString;
+            }
+        }
+
+        public bool CanBeEnabled
+        {
+            get
+            {
+                return !_enabledStateIsGPOConfigured && GeneralSettingsConfig.IsElevated;
             }
         }
 

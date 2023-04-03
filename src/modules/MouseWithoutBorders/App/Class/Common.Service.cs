@@ -32,7 +32,8 @@ namespace MouseWithoutBorders
 
         internal static void StartMouseWithoutBordersService(string desktopToRunMMOn = null, string startTag1 = "byapp", string startTag2 = null)
         {
-            if (Common.RunWithNoAdminRight)
+            // NOTE(@yuyoyuppe): the new flow assumes we run both mwb processes directly from the svc.
+            if (Common.RunWithNoAdminRight || true)
             {
                 return;
             }
