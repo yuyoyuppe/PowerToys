@@ -43,7 +43,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Resources\**" />
-        <Compile Remove="Service\**" />
+    <Compile Remove="Service\**" />
+    <Compile Remove="Helper\**" />
     <EmbeddedResource Remove="Resources\**" />
         <EmbeddedResource Remove="Service\**" />
         <ExcludeFromStyleCop Remove="Service\**" />

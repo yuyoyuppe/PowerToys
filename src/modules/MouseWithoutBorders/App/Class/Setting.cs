@@ -12,6 +12,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Utilities;
@@ -147,7 +148,7 @@ namespace MouseWithoutBorders.Class
 
                         if (shouldSaveNewSettingsValues)
                         {
-                            SaveSettingsToJson();
+                            SaveSettingsToJson(_properties);
                         }
                     }
                 }
@@ -160,9 +161,10 @@ namespace MouseWithoutBorders.Class
             _pause_instant_saving = false;
         }
 
-        private void SaveSettingsToJson()
+        private void SaveSettingsToJson(MouseWithoutBordersProperties properties_to_save)
         {
-            lock (_loadingSettingsLock)
+            _settings.Properties = properties_to_save;
+            Task.Factory.StartNew(() =>
             {
                 bool saved = false;
 
@@ -170,8 +172,11 @@ namespace MouseWithoutBorders.Class
                 {
                     try
                     {
-                        _settings.Properties = _properties;
-                        _settings.Save(_settingsUtils);
+                        lock (_loadingSettingsLock)
+                        {
+                            _settings.Save(_settingsUtils);
+                        }
+
                         saved = true;
                     }
                     catch (IOException ex)
@@ -185,10 +190,10 @@ namespace MouseWithoutBorders.Class
                     }
                     else
                     {
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                     }
                 }
-            }
+            });
         }
 
         internal Settings()
@@ -231,7 +236,7 @@ namespace MouseWithoutBorders.Class
                     _properties.MachineMatrixString = new List<string>(value.Split(","));
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -256,7 +261,7 @@ namespace MouseWithoutBorders.Class
                         _properties.MachinePool.Value = value;
                         if (!_pause_instant_saving)
                         {
-                            SaveSettingsToJson();
+                            SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                         }
                     }
                 }
@@ -284,7 +289,7 @@ namespace MouseWithoutBorders.Class
                     _properties.ShareClipboard = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -307,7 +312,7 @@ namespace MouseWithoutBorders.Class
                     _properties.TransferFile = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -330,7 +335,7 @@ namespace MouseWithoutBorders.Class
                     _properties.MatrixOneRow = true;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -353,7 +358,7 @@ namespace MouseWithoutBorders.Class
                     _properties.WrapMouse = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -376,7 +381,7 @@ namespace MouseWithoutBorders.Class
                     _properties.EasyMouse.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -399,7 +404,7 @@ namespace MouseWithoutBorders.Class
                     _properties.BlockMouseAtScreenCorners = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -457,7 +462,7 @@ namespace MouseWithoutBorders.Class
                     _properties.SecurityKey.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -507,7 +512,7 @@ namespace MouseWithoutBorders.Class
                     _properties.HideMouseAtScreenEdge = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -530,7 +535,7 @@ namespace MouseWithoutBorders.Class
                     _properties.BlockScreenSaverOnOtherMachines = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -553,7 +558,7 @@ namespace MouseWithoutBorders.Class
                     _properties.BlockScreenSaverOnOtherMachines = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -576,7 +581,7 @@ namespace MouseWithoutBorders.Class
                     _properties.MoveMouseRelatively = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -607,7 +612,7 @@ namespace MouseWithoutBorders.Class
                     _properties.MachineID.Value = (int)value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -670,7 +675,7 @@ namespace MouseWithoutBorders.Class
                     _properties.PackageID.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -693,7 +698,7 @@ namespace MouseWithoutBorders.Class
                     _properties.FirstRun = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -716,7 +721,7 @@ namespace MouseWithoutBorders.Class
                     _properties.HotkeySwitchMachine.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -739,7 +744,7 @@ namespace MouseWithoutBorders.Class
                     _properties.EasyMouse.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -799,7 +804,7 @@ namespace MouseWithoutBorders.Class
                 switchCount = value;
                 if (!_pause_instant_saving)
                 {
-                    SaveSettingsToJson();
+                    SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                 }
             }
         }
@@ -825,7 +830,7 @@ namespace MouseWithoutBorders.Class
                     _properties.DrawMouseCursor = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -848,7 +853,7 @@ namespace MouseWithoutBorders.Class
                     _properties.DrawMouseEx = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -871,7 +876,7 @@ namespace MouseWithoutBorders.Class
                     _properties.ValidateRemoteMachineIP = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -894,7 +899,7 @@ namespace MouseWithoutBorders.Class
                     _properties.SameSubnetOnly = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -917,7 +922,7 @@ namespace MouseWithoutBorders.Class
                     _properties.Name2IP.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -940,7 +945,7 @@ namespace MouseWithoutBorders.Class
                     _properties.UseVKMap = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -963,7 +968,7 @@ namespace MouseWithoutBorders.Class
                     _properties.FisrtCtrlShiftS = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -1033,7 +1038,7 @@ namespace MouseWithoutBorders.Class
                     _properties.MachineID.Value = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }
@@ -1060,7 +1065,7 @@ namespace MouseWithoutBorders.Class
                     _properties.ShowClipboardAndNetworkStatusMessages = value;
                     if (!_pause_instant_saving)
                     {
-                        SaveSettingsToJson();
+                        SaveSettingsToJson((MouseWithoutBordersProperties)_properties.Clone());
                     }
                 }
             }

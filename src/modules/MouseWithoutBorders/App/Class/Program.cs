@@ -9,6 +9,8 @@
 //     2008 created by Truong Do (ductdo).
 //     2009-... modified by Truong Do (TruongDo).
 // </history>
+#define ENABLE_SERVICE
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -31,16 +33,10 @@ namespace MouseWithoutBorders.Class
 {
     internal static class Program
     {
+#if ENABLE_SERVICE
         private static readonly string ServiceName = "Mouse Without Borders service";
 
-        private static FormHelper formHelper;
-
-        internal static FormHelper FormHelper => formHelper != null && !formHelper.IsDisposed ? formHelper : (formHelper = new FormHelper());
-
-        private static FormDot dotForm;
-
-        internal static FormDot DotForm => dotForm != null && !dotForm.IsDisposed ? dotForm : (dotForm = new FormDot());
-
+#endif
         [STAThread]
         private static void Main()
         {
@@ -62,13 +58,14 @@ namespace MouseWithoutBorders.Class
                 Common.Log("*** Started as " + User);
 
                 Common.Log(Environment.CommandLine);
-
+#if ENABLE_SERVICE
                 if (!runningAsSystem)
                 {
                     var sc = new ServiceController(ServiceName);
                     sc.Start();
                     return;
                 }
+#endif
 
                 if (args.Length > 2)
                 {

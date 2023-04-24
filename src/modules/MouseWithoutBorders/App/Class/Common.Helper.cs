@@ -28,7 +28,7 @@ namespace MouseWithoutBorders
     internal partial class Common
     {
         internal const string HELPER_FORM_TEXT = "Mouse without Borders Helper";
-        internal const string HelperProcessName = "MouseWithoutBordersHelper";
+        internal const string HelperProcessName = "PowerToys.MouseWithoutBordersHelper";
         private static bool signalHelperToExit;
         private static bool signalWatchDogToExit;
         internal static long WndProcCounter;
@@ -256,8 +256,6 @@ namespace MouseWithoutBorders
             }
         }
 
-        // NOTE(@yuyoyuppe): this function tries to launch dragndrop helper proces, and we're not using it.
-        // Keeping it in-place to minimize diff.
         internal static void RunDDHelper(bool cleanUp = false)
         {
             if (Common.RunOnLogonDesktop || Common.RunOnScrSaverDesktop)

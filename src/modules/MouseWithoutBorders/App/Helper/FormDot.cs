@@ -6,11 +6,11 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
-using MouseWithoutBorders.Class;
+using static MouseWithoutBorders.NativeMethods;
 
 namespace MouseWithoutBorders
 {
-    internal partial class FormDot : System.Windows.Forms.Form
+    internal sealed partial class FormDot : System.Windows.Forms.Form
     {
         private int left;
         private int top;
@@ -30,11 +30,11 @@ namespace MouseWithoutBorders
         private Cursor CreateCursor(Bitmap bmp, int xHotSpot, int yHotSpot)
         {
             IconInfo tmp = default;
-            tmp.XHotspot = xHotSpot;
-            tmp.YHotspot = yHotSpot;
-            tmp.FIcon = false;
-            tmp.HbmColor = bmp.GetHbitmap();
-            tmp.HbmMask = bmp.GetHbitmap();
+            tmp.xHotspot = xHotSpot;
+            tmp.yHotspot = yHotSpot;
+            tmp.fIcon = false;
+            tmp.hbmColor = bmp.GetHbitmap();
+            tmp.hbmMask = bmp.GetHbitmap();
             return new Cursor(NativeMethods.CreateIconIndirect(ref tmp));
         }
 

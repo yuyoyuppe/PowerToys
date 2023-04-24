@@ -11,8 +11,8 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
-using MouseWithoutBorders.Class;
 
 namespace MouseWithoutBorders
 {
@@ -22,8 +22,7 @@ namespace MouseWithoutBorders
         private readonly object bmScreenLock = new();
         private long lastClipboardEventTime;
 
-        // TODO(@yuyoyuppe): do not need IPC helper, since we're gonna do the logic directly here
-        // private IClipboardHelper remoteClipboardHelper;
+        private IClipboardHelper remoteClipboardHelper;
         private const string TEXTTYPESEP = "{4CFF57F7-BEDD-43d5-AE8F-27A61E886F2F}";
 
         private const int MAXTEXTSIZE = 20 * 1024 * 1024;
@@ -46,12 +45,14 @@ namespace MouseWithoutBorders
 
         public FormHelper()
         {
-            // TODO(@yuyoyuppe): do not need IPC helper, since we're gonna do the logic directly here
-            // if (remoteClipboardHelper == null)
-            // {
-            //    QuitDueToCommunicationError();
-            //    return;
-            // }
+            remoteClipboardHelper = IpcHelper.CreateIpcClient();
+
+            if (remoteClipboardHelper == null)
+            {
+                QuitDueToCommunicationError();
+                return;
+            }
+
             SetDPIAwareness();
             InitializeComponent();
             lastClipboardEventTime = GetTick();
@@ -128,8 +129,7 @@ namespace MouseWithoutBorders
 
                     try
                     {
-                        // TODO(@yuyoyuppe): invoke the method directly w/o any IPC
-                        Common.DragDropStep05Ex(fileName);
+                        remoteClipboardHelper.SendDragFile(fileName);
                     }
                     catch (Exception ex)
                     {
@@ -337,7 +337,7 @@ namespace MouseWithoutBorders
                     {
                         try
                         {
-                            _ = Common.CheckClipboardEx(data, isFile);
+                            remoteClipboardHelper.SendClipboardData(data, isFile);
                         }
                         catch (Exception ex)
                         {

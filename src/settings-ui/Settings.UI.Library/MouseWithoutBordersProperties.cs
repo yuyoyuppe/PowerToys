@@ -2,6 +2,7 @@
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -18,7 +19,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     {
     }
 
-    public class MouseWithoutBordersProperties
+    public class MouseWithoutBordersProperties : ICloneable
     {
         public StringProperty SecurityKey { get; set; }
 
@@ -138,6 +139,13 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             UseVKMap = false;
             FisrtCtrlShiftS = false;
             StealFocusWhenSwitchingMachine = false;
+        }
+
+        public object Clone()
+        {
+            var clone = new MouseWithoutBordersProperties();
+            clone = this;
+            return clone;
         }
     }
 }

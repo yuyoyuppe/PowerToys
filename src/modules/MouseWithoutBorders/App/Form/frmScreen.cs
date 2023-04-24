@@ -71,8 +71,6 @@ namespace MouseWithoutBorders
 
             Common.WndProcCounter++;
 
-            Program.FormHelper.Activate();
-
             try
             {
                 mnuWindowsPhone.Visible = false; // No longer supported.
@@ -110,6 +108,10 @@ namespace MouseWithoutBorders
 
             NotifyIcon.Visible = false;
             NotifyIcon.Dispose();
+            if (!Common.RunOnLogonDesktop && !Common.RunOnScrSaverDesktop)
+            {
+                Common.RunDDHelper(true);
+            }
 
             // Common.UnhookClipboard();
             Tag = "myself";
@@ -157,6 +159,8 @@ namespace MouseWithoutBorders
                         p.KillProcess();
                     }
                 }
+
+                Common.RunDDHelper(true);
             }
             catch (Exception e)
             {
@@ -411,6 +415,8 @@ namespace MouseWithoutBorders
 
                                 // Common.ReHookClipboard();
                             }
+
+                            Common.RunDDHelper();
                         }
 
                         count = 0;
@@ -483,6 +489,12 @@ namespace MouseWithoutBorders
                             }
                         }
                          * */
+                    }
+
+                    // One more time after 1/3 minutes (Sometimes XP has explorer started late)
+                    if (count == 600 || count == 1800)
+                    {
+                        Common.RunDDHelper();
                     }
 
                     if (count == 600)

@@ -12,7 +12,9 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
+#if !MM_HELPER
 using MouseWithoutBorders.Class;
+#endif
 using Clipb = System.Windows.Forms.Clipboard;
 
 namespace MouseWithoutBorders
@@ -26,6 +28,7 @@ namespace MouseWithoutBorders
         void SendClipboardData(object data, bool isFilePath);
     }
 
+#if !MM_HELPER
     public sealed class ClipboardHelper : MarshalByRefObject, IClipboardHelper
     {
         void MouseWithoutBorders.IClipboardHelper.SendLog(string log)
@@ -61,12 +64,14 @@ namespace MouseWithoutBorders
             _ = Common.CheckClipboardEx(data, isFilePath);
         }
     }
+#endif
 
-    internal class IpcHelper
+    internal sealed class IpcHelper
     {
         private const string ChannelName = "MouseWithoutBorders";
         private const string RemoteObjectName = "ClipboardHelper";
 
+#if !MM_HELPER
         private static void CleanupStream(PipeStream s)
         {
             s.Close();
@@ -124,11 +129,36 @@ namespace MouseWithoutBorders
                 Common.Log(e);
             }
         }
+#else
+        internal static IClipboardHelper CreateIpcClient()
+        {
+            try
+            {
+                // TODO(@yuyoyuppe): IPC feature
+                /*
+                IpcChannel channel = new IpcChannel();
+                ChannelServices.RegisterChannel(channel, true);
+                return (IClipboardHelper)Activator.GetObject(typeof(IClipboardHelper), "ipc://" + ChannelName + "/" + RemoteObjectName);
+                */
+            }
+            catch (Exception e)
+            {
+                Logger.LogEvent(e.Message, EventLogEntryType.Error);
+            }
+
+            return null;
+        }
+#endif
+
     }
 
     internal static class Logger
     {
+#if MM_HELPER
+        private const string EventSourceName = "MouseWithoutBordersHelper";
+#else
         private const string EventSourceName = "MouseWithoutBorders";
+#endif
 
         internal static void LogEvent(string message, EventLogEntryType logType = EventLogEntryType.Information)
         {
@@ -147,6 +177,7 @@ namespace MouseWithoutBorders
             }
         }
     }
+#if MM_HELPER
 
     internal static class ClipboardMMHelper
     {
@@ -438,12 +469,14 @@ namespace MouseWithoutBorders
         }
     }
 
-    internal class SharedConst
+#endif
+
+    internal sealed class SharedConst
     {
         internal const int QUIT_CMD = 0x409;
     }
 
-    internal partial class Common
+    internal sealed partial class Common
     {
         internal static bool IpcChannelCreated { get; set; }
 
