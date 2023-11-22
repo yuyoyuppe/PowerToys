@@ -27,7 +27,8 @@ class PowerToysConfigure {
     }
 
     [bool] Test() {
-        return $true
+        # TEMP: Report that the resource is always not present, thus making the LCM engine call Set() on $this each time it's needed
+        return $false 
     }
 
     [void] Set() {
