@@ -706,14 +706,14 @@ StackPanel SetupRunProgramControls(StackPanel& parent, StackPanel& row, Shortcut
     controlStackPanel.Children().Append(UIHelpers::GetLabelWrapped(stackPanelRunProgramStartInDir, GET_RESOURCE_STRING(IDS_EDITSHORTCUTS_LABELSTARTIN), runProgramLabelWidth).as<StackPanel>());
 
     // add shortcut type choice
-    runProgramElevationTypeCombo.Width(EditorConstants::RemapTableDropDownWidth - 40);
+    runProgramElevationTypeCombo.Width(EditorConstants::TableDropDownHeight);
     runProgramElevationTypeCombo.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ELEVATIONTYPENORMAL)));
     runProgramElevationTypeCombo.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ELEVATIONTYPEELEVATED)));
     runProgramElevationTypeCombo.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ELEVATIONTYPEDIFFERENTUSER)));
     runProgramElevationTypeCombo.SelectedIndex(0);
 
     // runProgramAlreadyRunningAction
-    runProgramAlreadyRunningAction.Width(EditorConstants::RemapTableDropDownWidth - 40);
+    runProgramAlreadyRunningAction.Width(EditorConstants::TableDropDownHeight);
     runProgramAlreadyRunningAction.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ALREADYRUNNINGSHOWWINDOW)));
     runProgramAlreadyRunningAction.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ALREADYRUNNINGSTARTANOTHER)));
     runProgramAlreadyRunningAction.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_ALREADYRUNNINGDONOTHING)));
@@ -729,7 +729,7 @@ StackPanel SetupRunProgramControls(StackPanel& parent, StackPanel& row, Shortcut
 
     auto runProgramStartWindow = ComboBox();
     runProgramStartWindow.Name(L"runProgramStartWindow_" + std::to_wstring(rowIndex));
-    runProgramStartWindow.Width(EditorConstants::RemapTableDropDownWidth - 40);
+    runProgramStartWindow.Width(EditorConstants::TableDropDownHeight);
     runProgramStartWindow.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_EDITSHORTCUTS_VIZNORMAL)));
     runProgramStartWindow.Items().Append(winrt::box_value(GET_RESOURCE_STRING(IDS_EDITSHORTCUTS_VIZHIDDEN)));
     runProgramStartWindow.SelectedIndex(0);
