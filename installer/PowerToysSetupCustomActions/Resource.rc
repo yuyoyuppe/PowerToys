@@ -84,6 +84,8 @@ END
 // TODO: Use to activate embedded MSIX
 //IDR_BIN_MSIX_HELLO_PACKAGE BIN "..\\..\..\\src\\modules\\HelloModule\\AppPackages\\HelloModule_1.0.0.0_x64_Test\\HelloModule_1.0.0.0_x64.msix"
 
+IDR_BIN_DSC_POWERTOYS_CONFIGURE_MODULE_PSD1 BIN "..\\..\..\\src\\dsc\\Microsoft.PowerToys.Configure\\Generated\\Microsoft.PowerToys.Configure\\FILE_VERSION_STRING\\Microsoft.PowerToys.Configure.psd1"
+IDR_BIN_DSC_POWERTOYS_CONFIGURE_MODULE_PSM1 BIN "..\\..\..\\src\\dsc\\Microsoft.PowerToys.Configure\\Generated\\Microsoft.PowerToys.Configure\\FILE_VERSION_STRING\\Microsoft.PowerToys.Configure.psm1"
 
 #ifndef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

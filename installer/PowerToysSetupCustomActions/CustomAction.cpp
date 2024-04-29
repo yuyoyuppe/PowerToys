@@ -138,6 +138,15 @@ LExit:
     return SUCCEEDED(hr);
 }
 
+std::filesystem::path getPowerShellModulesPath(const bool perUserInstall) 
+{
+    const wchar_t* modulesInstallString = perUserInstall ? L"%HOMEDRIVE%%HOMEPATH%\\Documents\\PowerShell\\Modules" :
+        L"%ProgramFiles%\\WindowsPowerShell\\Modules";
+    wchar_t         absolutePath[MAX_PATH];
+    ExpandEnvironmentStringsW(modulesInstallString, absolutePath, MAX_PATH);
+    return absolutePath;
+}
+
 UINT __stdcall LaunchPowerToysCA(MSIHANDLE hInstall)
 {
     HRESULT hr = S_OK;
@@ -161,7 +170,7 @@ UINT __stdcall LaunchPowerToysCA(MSIHANDLE hInstall)
     BOOL isSystemUser = IsLocalSystem();
 
     if (isSystemUser) {
-    
+
         auto action = [&commandLine](HANDLE userToken) {
             STARTUPINFO startupInfo{ .cb = sizeof(STARTUPINFO),  .wShowWindow = SW_SHOWNORMAL };
             PROCESS_INFORMATION processInformation;
@@ -192,7 +201,7 @@ UINT __stdcall LaunchPowerToysCA(MSIHANDLE hInstall)
             }
 
             return true;
-        };
+            };
 
         if (!ImpersonateLoggedInUserAndDoSomething(action))
         {
@@ -315,6 +324,70 @@ LExit:
     er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
     return WcaFinalize(er);
 }
+
+const wchar_t* DSC_CONFIGURE_PSD1_NAME = L"Microsoft.PowerToys.Configure.psd1";
+const wchar_t* DSC_CONFIGURE_PSM1_NAME = L"Microsoft.PowerToys.Configure.psm1";
+
+UINT __stdcall InstallDSCModuleCA(MSIHANDLE hInstall)
+{
+    HRESULT hr = S_OK;
+    UINT er = ERROR_SUCCESS;
+    hr = WcaInitialize(hInstall, "InstallDSCModuleCA");
+    ExitOnFailure(hr, "Failed to initialize");
+
+    std::array embeddedResources = { std::make_pair(DSC_CONFIGURE_PSD1_NAME, RcResource::create(IDR_BIN_DSC_POWERTOYS_CONFIGURE_MODULE_PSD1, L"BIN", DLL_HANDLE)) , std::make_pair(DSC_CONFIGURE_PSM1_NAME, RcResource::create(IDR_BIN_DSC_POWERTOYS_CONFIGURE_MODULE_PSM1, L"BIN", DLL_HANDLE))};
+
+    LPWSTR currentScope = nullptr;
+    hr = WcaGetProperty(L"InstallScope", &currentScope);
+    ExitOnFailure(hr, "Failed to get current install scope");
+    const bool perUserInstall = std::wstring{ currentScope } == L"perUser";
+
+    auto moduleDirectory = getPowerShellModulesPath(perUserInstall) / L"Microsoft.PowerToys.Configure";
+    moduleDirectory /= get_product_version();
+
+    // TODO: error checks
+    fs::create_directories(moduleDirectory);
+
+    for (auto& [filename, extractedFile] : embeddedResources)
+    {
+        if (!extractedFile)
+            ExitOnFailure(hr, "Failed to extract DSC module");
+
+        extractedFile->saveAsFile(moduleDirectory / filename);
+    }
+
+LExit:
+    er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+    return WcaFinalize(er);
+}
+
+UINT __stdcall UninstallDSCModuleCA(MSIHANDLE hInstall)
+{
+    HRESULT hr = S_OK;
+    UINT er = ERROR_SUCCESS;
+
+    hr = WcaInitialize(hInstall, "UninstallDSCModuleCA");
+
+    LPWSTR currentScope = nullptr;
+    hr = WcaGetProperty(L"InstallScope", &currentScope);
+    ExitOnFailure(hr, "Failed to get current install scope");
+    const bool perUserInstall = std::wstring{ currentScope } == L"perUser";
+    const auto version = get_product_version();
+
+    auto moduleDirectory = getPowerShellModulesPath(perUserInstall) / L"Microsoft.PowerToys.Configure";
+    moduleDirectory /= get_product_version();
+    
+    // TODO: error checks
+    fs::remove(moduleDirectory / DSC_CONFIGURE_PSD1_NAME);
+    fs::remove(moduleDirectory / DSC_CONFIGURE_PSM1_NAME);
+
+    ExitOnFailure(hr, "Failed to initialize");
+
+LExit:
+    er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+    return WcaFinalize(er);
+}
+
 
 UINT __stdcall InstallEmbeddedMSIXCA(MSIHANDLE hInstall)
 {
@@ -1099,7 +1172,7 @@ UINT __stdcall TerminateProcessesCA(MSIHANDLE hInstall)
                         SendMessageTimeoutA(hwnd, WM_CLOSE, 0, 0, SMTO_BLOCK, timeout, &_);
                     }
                     return TRUE;
-                };
+                    };
                 EnumWindows(windowEnumerator, reinterpret_cast<LPARAM>(&procID));
                 Sleep(timeout);
                 TerminateProcess(hProcess, 0);
